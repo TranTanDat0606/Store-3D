@@ -1,0 +1,76 @@
+- generic [ref=f14e2]:
+  - generic [ref=f14e30]:
+    - banner [ref=f14e31]:
+      - generic [ref=f14e32]:
+        - generic [ref=f14e38]:
+          - paragraph [ref=f14e39]: Store 3D
+          - paragraph [ref=f14e40]: Quản trị
+        - generic [ref=f14e41]:
+          - link "Về trang chủ" [ref=f14e42] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f14e43]:
+            - paragraph [ref=f14e44]: Quản trị viên
+            - paragraph [ref=f14e45]: Admin
+    - generic [ref=f14e46]:
+      - complementary [ref=f14e47]:
+        - navigation [ref=f14e48]:
+          - link "Tổng quan" [ref=f14e49] [cursor=pointer]:
+            - /url: /admin
+          - link "Sản phẩm" [ref=f14e55] [cursor=pointer]:
+            - /url: /admin/san-pham
+          - link "Danh mục" [ref=f14e60] [cursor=pointer]:
+            - /url: /admin/danh-muc
+          - link "Đơn hàng" [ref=f14e64] [cursor=pointer]:
+            - /url: /admin/don-hang
+          - link "Mã giảm giá" [ref=f14e69] [cursor=pointer]:
+            - /url: /admin/ma-giam-gia
+          - link "Đánh giá" [ref=f14e72] [cursor=pointer]:
+            - /url: /admin/danh-gia
+          - link "Khách hàng" [ref=f14e75] [cursor=pointer]:
+            - /url: /admin/khach-hang
+      - main [ref=f14e7]:
+        - generic [ref=f14e8]:
+          - generic [ref=f14e9]:
+            - heading "Quản lý đơn hàng" [level=1] [ref=f14e10]
+            - paragraph [ref=f14e11]: 1 đơn hàng
+          - generic [ref=f14e12]:
+            - textbox "Tìm theo tên khách hàng hoặc mã đơn..." [ref=f14e17]
+            - combobox [ref=f14e18]:
+              - generic: Lọc theo trạng thái
+          - generic [ref=f14e21]:
+            - button "#AF3923E8 Hoàn thành Chưa thanh toán Khách hàng demo · 15:58 07/08/2026 612.000 ₫" [ref=f14e119]:
+              - generic [ref=f14e23]:
+                - generic [ref=f14e24]: "#AF3923E8"
+                - generic [ref=f14e25]: Hoàn thành
+                - generic [ref=f14e26]: Chưa thanh toán
+              - generic [ref=f14e27]:
+                - generic [ref=f14e28]: Khách hàng demo · 15:58 07/08/2026
+                - generic [ref=f14e29]: 612.000 ₫
+            - generic [ref=f14e81]:
+              - generic [ref=f14e82]:
+                - generic [ref=f14e83]:
+                  - paragraph [ref=f14e84]: "Khách hàng: Khách hàng demo"
+                  - paragraph [ref=f14e85]: "SĐT: 0912345678"
+                  - paragraph [ref=f14e86]: "Email: khach@store3d.com"
+                  - paragraph [ref=f14e87]: "Địa chỉ: 123 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+                - generic [ref=f14e88]:
+                  - paragraph [ref=f14e89]:
+                    - generic [ref=f14e90]: Robot Gundam RX-78 × 1
+                    - generic [ref=f14e91]: 680.000 ₫
+                  - paragraph [ref=f14e92]:
+                    - generic [ref=f14e93]: Giảm giá
+                    - generic [ref=f14e94]: "-68.000 ₫"
+                  - paragraph [ref=f14e95]:
+                    - generic [ref=f14e96]: Tổng
+                    - generic [ref=f14e97]: 612.000 ₫
+              - generic [ref=f14e98]:
+                - generic [ref=f14e99]: "Cập nhật trạng thái:"
+                - combobox [active] [ref=f14e100]:
+                  - generic: Hoàn thành
+                - generic [ref=f14e101]: COD
+                - button "Đánh dấu đã thanh toán" [ref=f14e120] [cursor=pointer]
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=f14e121]:
+        - button "Close toast" [ref=f14e122] [cursor=pointer]
+        - generic [ref=f14e129]: Cập nhật trạng thái đơn hàng thành công

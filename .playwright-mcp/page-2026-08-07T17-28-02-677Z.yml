@@ -1,0 +1,214 @@
+- generic [ref=f17e2]:
+  - generic [ref=f17e7]:
+    - banner [ref=f17e8]:
+      - generic [ref=f17e9]:
+        - link "Store3D" [ref=f17e10] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=f17e16]:
+          - link "Trang chủ" [ref=f17e17] [cursor=pointer]:
+            - /url: /
+          - link "Sản phẩm" [ref=f17e18] [cursor=pointer]:
+            - /url: /san-pham
+          - link "Nổi bật" [ref=f17e19] [cursor=pointer]:
+            - /url: /san-pham?featured=true
+        - textbox "Tìm kiếm sản phẩm..." [ref=f17e24]
+        - generic [ref=f17e25]:
+          - button "Đổi giao diện" [ref=f17e26] [cursor=pointer]
+          - link [ref=f17e274] [cursor=pointer]:
+            - /url: /dang-nhap
+            - button "Danh sách yêu thích" [ref=f17e28]
+          - button "Giỏ hàng" [ref=f17e30] [cursor=pointer]:
+            - generic [ref=f17e31]: "3"
+          - button "Đăng nhập" [ref=f17e275] [cursor=pointer]
+    - main [ref=f17e34]:
+      - generic [ref=f17e35]:
+        - generic [ref=f17e38]:
+          - generic [ref=f17e39]: Sản phẩm in 3D chất lượng cao
+          - heading "Mô hình in 3D độc đáo cho mọi không gian" [level=1] [ref=f17e43]
+          - paragraph [ref=f17e44]: Khám phá bộ sưu tập figurine, đồ trang trí, mô hình kiến trúc và phụ kiện in 3D với chi tiết tuyệt hảo.
+          - generic [ref=f17e45]:
+            - link "Khám phá sản phẩm" [ref=f17e46] [cursor=pointer]:
+              - /url: /san-pham
+            - link "Sản phẩm nổi bật" [ref=f17e47] [cursor=pointer]:
+              - /url: /san-pham?featured=true
+        - generic [ref=f17e49]:
+          - generic [ref=f17e56]:
+            - heading "In 3D chất lượng cao" [level=3] [ref=f17e57]
+            - paragraph [ref=f17e58]: Chi tiết sắc nét từ máy in FDM và Resin
+          - generic [ref=f17e64]:
+            - heading "Sản phẩm độc quyền" [level=3] [ref=f17e65]
+            - paragraph [ref=f17e66]: Thiết kế độc đáo không đụng hàng
+          - generic [ref=f17e74]:
+            - heading "Giao hàng toàn quốc" [level=3] [ref=f17e75]
+            - paragraph [ref=f17e76]: Đóng gói chắc chắn, giao nhanh
+        - generic [ref=f17e77]:
+          - generic [ref=f17e79]:
+            - heading "Danh mục sản phẩm" [level=2] [ref=f17e80]
+            - paragraph [ref=f17e81]: Khám phá theo danh mục bạn yêu thích
+          - generic [ref=f17e82]:
+            - link "Mô hình kiến trúc Mô hình kiến trúc" [ref=f17e83] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=mo-hinh-kien-truc
+              - img "Mô hình kiến trúc" [ref=f17e85]
+              - generic [ref=f17e86]: Mô hình kiến trúc
+            - link "Mô hình máy móc Mô hình máy móc" [ref=f17e87] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=mo-hinh-may-moc
+              - img "Mô hình máy móc" [ref=f17e89]
+              - generic [ref=f17e90]: Mô hình máy móc
+            - link "Mô hình nhân vật Mô hình nhân vật" [ref=f17e91] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=mo-hinh-nhan-vat
+              - img "Mô hình nhân vật" [ref=f17e93]
+              - generic [ref=f17e94]: Mô hình nhân vật
+            - link "Phụ kiện & Cosplay Phụ kiện & Cosplay" [ref=f17e95] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=phu-kien-cosplay
+              - img "Phụ kiện & Cosplay" [ref=f17e97]
+              - generic [ref=f17e98]: Phụ kiện & Cosplay
+            - link "Đồ dùng hằng ngày Đồ dùng hằng ngày" [ref=f17e99] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=do-dung-hang-ngay
+              - img "Đồ dùng hằng ngày" [ref=f17e101]
+              - generic [ref=f17e102]: Đồ dùng hằng ngày
+            - link "Đồ trang trí Đồ trang trí" [ref=f17e103] [cursor=pointer]:
+              - /url: /san-pham?categorySlug=do-trang-tri
+              - img "Đồ trang trí" [ref=f17e105]
+              - generic [ref=f17e106]: Đồ trang trí
+        - generic [ref=f17e108]:
+          - generic [ref=f17e109]:
+            - generic [ref=f17e110]:
+              - heading "Sản phẩm nổi bật" [level=2] [ref=f17e111]
+              - paragraph [ref=f17e112]: Những mô hình được yêu thích nhất
+            - link "Xem tất cả" [ref=f17e113] [cursor=pointer]:
+              - /url: /san-pham?featured=true
+          - generic [ref=f17e114]:
+            - link "Robot Gundam RX-78 -20% Nổi bật Thêm vào yêu thích Mới Robot Gundam RX-78 680.000 ₫ 850.000 ₫ Thêm vào giỏ hàng" [ref=f17e116] [cursor=pointer]:
+              - /url: /san-pham/robot-gundam-rx-78
+              - generic [ref=f17e117]:
+                - img "Robot Gundam RX-78" [ref=f17e118]
+                - generic [ref=f17e119]:
+                  - generic [ref=f17e120]: "-20%"
+                  - generic [ref=f17e121]: Nổi bật
+                - button "Thêm vào yêu thích" [ref=f17e122]
+              - generic [ref=f17e123]:
+                - generic [ref=f17e124]: Mới
+                - heading "Robot Gundam RX-78" [level=3] [ref=f17e128]
+                - generic [ref=f17e129]:
+                  - generic [ref=f17e130]:
+                    - paragraph [ref=f17e131]: 680.000 ₫
+                    - paragraph [ref=f17e132]: 850.000 ₫
+                  - button "Thêm vào giỏ hàng" [ref=f17e133]
+            - link "Tháp Eiffel mini -20% Nổi bật Thêm vào yêu thích Mới Tháp Eiffel mini 280.000 ₫ 350.000 ₫ Thêm vào giỏ hàng" [ref=f17e135] [cursor=pointer]:
+              - /url: /san-pham/thap-eiffel-mini
+              - generic [ref=f17e136]:
+                - img "Tháp Eiffel mini" [ref=f17e137]
+                - generic [ref=f17e138]:
+                  - generic [ref=f17e139]: "-20%"
+                  - generic [ref=f17e140]: Nổi bật
+                - button "Thêm vào yêu thích" [ref=f17e141]
+              - generic [ref=f17e142]:
+                - generic [ref=f17e143]: Mới
+                - heading "Tháp Eiffel mini" [level=3] [ref=f17e147]
+                - generic [ref=f17e148]:
+                  - generic [ref=f17e149]:
+                    - paragraph [ref=f17e150]: 280.000 ₫
+                    - paragraph [ref=f17e151]: 350.000 ₫
+                  - button "Thêm vào giỏ hàng" [ref=f17e152]
+            - link "Rồng lửa châu Âu -20% Nổi bật Thêm vào yêu thích Mới Rồng lửa châu Âu 480.000 ₫ 600.000 ₫ Thêm vào giỏ hàng" [ref=f17e276] [cursor=pointer]:
+              - /url: /san-pham/rong-lua-chau-au
+              - generic [ref=f17e155]:
+                - img "Rồng lửa châu Âu" [ref=f17e156]
+                - generic [ref=f17e157]:
+                  - generic [ref=f17e158]: "-20%"
+                  - generic [ref=f17e159]: Nổi bật
+                - button "Thêm vào yêu thích" [ref=f17e277]
+              - generic [ref=f17e161]:
+                - generic [ref=f17e162]: Mới
+                - heading "Rồng lửa châu Âu" [level=3] [ref=f17e166]
+                - generic [ref=f17e167]:
+                  - generic [ref=f17e168]:
+                    - paragraph [ref=f17e169]: 480.000 ₫
+                    - paragraph [ref=f17e170]: 600.000 ₫
+                  - button "Thêm vào giỏ hàng" [ref=f17e171]
+            - link "Naruto Uzumaki - Sage Mode -21% Nổi bật Thêm vào yêu thích Mới Naruto Uzumaki - Sage Mode 330.000 ₫ 420.000 ₫ Thêm vào giỏ hàng" [ref=f17e173] [cursor=pointer]:
+              - /url: /san-pham/naruto-uzumaki-sage-mode
+              - generic [ref=f17e174]:
+                - img "Naruto Uzumaki - Sage Mode" [ref=f17e175]
+                - generic [ref=f17e176]:
+                  - generic [ref=f17e177]: "-21%"
+                  - generic [ref=f17e178]: Nổi bật
+                - button "Thêm vào yêu thích" [ref=f17e179]
+              - generic [ref=f17e180]:
+                - generic [ref=f17e181]: Mới
+                - heading "Naruto Uzumaki - Sage Mode" [level=3] [ref=f17e185]
+                - generic [ref=f17e186]:
+                  - generic [ref=f17e187]:
+                    - paragraph [ref=f17e188]: 330.000 ₫
+                    - paragraph [ref=f17e189]: 420.000 ₫
+                  - button "Thêm vào giỏ hàng" [ref=f17e190]
+            - link "One Piece Luffy - Gear 5 -22% Nổi bật Thêm vào yêu thích 4.5 One Piece Luffy - Gear 5 350.000 ₫ 450.000 ₫ Thêm vào giỏ hàng" [ref=f17e192] [cursor=pointer]:
+              - /url: /san-pham/one-piece-luffy-gear-5
+              - generic [ref=f17e193]:
+                - img "One Piece Luffy - Gear 5" [ref=f17e194]
+                - generic [ref=f17e195]:
+                  - generic [ref=f17e196]: "-22%"
+                  - generic [ref=f17e197]: Nổi bật
+                - button "Thêm vào yêu thích" [ref=f17e198]
+              - generic [ref=f17e199]:
+                - generic [ref=f17e200]: "4.5"
+                - heading "One Piece Luffy - Gear 5" [level=3] [ref=f17e204]
+                - generic [ref=f17e205]:
+                  - generic [ref=f17e206]:
+                    - paragraph [ref=f17e207]: 350.000 ₫
+                    - paragraph [ref=f17e208]: 450.000 ₫
+                  - button "Thêm vào giỏ hàng" [ref=f17e209]
+    - contentinfo [ref=f17e210]:
+      - generic [ref=f17e211]:
+        - generic [ref=f17e212]:
+          - generic [ref=f17e213]:
+            - link "Store3D" [ref=f17e214] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f17e220]: Cửa hàng mô hình in 3D chất lượng cao. Figurine, đồ trang trí, mô hình kiến trúc và nhiều sản phẩm độc đáo khác.
+            - generic [ref=f17e221]:
+              - link "Facebook" [ref=f17e222] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f17e223]: M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z
+              - link "Instagram" [ref=f17e224] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f17e225]: M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z
+              - link "Youtube" [ref=f17e226] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f17e227]: M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z
+          - generic [ref=f17e228]:
+            - heading "Liên kết" [level=3] [ref=f17e229]
+            - list [ref=f17e230]:
+              - listitem [ref=f17e231]:
+                - link "Trang chủ" [ref=f17e232] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f17e233]:
+                - link "Sản phẩm" [ref=f17e234] [cursor=pointer]:
+                  - /url: /san-pham
+              - listitem [ref=f17e235]:
+                - link "Sản phẩm nổi bật" [ref=f17e236] [cursor=pointer]:
+                  - /url: /san-pham?featured=true
+              - listitem [ref=f17e237]:
+                - link "Danh sách yêu thích" [ref=f17e238] [cursor=pointer]:
+                  - /url: /tai-khoan/yeu-thich
+          - generic [ref=f17e239]:
+            - heading "Hỗ trợ" [level=3] [ref=f17e240]
+            - list [ref=f17e241]:
+              - listitem [ref=f17e242]:
+                - link "Tài khoản" [ref=f17e243] [cursor=pointer]:
+                  - /url: /tai-khoan
+              - listitem [ref=f17e244]:
+                - link "Đơn hàng của tôi" [ref=f17e245] [cursor=pointer]:
+                  - /url: /tai-khoan/don-hang
+              - listitem [ref=f17e246]:
+                - link "Đăng ký tài khoản" [ref=f17e247] [cursor=pointer]:
+                  - /url: /dang-ky
+          - generic [ref=f17e248]:
+            - heading "Liên hệ" [level=3] [ref=f17e249]
+            - list [ref=f17e250]:
+              - listitem [ref=f17e251]: 123 Nguyễn Trãi, Thanh Xuân, Hà Nội
+              - listitem [ref=f17e255]: 0901 234 567
+              - listitem [ref=f17e258]: lienhe@store3d.com
+        - generic [ref=f17e262]:
+          - paragraph [ref=f17e263]: © 2026 Store 3D. Bảo lưu mọi quyền.
+          - paragraph [ref=f17e264]: Sản phẩm in 3D chất lượng cao, giao hàng toàn quốc.
+  - region "Notifications alt+T"

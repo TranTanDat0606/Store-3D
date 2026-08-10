@@ -1,0 +1,304 @@
+- generic [active]:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - generic:
+              - paragraph: Store 3D
+              - paragraph: Quản trị
+          - generic:
+            - link:
+              - /url: /
+              - text: Về trang chủ
+            - generic:
+              - paragraph: Qu?n tr? vi�n
+              - paragraph: Admin
+      - generic:
+        - complementary:
+          - navigation:
+            - link:
+              - /url: /admin
+              - text: Tổng quan
+            - link:
+              - /url: /admin/san-pham
+              - text: Sản phẩm
+            - link:
+              - /url: /admin/danh-muc
+              - text: Danh mục
+            - link:
+              - /url: /admin/don-hang
+              - text: Đơn hàng
+            - link:
+              - /url: /admin/ma-giam-gia
+              - text: Mã giảm giá
+            - link:
+              - /url: /admin/danh-gia
+              - text: Đánh giá
+            - link:
+              - /url: /admin/khach-hang
+              - text: Khách hàng
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]: Quản lý sản phẩm
+                - paragraph: 12 sản phẩm
+              - button: Thêm sản phẩm
+            - generic:
+              - textbox:
+                - /placeholder: Tìm kiếm sản phẩm...
+            - generic:
+              - generic:
+                - table:
+                  - rowgroup:
+                    - row:
+                      - columnheader: Ảnh
+                      - columnheader: Tên sản phẩm
+                      - columnheader: Danh mục
+                      - columnheader: Giá bán
+                      - columnheader: Tồn kho
+                      - columnheader: Trạng thái
+                      - columnheader: Thao tác
+                  - rowgroup:
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/moc-khoa-mini
+                            - text: Móc khóa mini
+                          - text: PLA
+                      - cell: Đồ dùng hằng ngày
+                      - cell: 79.000 ₫
+                      - cell:
+                        - generic: "100"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/nha-go-truyen-thong
+                            - text: Nhà gỗ truyền thống
+                          - text: PLA
+                      - cell: Mô hình kiến trúc
+                      - cell: 390.000 ₫
+                      - cell:
+                        - generic: "15"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/banh-rang-trang-tri
+                            - text: Bánh răng trang trí
+                          - text: ABS
+                      - cell: Mô hình máy móc
+                      - cell: 145.000 ₫
+                      - cell:
+                        - generic: "40"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/robot-gundam-rx-78
+                            - text: Robot Gundam RX-78
+                          - text: Resin
+                      - cell: Mô hình máy móc
+                      - cell: 680.000 ₫
+                      - cell:
+                        - generic: "4"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/kiem-ichigo-bleach
+                            - text: Kiếm Ichigo - Bleach
+                          - text: PETG
+                      - cell: Phụ kiện & Cosplay
+                      - cell: 560.000 ₫
+                      - cell:
+                        - generic: "6"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/mu-giap-viking
+                            - text: Mũ giáp Viking
+                          - text: PETG
+                      - cell: Phụ kiện & Cosplay
+                      - cell: 440.000 ₫
+                      - cell:
+                        - generic: "10"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/thap-eiffel-mini
+                            - text: Tháp Eiffel mini
+                          - text: PLA
+                      - cell: Mô hình kiến trúc
+                      - cell: 280.000 ₫
+                      - cell:
+                        - generic: "18"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/bo-ban-ghe-mini
+                            - text: Bộ bàn ghế mini
+                          - text: PLA
+                      - cell: Đồ dùng hằng ngày
+                      - cell: 160.000 ₫
+                      - cell:
+                        - generic: "50"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/chau-cay-hinh-robot
+                            - text: Chậu cây hình robot
+                          - text: PLA
+                      - cell: Đồ dùng hằng ngày
+                      - cell: 120.000 ₫
+                      - cell:
+                        - generic: "35"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+                    - row:
+                      - cell
+                      - cell:
+                        - generic:
+                          - link:
+                            - /url: /san-pham/rong-lua-chau-au
+                            - text: Rồng lửa châu Âu
+                          - text: PLA
+                      - cell: Đồ trang trí
+                      - cell: 480.000 ₫
+                      - cell:
+                        - generic: "20"
+                      - cell:
+                        - generic: Đang bán
+                      - cell:
+                        - generic:
+                          - button
+                          - button
+            - navigation:
+              - button [disabled]
+              - button [disabled]
+              - button: "1"
+              - button: "2"
+              - button
+              - button
+    - region "Notifications alt+T"
+  - dialog [ref=f19e310]:
+    - heading "Sửa sản phẩm" [level=2] [ref=f19e312]
+    - generic [ref=f19e313]:
+      - generic [ref=f19e314]:
+        - generic [ref=f19e315]:
+          - generic [ref=f19e316]: Tên sản phẩm
+          - textbox "Tên sản phẩm" [ref=f19e317]: Robot Gundam RX-78
+        - generic [ref=f19e318]:
+          - generic [ref=f19e319]: Danh mục
+          - combobox [ref=f19e320]:
+            - generic: Mô hình máy móc
+      - generic [ref=f19e321]:
+        - generic [ref=f19e322]: Hình ảnh
+        - generic [ref=f19e324]:
+          - button "Xóa ảnh" [ref=f19e326]
+          - button "Xóa ảnh" [ref=f19e331]
+          - button "Xóa ảnh" [ref=f19e376]
+          - button "Tải ảnh" [ref=f19e335]
+      - generic [ref=f19e341]:
+        - generic [ref=f19e342]: Mô tả
+        - textbox "Mô tả chi tiết sản phẩm..." [ref=f19e343]: Mô hình robot Gundam RX-78-2, khớp động linh hoạt, chi tiết nổi bật.
+      - generic [ref=f19e344]:
+        - generic [ref=f19e345]:
+          - generic [ref=f19e346]: Chất liệu
+          - combobox [ref=f19e347]:
+            - generic: Resin
+        - generic [ref=f19e348]:
+          - generic [ref=f19e349]: Loại máy in
+          - combobox [ref=f19e350]:
+            - generic: Resin Printer
+        - generic [ref=f19e351]:
+          - generic [ref=f19e352]: Kích thước
+          - 'textbox "VD: 10x10x15cm" [ref=f19e353]': 30 x 20 x 15 cm
+      - generic [ref=f19e354]:
+        - generic [ref=f19e355]:
+          - generic [ref=f19e356]: Giá gốc (VNĐ)
+          - spinbutton [ref=f19e357]: "850000"
+        - generic [ref=f19e358]:
+          - generic [ref=f19e359]: Giá bán (VNĐ)
+          - spinbutton [ref=f19e360]: "680000"
+        - generic [ref=f19e361]:
+          - generic [ref=f19e362]: Tồn kho
+          - spinbutton [ref=f19e363]: "4"
+      - generic [ref=f19e364]:
+        - generic [ref=f19e365]:
+          - switch [checked] [ref=f19e366]
+          - generic [ref=f19e367] [cursor=pointer]: Nổi bật
+        - combobox [ref=f19e369]:
+          - generic: Đang bán
+    - generic [ref=f19e370]:
+      - button "Hủy" [ref=f19e371] [cursor=pointer]
+      - button "Lưu thay đổi" [ref=f19e372] [cursor=pointer]
+    - button "Đóng" [ref=f19e373] [cursor=pointer]

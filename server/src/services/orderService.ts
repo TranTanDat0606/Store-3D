@@ -1,0 +1,202 @@
+import { Types } from 'mongoose';
+import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product } from '../models';
+import { AppError } from '../utils/AppError';
+import { apiFeatures, parsePagination } from '../utils/apiFeatures';
+import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
+
+interface CouponApplication {
+  code: string;
+  discount: number;
+}
+
+/** Validates a coupon code against the subtotal. Returns null when no coupon given. */
+async function resolveCoupon(code: string | undefined, subtotal: number): Promise<CouponApplication | null> {
+  if (!code) return null;
+
+  const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
+  if (!coupon) throw new AppError('Mã giảm giá không tồn tại', 400);
+  if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+  if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+
+  let discount = 0;
+  if (coupon.type === CouponType.Percent) {
+    discount = Math.round((subtotal * coupon.discount) / 100);
+  } else {
+    discount = Math.min(coupon.discount, subtotal);
+  }
+
+  return { code: coupon.code, discount };
+}
+
+export class OrderService {
+  async create(userId: string, data: CreateOrderInput) {
+    const productIds = data.items.map((i) => i.product);
+
+    const products = await Product.find({ _id: { $in: productIds } });
+    if (products.length !== productIds.length) {
+      throw new AppError('Có sản phẩm không tồn tại trong giỏ hàng', 400);
+    }
+
+    const productMap = new Map(products.map((p) => [String(p._id), p]));
+
+    // Validate stock and calculate line totals
+    const lineTotals: { productId: string; price: number; quantity: number; name: string; image: string }[] = [];
+    let subtotal = 0;
+
+    for (const item of data.items) {
+      const product = productMap.get(item.product);
+      if (!product) throw new AppError('Sản phẩm không tồn tại', 400);
+      if (product.stock < item.quantity) {
+        throw new AppError(`Sản phẩm "${product.name}" không đủ hàng`, 400);
+      }
+      const price = product.salePrice;
+      subtotal += price * item.quantity;
+      lineTotals.push({
+        productId: String(product._id),
+        price,
+        quantity: item.quantity,
+        name: product.name,
+        image: product.images[0] ?? '',
+      });
+    }
+
+    const coupon = await resolveCoupon(data.couponCode, subtotal);
+    const shipping = 0; // free shipping
+    const total = subtotal - (coupon?.discount ?? 0) + shipping;
+
+    // Note: sequential writes (no DB transaction) — MongoDB Community standalone
+    // does not support multi-document transactions (needs a replica set).
+    const order = await Order.create({
+      user: new Types.ObjectId(userId),
+      customer: data.customer,
+      note: data.note || '',
+      subtotal,
+      discount: coupon?.discount ?? 0,
+      shipping,
+      total,
+      coupon: coupon ? { code: coupon.code, discount: coupon.discount } : undefined,
+      payment: {
+        method: data.paymentMethod || PaymentMethod.Cash,
+        status: PaymentStatus.Unpaid,
+      },
+      status: OrderStatus.Pending,
+    });
+
+    const orderItems = await OrderItem.create(
+      lineTotals.map((lt) => ({
+        order: order._id,
+        product: new Types.ObjectId(lt.productId),
+        name: lt.name,
+        image: lt.image,
+        price: lt.price,
+        quantity: lt.quantity,
+      })),
+    );
+
+    await Order.updateOne(
+      { _id: order._id },
+      { $set: { items: orderItems.map((oi) => oi._id) } },
+    );
+
+    // Decrement stock atomically (guards against overselling under concurrency).
+    for (const lt of lineTotals) {
+      const updated = await Product.findOneAndUpdate(
+        { _id: lt.productId, stock: { $gte: lt.quantity } },
+        { $inc: { stock: -lt.quantity } },
+        { new: true },
+      );
+      if (!updated) {
+        await OrderItem.deleteMany({ order: order._id });
+        await Order.findByIdAndDelete(order._id);
+        throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
+      }
+    }
+
+    // Increment coupon usage
+    if (coupon) {
+      await Coupon.updateOne(
+        { code: coupon.code },
+        { $inc: { usedCount: 1 } },
+      );
+    }
+
+    return this.getById(String(order._id));
+  }
+
+  /** Customer's own orders. */
+  async listForUser(userId: string, params: Record<string, unknown>) {
+    const options = parsePagination(params);
+    const filter = { user: new Types.ObjectId(userId) };
+    return apiFeatures(
+      Order.find()
+        .populate('items')
+        .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } }),
+      filter,
+      options,
+    );
+  }
+
+  /** Admin: all orders with search/filter. */
+  async listAll(params: Record<string, unknown>) {
+    const options = parsePagination(params);
+
+    const filter: Record<string, unknown> = {};
+    const { status, from, to } = params;
+    if (status) filter.status = status;
+    if (from || to) {
+      filter.createdAt = {
+        ...(from ? { $gte: new Date(String(from)) } : {}),
+        ...(to ? { $lte: new Date(String(to)) } : {}),
+      };
+    }
+
+    const searchTerm = options.search?.replace(/^#/, '').trim();
+    if (searchTerm) {
+      filter.$or = [
+        { 'customer.name': { $regex: searchTerm, $options: 'i' } },
+        { 'customer.phone': { $regex: searchTerm, $options: 'i' } },
+        { 'customer.email': { $regex: searchTerm, $options: 'i' } },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $toLower: { $toString: '$_id' } },
+              regex: searchTerm.toLowerCase(),
+            },
+          },
+        },
+      ];
+    }
+
+    return apiFeatures(
+      Order.find().populate('items'),
+      filter,
+      options,
+    );
+  }
+
+  async getById(id: string) {
+    const order = await Order.findById(id).populate('items').populate({
+      path: 'items',
+      populate: { path: 'product', select: 'name slug images salePrice' },
+    });
+    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+    return order;
+  }
+
+  async updateStatus(id: string, data: UpdateOrderStatusInput) {
+    const order = await Order.findById(id);
+    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+
+    const updates: Record<string, unknown> = { status: data.status };
+    if (data.paymentStatus) {
+      updates['payment.status'] = data.paymentStatus;
+    }
+
+    const updated = await Order.findByIdAndUpdate(id, { $set: updates }, { new: true })
+      .populate('items')
+      .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
+    return updated;
+  }
+}
+
+export const orderService = new OrderService();

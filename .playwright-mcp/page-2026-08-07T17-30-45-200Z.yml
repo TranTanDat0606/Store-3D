@@ -1,0 +1,211 @@
+- generic [ref=f19e2]:
+  - generic [ref=f19e7]:
+    - banner [ref=f19e8]:
+      - generic [ref=f19e9]:
+        - generic [ref=f19e15]:
+          - paragraph [ref=f19e16]: Store 3D
+          - paragraph [ref=f19e17]: Quản trị
+        - generic [ref=f19e18]:
+          - link "Về trang chủ" [ref=f19e19] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f19e20]:
+            - paragraph [ref=f19e21]: Qu?n tr? vi�n
+            - paragraph [ref=f19e22]: Admin
+    - generic [ref=f19e23]:
+      - complementary [ref=f19e24]:
+        - navigation [ref=f19e25]:
+          - link "Tổng quan" [ref=f19e26] [cursor=pointer]:
+            - /url: /admin
+          - link "Sản phẩm" [ref=f19e32] [cursor=pointer]:
+            - /url: /admin/san-pham
+          - link "Danh mục" [ref=f19e37] [cursor=pointer]:
+            - /url: /admin/danh-muc
+          - link "Đơn hàng" [ref=f19e41] [cursor=pointer]:
+            - /url: /admin/don-hang
+          - link "Mã giảm giá" [ref=f19e46] [cursor=pointer]:
+            - /url: /admin/ma-giam-gia
+          - link "Đánh giá" [ref=f19e49] [cursor=pointer]:
+            - /url: /admin/danh-gia
+          - link "Khách hàng" [ref=f19e52] [cursor=pointer]:
+            - /url: /admin/khach-hang
+      - main [ref=f19e58]:
+        - generic [ref=f19e59]:
+          - generic [ref=f19e60]:
+            - generic [ref=f19e61]:
+              - heading "Quản lý sản phẩm" [level=1] [ref=f19e62]
+              - paragraph [ref=f19e63]: 12 sản phẩm
+            - button "Thêm sản phẩm" [ref=f19e64] [cursor=pointer]
+          - textbox "Tìm kiếm sản phẩm..." [ref=f19e69]
+          - table [ref=f19e72]:
+            - rowgroup [ref=f19e73]:
+              - row [ref=f19e74]:
+                - columnheader "Ảnh" [ref=f19e75]
+                - columnheader "Tên sản phẩm" [ref=f19e76]
+                - columnheader "Danh mục" [ref=f19e77]
+                - columnheader "Giá bán" [ref=f19e78]
+                - columnheader "Tồn kho" [ref=f19e79]
+                - columnheader "Trạng thái" [ref=f19e80]
+                - columnheader "Thao tác" [ref=f19e81]
+            - rowgroup [ref=f19e82]:
+              - row [ref=f19e380]:
+                - cell [ref=f19e381]
+                - cell [ref=f19e382]:
+                  - generic [ref=f19e383]:
+                    - link "Móc khóa mini" [ref=f19e384] [cursor=pointer]:
+                      - /url: /san-pham/moc-khoa-mini
+                    - text: PLA
+                - cell "Đồ dùng hằng ngày" [ref=f19e385]
+                - cell "79.000 ₫" [ref=f19e386]
+                - cell "100" [ref=f19e387]
+                - cell "Đang bán" [ref=f19e389]
+                - cell [ref=f19e391]:
+                  - generic [ref=f19e392]:
+                    - button "Sửa" [ref=f19e393] [cursor=pointer]
+                    - button "Xóa" [ref=f19e394] [cursor=pointer]
+              - row [ref=f19e395]:
+                - cell [ref=f19e396]
+                - cell [ref=f19e397]:
+                  - generic [ref=f19e398]:
+                    - link "Nhà gỗ truyền thống" [ref=f19e399] [cursor=pointer]:
+                      - /url: /san-pham/nha-go-truyen-thong
+                    - text: PLA
+                - cell "Mô hình kiến trúc" [ref=f19e400]
+                - cell "390.000 ₫" [ref=f19e401]
+                - cell "15" [ref=f19e402]
+                - cell "Đang bán" [ref=f19e404]
+                - cell [ref=f19e406]:
+                  - generic [ref=f19e407]:
+                    - button "Sửa" [ref=f19e408] [cursor=pointer]
+                    - button "Xóa" [ref=f19e409] [cursor=pointer]
+              - row [ref=f19e410]:
+                - cell [ref=f19e411]
+                - cell [ref=f19e412]:
+                  - generic [ref=f19e413]:
+                    - link "Bánh răng trang trí" [ref=f19e414] [cursor=pointer]:
+                      - /url: /san-pham/banh-rang-trang-tri
+                    - text: ABS
+                - cell "Mô hình máy móc" [ref=f19e415]
+                - cell "145.000 ₫" [ref=f19e416]
+                - cell "40" [ref=f19e417]
+                - cell "Đang bán" [ref=f19e419]
+                - cell [ref=f19e421]:
+                  - generic [ref=f19e422]:
+                    - button "Sửa" [ref=f19e423] [cursor=pointer]
+                    - button "Xóa" [ref=f19e424] [cursor=pointer]
+              - row [ref=f19e425]:
+                - cell [ref=f19e426]
+                - cell [ref=f19e427]:
+                  - generic [ref=f19e428]:
+                    - link "Robot Gundam RX-78" [ref=f19e429] [cursor=pointer]:
+                      - /url: /san-pham/robot-gundam-rx-78
+                    - text: Resin
+                - cell "Mô hình máy móc" [ref=f19e430]
+                - cell "680.000 ₫" [ref=f19e431]
+                - cell "4" [ref=f19e432]
+                - cell "Đang bán" [ref=f19e434]
+                - cell [ref=f19e436]:
+                  - generic [ref=f19e437]:
+                    - button "Sửa" [ref=f19e438] [cursor=pointer]
+                    - button "Xóa" [ref=f19e439] [cursor=pointer]
+              - row [ref=f19e440]:
+                - cell [ref=f19e441]
+                - cell [ref=f19e442]:
+                  - generic [ref=f19e443]:
+                    - link "Kiếm Ichigo - Bleach" [ref=f19e444] [cursor=pointer]:
+                      - /url: /san-pham/kiem-ichigo-bleach
+                    - text: PETG
+                - cell "Phụ kiện & Cosplay" [ref=f19e445]
+                - cell "560.000 ₫" [ref=f19e446]
+                - cell "6" [ref=f19e447]
+                - cell "Đang bán" [ref=f19e449]
+                - cell [ref=f19e451]:
+                  - generic [ref=f19e452]:
+                    - button "Sửa" [ref=f19e453] [cursor=pointer]
+                    - button "Xóa" [ref=f19e454] [cursor=pointer]
+              - row [ref=f19e455]:
+                - cell [ref=f19e456]
+                - cell [ref=f19e457]:
+                  - generic [ref=f19e458]:
+                    - link "Mũ giáp Viking" [ref=f19e459] [cursor=pointer]:
+                      - /url: /san-pham/mu-giap-viking
+                    - text: PETG
+                - cell "Phụ kiện & Cosplay" [ref=f19e460]
+                - cell "440.000 ₫" [ref=f19e461]
+                - cell "10" [ref=f19e462]
+                - cell "Đang bán" [ref=f19e464]
+                - cell [ref=f19e466]:
+                  - generic [ref=f19e467]:
+                    - button "Sửa" [ref=f19e468] [cursor=pointer]
+                    - button "Xóa" [ref=f19e469] [cursor=pointer]
+              - row [ref=f19e470]:
+                - cell [ref=f19e471]
+                - cell [ref=f19e472]:
+                  - generic [ref=f19e473]:
+                    - link "Tháp Eiffel mini" [ref=f19e474] [cursor=pointer]:
+                      - /url: /san-pham/thap-eiffel-mini
+                    - text: PLA
+                - cell "Mô hình kiến trúc" [ref=f19e475]
+                - cell "280.000 ₫" [ref=f19e476]
+                - cell "18" [ref=f19e477]
+                - cell "Đang bán" [ref=f19e479]
+                - cell [ref=f19e481]:
+                  - generic [ref=f19e482]:
+                    - button "Sửa" [ref=f19e483] [cursor=pointer]
+                    - button "Xóa" [ref=f19e484] [cursor=pointer]
+              - row [ref=f19e485]:
+                - cell [ref=f19e486]
+                - cell [ref=f19e487]:
+                  - generic [ref=f19e488]:
+                    - link "Bộ bàn ghế mini" [ref=f19e489] [cursor=pointer]:
+                      - /url: /san-pham/bo-ban-ghe-mini
+                    - text: PLA
+                - cell "Đồ dùng hằng ngày" [ref=f19e490]
+                - cell "160.000 ₫" [ref=f19e491]
+                - cell "50" [ref=f19e492]
+                - cell "Đang bán" [ref=f19e494]
+                - cell [ref=f19e496]:
+                  - generic [ref=f19e497]:
+                    - button "Sửa" [ref=f19e498] [cursor=pointer]
+                    - button "Xóa" [ref=f19e499] [cursor=pointer]
+              - row [ref=f19e500]:
+                - cell [ref=f19e501]
+                - cell [ref=f19e502]:
+                  - generic [ref=f19e503]:
+                    - link "Chậu cây hình robot" [ref=f19e504] [cursor=pointer]:
+                      - /url: /san-pham/chau-cay-hinh-robot
+                    - text: PLA
+                - cell "Đồ dùng hằng ngày" [ref=f19e505]
+                - cell "120.000 ₫" [ref=f19e506]
+                - cell "35" [ref=f19e507]
+                - cell "Đang bán" [ref=f19e509]
+                - cell [ref=f19e511]:
+                  - generic [ref=f19e512]:
+                    - button "Sửa" [ref=f19e513] [cursor=pointer]
+                    - button "Xóa" [ref=f19e514] [cursor=pointer]
+              - row [ref=f19e515]:
+                - cell [ref=f19e516]
+                - cell [ref=f19e517]:
+                  - generic [ref=f19e518]:
+                    - link "Rồng lửa châu Âu" [ref=f19e519] [cursor=pointer]:
+                      - /url: /san-pham/rong-lua-chau-au
+                    - text: PLA
+                - cell "Đồ trang trí" [ref=f19e520]
+                - cell "480.000 ₫" [ref=f19e521]
+                - cell "20" [ref=f19e522]
+                - cell "Đang bán" [ref=f19e524]
+                - cell [ref=f19e526]:
+                  - generic [ref=f19e527]:
+                    - button "Sửa" [ref=f19e528] [cursor=pointer]
+                    - button "Xóa" [ref=f19e529] [cursor=pointer]
+          - navigation "Phân trang" [ref=f19e233]:
+            - button "Trang đầu" [disabled]
+            - button "Trang trước" [disabled]
+            - button "1" [ref=f19e234] [cursor=pointer]
+            - button "2" [ref=f19e235] [cursor=pointer]
+            - button "Trang sau" [ref=f19e236] [cursor=pointer]
+            - button "Trang cuối" [ref=f19e237] [cursor=pointer]
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=f19e530]:
+        - button "Close toast" [ref=f19e531] [cursor=pointer]
+        - generic [ref=f19e538]: Cập nhật sản phẩm thành công

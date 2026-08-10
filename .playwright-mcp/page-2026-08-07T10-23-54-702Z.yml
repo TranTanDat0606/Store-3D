@@ -1,0 +1,41 @@
+- generic [ref=f48e2]:
+  - generic [ref=f48e7]:
+    - banner [ref=f48e8]:
+      - generic [ref=f48e9]:
+        - generic [ref=f48e15]:
+          - paragraph [ref=f48e16]: Store 3D
+          - paragraph [ref=f48e17]: Quản trị
+        - generic [ref=f48e18]:
+          - link "Về trang chủ" [ref=f48e19] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f48e20]:
+            - paragraph [ref=f48e21]: Quản trị viên
+            - paragraph [ref=f48e22]: Admin
+    - generic [ref=f48e23]:
+      - complementary [ref=f48e24]:
+        - navigation [ref=f48e25]:
+          - link "Tổng quan" [ref=f48e26] [cursor=pointer]:
+            - /url: /admin
+          - link "Sản phẩm" [ref=f48e32] [cursor=pointer]:
+            - /url: /admin/san-pham
+          - link "Danh mục" [ref=f48e37] [cursor=pointer]:
+            - /url: /admin/danh-muc
+          - link "Đơn hàng" [ref=f48e41] [cursor=pointer]:
+            - /url: /admin/don-hang
+          - link "Mã giảm giá" [ref=f48e46] [cursor=pointer]:
+            - /url: /admin/ma-giam-gia
+          - link "Đánh giá" [ref=f48e49] [cursor=pointer]:
+            - /url: /admin/danh-gia
+          - link "Khách hàng" [ref=f48e52] [cursor=pointer]:
+            - /url: /admin/khach-hang
+      - main [ref=f48e58]:
+        - generic [ref=f48e59]:
+          - generic [ref=f48e60]:
+            - heading "Quản lý đơn hàng" [level=1] [ref=f48e61]
+            - paragraph [ref=f48e62]: 0 đơn hàng
+          - generic [ref=f48e63]:
+            - textbox "Tìm theo tên khách hàng hoặc mã đơn..." [active] [ref=f48e68]: AF3923E8
+            - combobox [ref=f48e69]:
+              - generic: Lọc theo trạng thái
+          - generic [ref=f48e70]: Không có đơn hàng nào
+  - region "Notifications alt+T"

@@ -1,0 +1,98 @@
+- generic:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - generic:
+              - paragraph: Store 3D
+              - paragraph: Quản trị
+          - generic:
+            - link:
+              - /url: /
+              - text: Về trang chủ
+            - generic:
+              - paragraph: Quản trị viên
+              - paragraph: Admin
+      - generic:
+        - complementary:
+          - navigation:
+            - link:
+              - /url: /admin
+              - text: Tổng quan
+            - link:
+              - /url: /admin/san-pham
+              - text: Sản phẩm
+            - link:
+              - /url: /admin/danh-muc
+              - text: Danh mục
+            - link:
+              - /url: /admin/don-hang
+              - text: Đơn hàng
+            - link:
+              - /url: /admin/ma-giam-gia
+              - text: Mã giảm giá
+            - link:
+              - /url: /admin/danh-gia
+              - text: Đánh giá
+            - link:
+              - /url: /admin/khach-hang
+              - text: Khách hàng
+        - main:
+          - generic:
+            - generic:
+              - generic:
+                - heading [level=1]: Mã giảm giá
+                - paragraph: 2 mã
+              - button: Thêm mã
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: GIAM50K
+                      - paragraph: "-50.000 ₫"
+                    - generic:
+                      - button
+                      - button
+                  - generic:
+                    - paragraph: "Hạn dùng: 31/12/2026"
+                    - paragraph: "Đã dùng: 0/50"
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - paragraph: SALE10
+                      - paragraph: "-10%"
+                    - generic:
+                      - button
+                      - button
+                  - generic:
+                    - paragraph: "Hạn dùng: 31/12/2026"
+                    - paragraph: "Đã dùng: 1/100"
+    - region "Notifications alt+T"
+  - dialog [ref=f21e40]:
+    - heading "Thêm mã giảm giá" [level=2] [ref=f21e42]
+    - generic [ref=f21e43]:
+      - generic [ref=f21e44]:
+        - generic [ref=f21e45]:
+          - generic [ref=f21e46]: Mã
+          - textbox "SALE10" [active] [ref=f21e47]
+        - generic [ref=f21e48]:
+          - generic [ref=f21e49]: Loại giảm giá
+          - combobox [ref=f21e50]:
+            - generic: Theo phần trăm (%)
+      - generic [ref=f21e51]:
+        - generic [ref=f21e52]:
+          - generic [ref=f21e53]: Giá trị giảm
+          - spinbutton [ref=f21e54]
+        - generic [ref=f21e55]:
+          - generic [ref=f21e56]: Số lượng (0 = không giới hạn)
+          - spinbutton [ref=f21e57]: "0"
+      - generic [ref=f21e58]:
+        - generic [ref=f21e59]: Ngày hết hạn
+        - textbox [ref=f21e60]
+    - generic [ref=f21e61]:
+      - button "Hủy" [ref=f21e62] [cursor=pointer]
+      - button "Thêm mã" [ref=f21e63] [cursor=pointer]
+    - button "Đóng" [ref=f21e64] [cursor=pointer]

@@ -1,0 +1,91 @@
+- generic:
+  - generic:
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - generic:
+              - paragraph: Store 3D
+              - paragraph: Quản trị
+          - generic:
+            - link:
+              - /url: /
+              - text: Về trang chủ
+            - generic:
+              - paragraph: Quản trị viên
+              - paragraph: Admin
+      - generic:
+        - complementary:
+          - navigation:
+            - link:
+              - /url: /admin
+              - text: Tổng quan
+            - link:
+              - /url: /admin/san-pham
+              - text: Sản phẩm
+            - link:
+              - /url: /admin/danh-muc
+              - text: Danh mục
+            - link:
+              - /url: /admin/don-hang
+              - text: Đơn hàng
+            - link:
+              - /url: /admin/ma-giam-gia
+              - text: Mã giảm giá
+            - link:
+              - /url: /admin/danh-gia
+              - text: Đánh giá
+            - link:
+              - /url: /admin/khach-hang
+              - text: Khách hàng
+        - main:
+          - generic:
+            - generic:
+              - heading [level=1]: Quản lý đơn hàng
+              - paragraph: 1 đơn hàng
+            - generic:
+              - generic:
+                - textbox:
+                  - /placeholder: Tìm theo tên khách hàng hoặc mã đơn...
+              - combobox:
+                - generic: Lọc theo trạng thái
+            - generic:
+              - generic:
+                - generic:
+                  - button:
+                    - generic:
+                      - generic: "#AF3923E8"
+                      - generic: Chờ xác nhận
+                      - generic: Chưa thanh toán
+                    - generic:
+                      - generic: Khách hàng demo · 15:58 07/08/2026
+                      - generic: 612.000 ₫
+                  - generic:
+                    - generic:
+                      - generic:
+                        - paragraph: "Khách hàng: Khách hàng demo"
+                        - paragraph: "SĐT: 0912345678"
+                        - paragraph: "Email: khach@store3d.com"
+                        - paragraph: "Địa chỉ: 123 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+                      - generic:
+                        - paragraph:
+                          - generic: Robot Gundam RX-78 × 1
+                          - generic: 680.000 ₫
+                        - paragraph:
+                          - generic: Giảm giá
+                          - generic: "-68.000 ₫"
+                        - paragraph:
+                          - generic: Tổng
+                          - generic: 612.000 ₫
+                    - generic:
+                      - generic: "Cập nhật trạng thái:"
+                      - combobox [expanded]:
+                        - generic: Chờ xác nhận
+                      - generic: COD
+    - region "Notifications alt+T"
+  - listbox [ref=f14e102]:
+    - option "Chờ xác nhận" [active] [selected] [ref=f14e103]
+    - option "Đã xác nhận" [ref=f14e107]
+    - option "Đang giao" [ref=f14e110]
+    - option "Hoàn thành" [ref=f14e113]
+    - option "Đã hủy" [ref=f14e116]

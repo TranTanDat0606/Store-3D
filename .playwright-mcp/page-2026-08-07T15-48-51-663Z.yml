@@ -1,0 +1,141 @@
+- generic [ref=f7e2]:
+  - generic [ref=f7e6]:
+    - banner [ref=f7e7]:
+      - generic [ref=f7e8]:
+        - link "Store3D" [ref=f7e9] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=f7e15]:
+          - link "Trang chủ" [ref=f7e16] [cursor=pointer]:
+            - /url: /
+          - link "Sản phẩm" [ref=f7e17] [cursor=pointer]:
+            - /url: /san-pham
+          - link "Nổi bật" [ref=f7e18] [cursor=pointer]:
+            - /url: /san-pham?featured=true
+        - textbox "Tìm kiếm sản phẩm..." [ref=f7e23]
+        - generic [ref=f7e24]:
+          - button "Đổi giao diện" [ref=f7e25] [cursor=pointer]
+          - link "Danh sách yêu thích 1" [ref=f7e26] [cursor=pointer]:
+            - /url: /tai-khoan/yeu-thich
+            - button "Danh sách yêu thích" [ref=f7e27]
+            - generic [ref=f7e28]: "1"
+          - button "Giỏ hàng" [ref=f7e29] [cursor=pointer]:
+            - generic [ref=f7e30]: "3"
+          - button [ref=f7e31] [cursor=pointer]:
+            - img "Khách hàng demo" [ref=f7e32]
+    - main [ref=f7e33]:
+      - generic [ref=f7e34]:
+        - generic [ref=f7e35]:
+          - heading "Tài khoản" [level=1] [ref=f7e36]
+          - paragraph [ref=f7e37]: Xin chào, Khách hàng demo
+        - generic [ref=f7e38]:
+          - complementary [ref=f7e39]:
+            - navigation [ref=f7e40]:
+              - link "Tổng quan" [ref=f7e41] [cursor=pointer]:
+                - /url: /tai-khoan
+              - link "Đơn hàng của tôi" [ref=f7e47] [cursor=pointer]:
+                - /url: /tai-khoan/don-hang
+              - link "Yêu thích" [ref=f7e52] [cursor=pointer]:
+                - /url: /tai-khoan/yeu-thich
+              - link "Hồ sơ" [ref=f7e55] [cursor=pointer]:
+                - /url: /tai-khoan/ho-so
+              - link "Đổi mật khẩu" [ref=f7e59] [cursor=pointer]:
+                - /url: /tai-khoan/mat-khau
+          - main [ref=f7e63]:
+            - generic [ref=f7e140]:
+              - link "Quay lại" [ref=f7e141] [cursor=pointer]:
+                - /url: /tai-khoan/don-hang
+              - generic [ref=f7e142]:
+                - generic [ref=f7e143]:
+                  - 'heading "Đơn hàng #AF3923E8" [level=2] [ref=f7e144]'
+                  - paragraph [ref=f7e145]: Đặt lúc 15:58 07/08/2026
+                - generic [ref=f7e146]:
+                  - generic [ref=f7e147]: Hoàn thành
+                  - generic [ref=f7e148]: Đã thanh toán
+              - generic [ref=f7e149]:
+                - generic [ref=f7e150]:
+                  - generic [ref=f7e151]:
+                    - generic [ref=f7e152]: Sản phẩm
+                    - generic [ref=f7e155]:
+                      - img "Robot Gundam RX-78" [ref=f7e157]
+                      - generic [ref=f7e158]:
+                        - link "Robot Gundam RX-78" [ref=f7e159] [cursor=pointer]:
+                          - /url: /san-pham/robot-gundam-rx-78
+                        - paragraph [ref=f7e160]: x1
+                      - generic [ref=f7e161]: 680.000 ₫
+                  - generic [ref=f7e162]:
+                    - generic [ref=f7e163]: Thông tin giao hàng
+                    - generic [ref=f7e165]:
+                      - paragraph [ref=f7e166]: "Người nhận: Khách hàng demo"
+                      - paragraph [ref=f7e167]: "Số điện thoại: 0912345678"
+                      - paragraph [ref=f7e168]: "Email: khach@store3d.com"
+                      - paragraph [ref=f7e169]: "Địa chỉ: 123 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+                - generic [ref=f7e170]:
+                  - generic [ref=f7e171]: Tổng đơn hàng
+                  - generic [ref=f7e173]:
+                    - generic [ref=f7e174]:
+                      - generic [ref=f7e175]: Tạm tính
+                      - generic [ref=f7e176]: 680.000 ₫
+                    - generic [ref=f7e177]:
+                      - generic [ref=f7e178]: Giảm giá
+                      - generic [ref=f7e179]: "-68.000 ₫"
+                    - generic [ref=f7e180]:
+                      - generic [ref=f7e181]: Phí vận chuyển
+                      - generic [ref=f7e182]: Miễn phí
+                    - generic [ref=f7e183]:
+                      - generic [ref=f7e184]: Tổng cộng
+                      - generic [ref=f7e185]: 612.000 ₫
+                    - generic [ref=f7e186]: "Phương thức thanh toán: Thanh toán khi nhận hàng (COD)"
+    - contentinfo [ref=f7e85]:
+      - generic [ref=f7e86]:
+        - generic [ref=f7e87]:
+          - generic [ref=f7e88]:
+            - link "Store3D" [ref=f7e89] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f7e95]: Cửa hàng mô hình in 3D chất lượng cao. Figurine, đồ trang trí, mô hình kiến trúc và nhiều sản phẩm độc đáo khác.
+            - generic [ref=f7e96]:
+              - link "Facebook" [ref=f7e97] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f7e98]: M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z
+              - link "Instagram" [ref=f7e99] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f7e100]: M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z
+              - link "Youtube" [ref=f7e101] [cursor=pointer]:
+                - /url: "#"
+                - img [ref=f7e102]: M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z
+          - generic [ref=f7e103]:
+            - heading "Liên kết" [level=3] [ref=f7e104]
+            - list [ref=f7e105]:
+              - listitem [ref=f7e106]:
+                - link "Trang chủ" [ref=f7e107] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f7e108]:
+                - link "Sản phẩm" [ref=f7e109] [cursor=pointer]:
+                  - /url: /san-pham
+              - listitem [ref=f7e110]:
+                - link "Sản phẩm nổi bật" [ref=f7e111] [cursor=pointer]:
+                  - /url: /san-pham?featured=true
+              - listitem [ref=f7e112]:
+                - link "Danh sách yêu thích" [ref=f7e113] [cursor=pointer]:
+                  - /url: /tai-khoan/yeu-thich
+          - generic [ref=f7e114]:
+            - heading "Hỗ trợ" [level=3] [ref=f7e115]
+            - list [ref=f7e116]:
+              - listitem [ref=f7e117]:
+                - link "Tài khoản" [ref=f7e118] [cursor=pointer]:
+                  - /url: /tai-khoan
+              - listitem [ref=f7e119]:
+                - link "Đơn hàng của tôi" [ref=f7e120] [cursor=pointer]:
+                  - /url: /tai-khoan/don-hang
+              - listitem [ref=f7e121]:
+                - link "Đăng ký tài khoản" [ref=f7e122] [cursor=pointer]:
+                  - /url: /dang-ky
+          - generic [ref=f7e123]:
+            - heading "Liên hệ" [level=3] [ref=f7e124]
+            - list [ref=f7e125]:
+              - listitem [ref=f7e126]: 123 Nguyễn Trãi, Thanh Xuân, Hà Nội
+              - listitem [ref=f7e130]: 0901 234 567
+              - listitem [ref=f7e133]: lienhe@store3d.com
+        - generic [ref=f7e137]:
+          - paragraph [ref=f7e138]: © 2026 Store 3D. Bảo lưu mọi quyền.
+          - paragraph [ref=f7e139]: Sản phẩm in 3D chất lượng cao, giao hàng toàn quốc.
+  - region "Notifications alt+T"
