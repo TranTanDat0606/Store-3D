@@ -4,6 +4,11 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react'
 import { productApi, categoryApi, type ProductPayload } from '@/services'
 import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -152,10 +157,28 @@ export default function AdminProductEditPage() {
         </div>
         <div className="flex items-center gap-2">
           {!isNew && (
-            <Button variant="outline" onClick={handleDelete} className="border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 hover:text-rose-200">
-              <Trash2 className="size-4" />
-              Xóa
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 hover:text-rose-200">
+                  <Trash2 className="size-4" />
+                  Xóa
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border-white/10 bg-slate-900 text-slate-100">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-white">Xóa sản phẩm?</AlertDialogTitle>
+                  <AlertDialogDescription className="text-slate-400">
+                    Bạn có chắc muốn xóa "{product?.name}"? Hành động này không thể hoàn tác.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">Hủy</AlertDialogCancel>
+                  <AlertDialogAction className="bg-rose-500 text-white hover:bg-rose-600" onClick={handleDelete}>
+                    Xóa
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
           <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500">
             <Save className="size-4" />
