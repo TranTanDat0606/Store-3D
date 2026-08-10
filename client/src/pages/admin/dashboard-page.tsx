@@ -1,23 +1,36 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { DollarSign, Package, ShoppingCart, Users, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
 import {
-  DollarSign,
-  Package,
-  ShoppingCart,
-  Users,
-  Clock,
-  CheckCircle2,
-  TrendingUp,
-} from 'lucide-react'
+  Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts'
 import { statsApi, orderApi } from '@/services'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrderStatusBadge } from '@/components/order/order-status-badge'
 import { formatCurrency, formatDateTime, cn } from '@/lib'
-import type { BestSellingProduct, Order, StatsOverview } from '@/types'
+import type { BestSellingProduct, Order, OrdersByStatus, RevenuePoint, StatsOverview } from '@/types'
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#f59e0b',
+  confirmed: '#38bdf8',
+  shipping: '#818cf8',
+  completed: '#34d399',
+  cancelled: '#f43f5e',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  shipping: 'Đang giao',
+  completed: 'Hoàn thành',
+  cancelled: 'Đã hủy',
+}
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<StatsOverview | null>(null)
+  const [revenue, setRevenue] = useState<RevenuePoint[]>([])
+  const [byStatus, setByStatus] = useState<OrdersByStatus[]>([])
   const [bestSelling, setBestSelling] = useState<BestSellingProduct[]>([])
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,12 +39,16 @@ export default function AdminDashboardPage() {
     let cancelled = false
     void Promise.all([
       statsApi.overview(),
+      statsApi.revenue(30),
+      statsApi.ordersByStatus(),
       statsApi.bestSelling(5),
       orderApi.adminList({ limit: 5 }),
     ])
-      .then(([ov, best, orders]) => {
+      .then(([ov, rev, statuses, best, orders]) => {
         if (cancelled) return
         setStats(ov)
+        setRevenue(rev)
+        setByStatus(statuses)
         setBestSelling(best)
         setRecentOrders(orders.data)
       })
@@ -44,43 +61,46 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
+  const chartData = useMemo(
+    () => revenue.map((r) => ({ ...r, date: r.date.slice(5) })),
+    [revenue]
+  )
+
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
+            <Skeleton key={i} className="h-32 rounded-2xl bg-white/5" />
           ))}
         </div>
-        <Skeleton className="h-80" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-80 rounded-2xl bg-white/5" />
+          <Skeleton className="h-80 rounded-2xl bg-white/5" />
+        </div>
       </div>
     )
   }
 
   const statCards = [
-    { label: 'Tổng doanh thu', value: formatCurrency(stats?.totalRevenue ?? 0), icon: DollarSign, color: 'text-emerald-600' },
-    { label: 'Tổng đơn hàng', value: String(stats?.totalOrders ?? 0), icon: ShoppingCart, color: 'text-blue-600' },
-    { label: 'Tổng sản phẩm', value: String(stats?.totalProducts ?? 0), icon: Package, color: 'text-purple-600' },
-    { label: 'Khách hàng', value: String(stats?.totalCustomers ?? 0), icon: Users, color: 'text-amber-600' },
+    { label: 'Tổng doanh thu', value: formatCurrency(stats?.totalRevenue ?? 0), icon: DollarSign, accent: 'from-emerald-400 to-teal-500', glow: 'shadow-emerald-500/20' },
+    { label: 'Tổng đơn hàng', value: String(stats?.totalOrders ?? 0), icon: ShoppingCart, accent: 'from-cyan-400 to-blue-500', glow: 'shadow-cyan-500/20' },
+    { label: 'Tổng sản phẩm', value: String(stats?.totalProducts ?? 0), icon: Package, accent: 'from-violet-400 to-purple-500', glow: 'shadow-violet-500/20' },
+    { label: 'Khách hàng', value: String(stats?.totalCustomers ?? 0), icon: Users, accent: 'from-amber-400 to-orange-500', glow: 'shadow-amber-500/20' },
   ]
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Tổng quan</h1>
-        <p className="text-muted-foreground">Thống kê hoạt động của cửa hàng</p>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <Card key={card.label}>
-            <CardContent className="flex items-center justify-between pt-6">
+          <Card key={card.label} className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+            <CardContent className="flex items-center justify-between p-5">
               <div>
-                <p className="text-muted-foreground text-sm">{card.label}</p>
-                <p className="mt-1 text-2xl font-bold">{card.value}</p>
+                <p className="text-sm text-slate-400">{card.label}</p>
+                <p className="mt-1 text-2xl font-bold text-white">{card.value}</p>
               </div>
-              <div className={cn('flex size-12 items-center justify-center rounded-xl bg-muted', card.color)}>
-                <card.icon className="size-6" />
+              <div className={cn('flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg', card.accent, card.glow)}>
+                <card.icon className="size-6 text-white" />
               </div>
             </CardContent>
           </Card>
@@ -88,52 +108,105 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-amber-100 dark:bg-amber-950 flex size-12 items-center justify-center rounded-xl">
-              <Clock className="size-6 text-amber-600" />
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/20">
+              <Clock className="size-6 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.pendingOrders ?? 0}</p>
-              <p className="text-muted-foreground text-sm">Đơn chờ xác nhận</p>
+              <p className="text-2xl font-bold text-white">{stats?.pendingOrders ?? 0}</p>
+              <p className="text-sm text-slate-400">Đơn chờ xác nhận</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-emerald-100 dark:bg-emerald-950 flex size-12 items-center justify-center rounded-xl">
-              <CheckCircle2 className="size-6 text-emerald-600" />
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+          <CardContent className="flex items-center gap-4 p-5">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20">
+              <CheckCircle2 className="size-6 text-white" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats?.completedOrders ?? 0}</p>
-              <p className="text-muted-foreground text-sm">Đơn hoàn thành</p>
+              <p className="text-2xl font-bold text-white">{stats?.completedOrders ?? 0}</p>
+              <p className="text-sm text-slate-400">Đơn hoàn thành</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Sản phẩm bán chạy</CardTitle>
-            <TrendingUp className="text-muted-foreground size-5" />
+            <CardTitle className="text-base text-white">Doanh thu 30 ngày</CardTitle>
+            <TrendingUp className="size-5 text-cyan-400" />
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff14" />
+                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
+                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#f1f5f9' }} formatter={(v) => formatCurrency(Number(v))} />
+                <Area type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={2} fill="url(#rev)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-base text-white">Trạng thái đơn hàng</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={byStatus} dataKey="count" nameKey="status" innerRadius={70} outerRadius={100} paddingAngle={3} stroke="none">
+                  {byStatus.map((s) => (
+                    <Cell key={s.status} fill={STATUS_COLORS[s.status] ?? '#64748b'} />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#f1f5f9' }} formatter={(v, n) => [`${v} đơn`, STATUS_LABELS[String(n)] ?? String(n)]} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
+              {byStatus.map((s) => (
+                <span key={s.status} className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <span className="size-2.5 rounded-full" style={{ background: STATUS_COLORS[s.status] ?? '#64748b' }} />
+                  {STATUS_LABELS[s.status] ?? s.status} · {s.count}
+                </span>
+              ))}
+              {byStatus.length === 0 && <span className="text-sm text-slate-400">Chưa có dữ liệu</span>}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base text-white">Sản phẩm bán chạy</CardTitle>
+            <TrendingUp className="size-5 text-cyan-400" />
           </CardHeader>
           <CardContent>
             {bestSelling.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center text-sm">Chưa có dữ liệu</p>
+              <p className="py-8 text-center text-sm text-slate-400">Chưa có dữ liệu</p>
             ) : (
               <div className="space-y-4">
                 {bestSelling.map((p, i) => (
                   <div key={p._id} className="flex items-center gap-3">
-                    <span className="text-muted-foreground w-6 text-sm font-bold">#{i + 1}</span>
-                    <img src={p.image} alt="" className="bg-muted size-10 rounded-lg object-cover" />
+                    <span className={cn('w-6 text-sm font-bold', i === 0 ? 'text-cyan-400' : 'text-slate-400')}>#{i + 1}</span>
+                    <img src={p.image} alt="" className="size-10 rounded-lg border border-white/10 object-cover" />
                     <div className="min-w-0 flex-1">
-                      <Link to={`/admin/san-pham`} className="hover:text-primary line-clamp-1 text-sm font-medium">
+                      <Link to="/admin/san-pham" className="line-clamp-1 text-sm font-medium text-slate-100 hover:text-cyan-300">
                         {p.name}
                       </Link>
-                      <p className="text-muted-foreground text-xs">{p.totalSold} đã bán</p>
+                      <p className="text-xs text-slate-400">{p.totalSold} đã bán</p>
                     </div>
-                    <span className="text-sm font-semibold">{formatCurrency(p.revenue)}</span>
+                    <span className="text-sm font-semibold text-slate-100">{formatCurrency(p.revenue)}</span>
                   </div>
                 ))}
               </div>
@@ -141,29 +214,25 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
           <CardHeader>
-            <CardTitle className="text-base">Đơn hàng gần đây</CardTitle>
+            <CardTitle className="text-base text-white">Đơn hàng gần đây</CardTitle>
           </CardHeader>
           <CardContent>
             {recentOrders.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center text-sm">Chưa có đơn hàng</p>
+              <p className="py-8 text-center text-sm text-slate-400">Chưa có đơn hàng</p>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-white/5">
                 {recentOrders.map((order) => (
-                  <Link
-                    key={order._id}
-                    to={`/admin/don-hang`}
-                    className="flex items-center justify-between gap-3 py-3"
-                  >
+                  <Link key={order._id} to="/admin/don-hang" className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
+                      <p className="truncate text-sm font-medium text-slate-100">
                         #{order._id.slice(-8).toUpperCase()} · {order.customer.name}
                       </p>
-                      <p className="text-muted-foreground text-xs">{formatDateTime(order.createdAt)}</p>
+                      <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">{formatCurrency(order.total)}</span>
+                      <span className="text-sm font-semibold text-slate-100">{formatCurrency(order.total)}</span>
                       <OrderStatusBadge status={order.status} />
                     </div>
                   </Link>
