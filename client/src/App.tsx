@@ -30,6 +30,7 @@ const AdminOrdersPage = lazy(() => import('@/pages/admin/orders-page'))
 const AdminCouponsPage = lazy(() => import('@/pages/admin/coupons-page'))
 const AdminReviewsPage = lazy(() => import('@/pages/admin/reviews-page'))
 const AdminUsersPage = lazy(() => import('@/pages/admin/users-page'))
+const AdminProductEditPage = lazy(() => import('@/pages/admin/product-edit-page'))
 
 function PageFallback() {
   return (
@@ -77,6 +78,7 @@ function App() {
                 <Route element={<AdminLayout />}>
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="san-pham" element={<AdminProductsPage />} />
+                  <Route path="san-pham/:id" element={<AdminProductEditPage />} />
                   <Route path="danh-muc" element={<AdminCategoriesPage />} />
                   <Route path="don-hang" element={<AdminOrdersPage />} />
                   <Route path="ma-giam-gia" element={<AdminCouponsPage />} />
