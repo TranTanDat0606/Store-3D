@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import type { FilterQuery, Types } from 'mongoose';
 import { Product, ProductStatus, Category } from '../models';
 import { AppError } from '../utils/AppError';
@@ -115,7 +116,10 @@ export class ProductService {
   }
 
   async getBySlug(slug: string) {
-    const product = await Product.findOne({ slug }).populate('category', 'name slug');
+    let product = await Product.findOne({ slug }).populate('category', 'name slug');
+    if (!product && mongoose.isValidObjectId(slug)) {
+      product = await Product.findById(slug).populate('category', 'name slug');
+    }
     if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
     return product;
   }

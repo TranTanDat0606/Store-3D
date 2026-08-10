@@ -47,6 +47,9 @@ export const productApi = {
   getBySlug: (slug: string) =>
     apiClient.get<ApiResponse<Product>>(`/products/${slug}`).then((r) => r.data.data),
 
+  getById: (id: string) =>
+    apiClient.get<ApiResponse<Product>>(`/products/${id}`).then((r) => r.data.data),
+
   related: (id: string, limit = 4) =>
     apiClient.get<ApiResponse<Product[]>>(`/products/${id}/related`, { params: { limit } }).then((r) => r.data.data),
 
