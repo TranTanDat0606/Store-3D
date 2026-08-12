@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Layers, Pencil, Plus, Trash2 } from 'lucide-react'
 import { categoryApi } from '@/services'
 import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
+import { resolveImageUrl } from '@/lib'
 import {
   Dialog,
   DialogContent,
@@ -97,10 +97,9 @@ export default function AdminCategoriesPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Quản lý danh mục</h1>
-          <p className="text-muted-foreground">{categories.length} danh mục</p>
+          <p className="text-sm text-slate-400">{categories.length} danh mục</p>
         </div>
-        <Button onClick={openCreate}>
+        <Button onClick={openCreate} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500">
           <Plus className="size-4" />
           Thêm danh mục
         </Button>
@@ -109,7 +108,7 @@ export default function AdminCategoriesPage() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-muted h-40 animate-pulse rounded-xl" />
+            <div key={i} className="h-40 animate-pulse rounded-2xl bg-white/5" />
           ))}
         </div>
       ) : categories.length === 0 ? (
@@ -117,82 +116,78 @@ export default function AdminCategoriesPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((cat) => (
-            <Card key={cat._id}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="bg-muted flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                    {cat.image ? (
-                      <img src={cat.image} alt="" className="size-full object-cover" />
-                    ) : (
-                      <span className="text-muted-foreground text-xs">No img</span>
-                    )}
+            <div key={cat._id} className="group overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all hover:border-cyan-400/30 hover:shadow-xl hover:shadow-cyan-500/10">
+              <div className="bg-muted relative aspect-video overflow-hidden">
+                {cat.image ? (
+                  <img src={resolveImageUrl(cat.image)} alt="" className="size-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-slate-500">
+                    <Layers className="size-10" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{cat.name}</p>
-                    <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-                      {cat.description || 'Chưa có mô tả'}
-                    </p>
-                    <p className="text-muted-foreground mt-1 text-xs">{cat.slug}</p>
-                  </div>
+                )}
+              </div>
+              <div className="space-y-1 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="line-clamp-1 text-sm font-semibold text-slate-100">{cat.name}</p>
                 </div>
-                <div className="mt-4 flex justify-end gap-1 border-t pt-3">
-                  <Button variant="ghost" size="sm" onClick={() => openEdit(cat)}>
+                <p className="line-clamp-2 text-xs text-slate-400">{cat.description || 'Chưa có mô tả'}</p>
+                <p className="text-[10px] text-slate-500">{cat.slug}</p>
+                <div className="flex justify-end gap-1 pt-2">
+                  <Button variant="ghost" size="sm" onClick={() => openEdit(cat)} className="text-slate-300 hover:bg-white/5 hover:text-white">
                     <Pencil className="size-4" />
                     Sửa
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="size-4 text-destructive" />
+                      <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/5 hover:text-rose-400">
+                        <Trash2 className="size-4" />
                         Xóa
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="border-white/10 bg-slate-900 text-slate-100">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Xóa danh mục?</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="text-white">Xóa danh mục?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-slate-400">
                           Bạn có chắc muốn xóa danh mục "{cat.name}"?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-white hover:bg-destructive/90"
-                          onClick={() => handleDelete(cat._id, cat.name)}
-                        >
+                        <AlertDialogCancel className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">Hủy</AlertDialogCancel>
+                        <AlertDialogAction className="bg-rose-500 text-white hover:bg-rose-600" onClick={() => handleDelete(cat._id, cat.name)}>
                           Xóa
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
           <DialogHeader>
-            <DialogTitle>{editing ? 'Sửa danh mục' : 'Thêm danh mục mới'}</DialogTitle>
+            <DialogTitle className="text-white">{editing ? 'Sửa danh mục' : 'Thêm danh mục mới'}</DialogTitle>
           </DialogHeader>
           {error && (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+            <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
               {error}
             </div>
           )}
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label>Tên danh mục</Label>
+              <Label className="text-slate-300">Tên danh mục</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="VD: Figurine"
+                className="border-white/10 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40"
               />
             </div>
             <div className="grid gap-2">
-              <Label>Hình ảnh</Label>
+              <Label className="text-slate-300">Hình ảnh</Label>
               <ImageUpload
                 images={form.image ? [form.image] : []}
                 max={1}
@@ -200,20 +195,21 @@ export default function AdminCategoriesPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>Mô tả</Label>
+              <Label className="text-slate-300">Mô tả</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={3}
                 placeholder="Mô tả danh mục..."
+                className="border-white/10 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
               Hủy
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500">
               {saving ? 'Đang lưu...' : editing ? 'Lưu thay đổi' : 'Thêm danh mục'}
             </Button>
           </DialogFooter>
