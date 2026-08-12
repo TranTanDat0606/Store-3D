@@ -52,6 +52,9 @@ export class ProductService {
     if (params.sort === 'best-selling') {
       return this.listBestSelling(params);
     }
+    if (params.sort === 'discount') {
+      return this.listDiscounted(params);
+    }
     const options = { ...parsePagination(params), searchFields: ['name', 'description'] };
     const filter = this.buildFilter(params);
 
@@ -80,6 +83,58 @@ export class ProductService {
         { $lookup: { from: 'orderitems', localField: '_id', foreignField: 'product', as: '_orderItems' } },
         { $addFields: { _sold: { $sum: '$_orderItems.quantity' } } },
         { $sort: { _sold: -1, _id: 1 } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: '_category' } },
+        { $unwind: { path: '$_category', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            name: 1, slug: 1, description: 1, images: 1, material: 1, printerType: 1,
+            size: 1, stock: 1, originalPrice: 1, salePrice: 1, rating: 1, reviewCount: 1,
+            status: 1, featured: 1, createdAt: 1, updatedAt: 1, category: '$_category',
+          },
+        },
+      ]),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    return {
+      data: docs as InstanceType<typeof Product>[],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    };
+  }
+
+  /** Sorts by discount ratio (salePrice/originalPrice) ascending — biggest discount first. */
+  private async listDiscounted(params: Record<string, unknown>) {
+    const { page, limit, search } = parsePagination(params);
+    const matchStage: Record<string, unknown> = {
+      ...this.buildFilter(params),
+      originalPrice: { $gt: 0 },
+    };
+    if (search) {
+      matchStage.$and = [
+        {
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        },
+      ];
+    }
+
+    const [total, docs] = await Promise.all([
+      Product.countDocuments(matchStage),
+      Product.aggregate([
+        { $match: matchStage },
+        { $addFields: { _discountRatio: { $divide: ['$salePrice', '$originalPrice'] } } },
+        { $sort: { _discountRatio: 1, _id: 1 } },
         { $skip: (page - 1) * limit },
         { $limit: limit },
         { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: '_category' } },
