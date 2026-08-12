@@ -27,9 +27,16 @@ export function ImageUpload({ images, onChange, max = 5 }: ImageUploadProps) {
           .slice(0, room)
         const urls: string[] = []
         for (const f of selected) {
-          urls.push(await uploadApi.uploadImage(f))
+          try {
+            urls.push(await uploadApi.uploadImage(f))
+          } catch (err) {
+            toast.error(`${f.name}: ${getErrorMessage(err)}`)
+          }
         }
-        onChange([...images, ...urls])
+        if (urls.length > 0) onChange([...images, ...urls])
+        if (urls.length === 0 && selected.length > 0) {
+          toast.error('Không có ảnh nào được tải lên. Vui lòng thử lại.')
+        }
       } catch (err) {
         toast.error(getErrorMessage(err))
       } finally {
