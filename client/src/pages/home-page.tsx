@@ -65,7 +65,7 @@ export default function HomePage() {
       if (cancelled) return
       setFeatured(featuredResult.data)
       setCategories(cats)
-      setHotSale(hot.data)
+      setHotSale((hot.data ?? []).filter((p) => p.originalPrice > p.salePrice))
     }).catch(() => {
       // errors rendered via empty states
     }).finally(() => {
@@ -161,7 +161,7 @@ export default function HomePage() {
                   >
                     <div className="absolute inset-0 flex items-center justify-center opacity-25">
                       {cat.image ? (
-                        <img src={cat.image} alt="" className="size-40 object-cover" />
+                        <img src={resolveImageUrl(cat.image)} alt="" className="size-40 object-cover" />
                       ) : (
                         <Layers className="size-24" />
                       )}
@@ -182,7 +182,7 @@ export default function HomePage() {
                   <div className="bg-muted relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg">
                     {cat.image ? (
                       <img
-                        src={cat.image}
+                        src={resolveImageUrl(cat.image)}
                         alt={cat.name}
                         loading="lazy"
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
