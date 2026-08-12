@@ -54,7 +54,7 @@ export function CartDrawer() {
           <>
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
               {items.map((item) => (
-                <div key={item.productId} className="flex gap-4">
+                <div key={item.productId} className="flex gap-3 rounded-xl border border-border/60 bg-card/50 p-3">
                   <Link
                     to={`/san-pham/${item.slug}`}
                     onClick={closeCart}
@@ -74,17 +74,20 @@ export function CartDrawer() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="size-7"
+                        className="size-7 -mr-1 -mt-1 text-muted-foreground hover:text-destructive"
                         onClick={() => removeItem(item.productId)}
                         aria-label="Xóa khỏi giỏ"
                       >
-                        <Trash2 className="size-4 text-destructive" />
+                        <Trash2 className="size-4" />
                       </Button>
                     </div>
+                    <p className="text-muted-foreground mt-0.5 text-xs">
+                      {formatCurrency(item.price)} / cái
+                    </p>
                     <div className="mt-auto flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
                           className="size-7"
                           onClick={() => updateQuantity(item.productId, item.quantity - 1)}
@@ -95,7 +98,7 @@ export function CartDrawer() {
                         </Button>
                         <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="icon"
                           className="size-7"
                           onClick={() => updateQuantity(item.productId, item.quantity + 1)}
@@ -114,7 +117,7 @@ export function CartDrawer() {
 
             <div className="space-y-3 border-t px-6 py-4">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-sm">Tạm tính</span>
+                <span className="text-muted-foreground text-sm">Tạm tính ({items.length} sản phẩm)</span>
                 <span className="text-lg font-bold">{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex gap-3">
