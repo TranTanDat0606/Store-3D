@@ -7,6 +7,36 @@ import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
 import { Button } from '@/components/ui/button'
 import type { Category, Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
+import { cn, formatCurrency, resolveImageUrl } from '@/lib'
+import { motion } from 'framer-motion'
+
+function HeroShowcase({ products }: { products: Product[] }) {
+  const showcase = products.slice(0, 2)
+  return (
+    <div className="relative mx-auto mt-14 hidden h-80 w-full max-w-md md:block lg:mt-0">
+      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/30 via-blue-600/20 to-transparent blur-3xl" />
+      {showcase.map((p, i) => (
+        <motion.div
+          key={p._id}
+          className={cn(
+            'absolute w-44 overflow-hidden rounded-2xl border border-white/20 bg-slate-900/70 shadow-2xl shadow-cyan-500/10 backdrop-blur-xl',
+            i === 0 ? 'top-6 left-0 z-10 rotate-[-6deg]' : 'top-16 right-0 z-20 rotate-[5deg]'
+          )}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: i * 0.15 }}
+          whileHover={{ scale: 1.05, rotate: 0 }}
+        >
+          <img src={resolveImageUrl(p.images?.[0] ?? '')} alt={p.name} className="aspect-square w-full object-cover" />
+          <div className="p-3">
+            <p className="line-clamp-1 text-xs font-semibold">{p.name}</p>
+            <p className="text-primary text-sm font-bold">{formatCurrency(p.salePrice)}</p>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
 
 export default function HomePage() {
   const { user } = useAuth()
@@ -37,22 +67,23 @@ export default function HomePage() {
     <div>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-950 via-blue-950 to-black" />
+        <div className="pointer-events-none absolute -top-32 -right-32 size-96 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 size-96 rounded-full bg-blue-600/10 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
           <div className="max-w-2xl">
-            <div className="bg-muted inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm">
-              <Sparkles className="text-primary size-4" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-slate-200">
+              <Sparkles className="text-cyan-400 size-4" />
               {user ? `Chào mừng trở lại, ${user.fullname}!` : 'Sản phẩm in 3D chất lượng cao'}
             </div>
-            <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Mô hình in 3D{' '}
-              <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 độc đáo
               </span>{' '}
               cho mọi không gian
             </h1>
-            <p className="text-muted-foreground mt-4 max-w-xl text-lg">
+            <p className="mt-4 max-w-xl text-lg text-slate-300">
               Khám phá bộ sưu tập figurine, đồ trang trí, mô hình kiến trúc và phụ kiện in 3D với
               chi tiết tuyệt hảo.
             </p>
@@ -63,11 +94,12 @@ export default function HomePage() {
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" asChild>
+              <Button size="lg" variant="outline" className="border-white/15 bg-white/5 text-white hover:bg-white/10" asChild>
                 <Link to="/san-pham?featured=true">Sản phẩm nổi bật</Link>
               </Button>
             </div>
           </div>
+          <HeroShowcase products={featured} />
         </div>
       </section>
 
