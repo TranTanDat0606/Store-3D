@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Box, Layers, Printer, Sparkles, Truck } from 'lucide-react'
+import { ArrowRight, Box, Flame, Layers, Printer, Sparkles, Truck } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
@@ -51,6 +51,8 @@ export default function HomePage() {
   const { user } = useAuth()
   const [featured, setFeatured] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [hotSale, setHotSale] = useState<Product[]>([])
+  const [hotLoading, setHotLoading] = useState(true)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -58,14 +60,16 @@ export default function HomePage() {
     void Promise.all([
       productApi.featured({ limit: 8 }),
       categoryApi.all(),
-    ]).then(([featuredResult, cats]) => {
+      productApi.hotSale(8),
+    ]).then(([featuredResult, cats, hot]) => {
       if (cancelled) return
       setFeatured(featuredResult.data)
       setCategories(cats)
+      setHotSale(hot.data)
     }).catch(() => {
       // errors rendered via empty states
     }).finally(() => {
-      if (!cancelled) setLoading(false)
+      if (!cancelled) { setLoading(false); setHotLoading(false) }
     })
     return () => {
       cancelled = true
@@ -221,6 +225,34 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* Hot Sale */}
+      {!hotLoading && hotSale.length > 0 && (
+        <section className="border-t bg-gradient-to-b from-transparent to-slate-900/5 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Flame className="text-destructive size-6" />
+                  <h2 className="text-2xl font-bold sm:text-3xl">Hot Sale</h2>
+                </div>
+                <p className="text-muted-foreground mt-1">Ưu đãi giảm giá tốt nhất đang diễn ra</p>
+              </div>
+              <Button variant="ghost" asChild>
+                <Link to="/san-pham">
+                  Xem tất cả
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {hotSale.map((product, i) => (
+                <ProductCard key={product._id} product={product} index={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   )
 }
