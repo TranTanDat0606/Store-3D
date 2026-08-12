@@ -59,6 +59,14 @@ export const productApi = {
       pagination: r.data.pagination!,
     })),
 
+  hotSale: (limit = 8) =>
+    apiClient.get<ApiResponse<Product[]>>('/products', {
+      params: { sort: 'discount', status: 'active', limit },
+    }).then((r) => ({
+      data: r.data.data,
+      pagination: r.data.pagination!,
+    })),
+
   create: (data: ProductPayload) =>
     apiClient.post<ApiResponse<Product>>('/products', data).then((r) => r.data.data),
 
