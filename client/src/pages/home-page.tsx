@@ -29,8 +29,8 @@ function HeroShowcase({ products }: { products: Product[] }) {
         >
           <img src={resolveImageUrl(p.images?.[0] ?? '')} alt={p.name} className="aspect-square w-full object-cover" />
           <div className="p-3">
-            <p className="line-clamp-1 text-xs font-semibold">{p.name}</p>
-            <p className="text-primary text-sm font-bold">{formatCurrency(p.salePrice)}</p>
+            <p className="line-clamp-1 text-xs font-semibold text-slate-100">{p.name}</p>
+            <p className="text-sm font-bold text-cyan-300">{formatCurrency(p.salePrice)}</p>
           </div>
         </motion.div>
       ))}
