@@ -14,6 +14,7 @@ import { productApi, reviewApi } from '@/services'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
 import { ProductCard } from '@/components/product/product-card'
 import { Breadcrumb } from '@/components/common/breadcrumb'
 import { Badge } from '@/components/ui/badge'
@@ -53,6 +54,7 @@ export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description')
+  const [loginOpen, setLoginOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -104,6 +106,10 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product || isOutOfStock) return
+    if (!isAuthenticated) {
+      setLoginOpen(true)
+      return
+    }
     addItem(product, quantity)
     toast.success('Đã thêm vào giỏ hàng', { description: product.name })
   }
@@ -435,6 +441,8 @@ export default function ProductDetailPage() {
           </div>
         </section>
       )}
+
+      <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
     </div>
   )
 }

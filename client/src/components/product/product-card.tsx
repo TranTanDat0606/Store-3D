@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Heart, ShoppingBag, Star } from 'lucide-react'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
+import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,8 @@ export const ProductCard = memo(function ProductCard({
   const { isWishlisted, toggleWishlist } = useWishlist()
   const { isAuthenticated } = useAuth()
 
+  const [loginOpen, setLoginOpen] = useState(false)
+
   const wishlisted = isWishlisted(product._id)
   const discountPercent = calculateDiscountPercent(product.originalPrice, product.salePrice)
   const isOutOfStock = product.stock <= 0
@@ -33,6 +36,10 @@ export const ProductCard = memo(function ProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     if (isOutOfStock) return
+    if (!isAuthenticated) {
+      setLoginOpen(true)
+      return
+    }
     addItem(product)
     toast.success('Đã thêm vào giỏ hàng', { description: product.name })
   }
@@ -131,6 +138,7 @@ export const ProductCard = memo(function ProductCard({
           </div>
         </div>
       </Link>
+      <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
     </motion.div>
   )
 })
