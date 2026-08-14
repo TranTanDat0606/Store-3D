@@ -23,6 +23,7 @@ export interface Category {
   slug: string
   image: string
   description?: string
+  productCount?: number
   createdAt: string
   updatedAt: string
 }

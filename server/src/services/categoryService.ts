@@ -25,7 +25,12 @@ export class CategoryService {
 
   /** All categories (for nav/filter dropdowns), no pagination. */
   async all() {
-    return Category.find().sort({ name: 1 });
+    return Category.aggregate([
+      { $sort: { name: 1 } },
+      { $lookup: { from: 'products', localField: '_id', foreignField: 'category', as: '__products' } },
+      { $addFields: { productCount: { $size: '$__products' } } },
+      { $project: { __products: 0 } },
+    ]);
   }
 
   async getBySlug(slug: string) {
