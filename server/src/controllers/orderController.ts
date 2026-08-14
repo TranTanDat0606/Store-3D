@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { orderService } from '../services/orderService';
+import { paymentService } from '../services/paymentService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
 import { UserRole } from '../models';
@@ -26,6 +27,12 @@ export const orderController = {
       throw new AppError('Không có quyền xem đơn hàng này', 403);
     }
     return successResponse(res, order);
+  }),
+
+  /** Customer: generate a VietQR payment code for their order. */
+  createPaymentQr: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const qr = await paymentService.createQrForOrder(req.user!._id, req.params.id);
+    return successResponse(res, qr, { message: 'Tạo mã QR thanh toán thành công' });
   }),
 
   /** Admin: list all orders. */

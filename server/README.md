@@ -59,3 +59,4 @@ Demo accounts:
 
 See `.env.example` — `MONGODB_URI`, `JWT_SECRET`, `PORT`, `CLIENT_URL` and rate limit
 tuning are the ones you'll usually touch.
+

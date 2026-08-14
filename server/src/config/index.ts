@@ -29,4 +29,11 @@ export const config = {
     authMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 20,
   },
   uploadDir: process.env.UPLOAD_DIR || path.resolve(__dirname, '../../uploads'),
+  bank: {
+    bin: process.env.BANK_BIN || '',
+    accountNumber: process.env.BANK_ACCOUNT_NUMBER || '',
+    accountName: process.env.BANK_ACCOUNT_NAME || '',
+  },
+  qrTtlMinutes: Number(process.env.QR_TTL_MINUTES) || 5,
+  paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',
 } as const;

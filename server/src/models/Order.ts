@@ -16,6 +16,7 @@ export enum PaymentMethod {
 
 export enum PaymentStatus {
   Unpaid = 'unpaid',
+  PendingPayment = 'pending_payment',
   Paid = 'paid',
 }
 
@@ -40,7 +41,10 @@ export interface IOrder {
   payment: {
     method: PaymentMethod;
     status: PaymentStatus;
+    orderCode?: string;
+    qrExpiresAt?: Date;
   };
+  paidAt?: Date;
   status: OrderStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -89,7 +93,10 @@ const orderSchema = new Schema<IOrder>(
         enum: Object.values(PaymentStatus),
         default: PaymentStatus.Unpaid,
       },
+      orderCode: { type: String, trim: true, uppercase: true },
+      qrExpiresAt: { type: Date },
     },
+    paidAt: { type: Date },
     status: {
       type: String,
       enum: Object.values(OrderStatus),
@@ -102,5 +109,6 @@ const orderSchema = new Schema<IOrder>(
 orderSchema.index({ user: 1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
+orderSchema.index({ 'payment.orderCode': 1 }, { sparse: true, unique: true });
 
 export const Order = models.Order || model<IOrder>('Order', orderSchema);

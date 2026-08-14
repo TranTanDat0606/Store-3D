@@ -106,7 +106,11 @@ export default function CheckoutPage() {
     try {
       const order = await orderApi.create(payload)
       clearCart()
-      navigate(`/thanh-toan-thanh-cong/${order._id}`)
+      if (order.payment.method === 'bank-transfer') {
+        navigate(`/thanh-toan-qr/${order._id}`)
+      } else {
+        navigate(`/thanh-toan-thanh-cong/${order._id}`)
+      }
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {

@@ -20,6 +20,13 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
 const PAYMENT_LABELS: Record<PaymentStatus, string> = {
   paid: 'Đã thanh toán',
   unpaid: 'Chưa thanh toán',
+  pending_payment: 'Chờ thanh toán',
+}
+
+const PAYMENT_STYLES: Record<PaymentStatus, string> = {
+  paid: 'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+  unpaid: 'border-transparent bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300',
+  pending_payment: 'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
 }
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
@@ -32,14 +39,7 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
 
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   return (
-    <Badge
-      variant="outline"
-      className={
-        status === 'paid'
-          ? 'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-          : 'border-transparent bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
-      }
-    >
+    <Badge variant="outline" className={PAYMENT_STYLES[status] ?? ''}>
       {PAYMENT_LABELS[status] ?? status}
     </Badge>
   )

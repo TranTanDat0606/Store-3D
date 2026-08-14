@@ -50,7 +50,7 @@ export interface Product {
 
 export type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'completed' | 'cancelled'
 export type PaymentMethod = 'cash' | 'bank-transfer'
-export type PaymentStatus = 'unpaid' | 'paid'
+export type PaymentStatus = 'unpaid' | 'pending_payment' | 'paid'
 
 export interface OrderItem {
   _id: string
@@ -86,7 +86,10 @@ export interface Order {
   payment: {
     method: PaymentMethod
     status: PaymentStatus
+    orderCode?: string
+    qrExpiresAt?: string
   }
+  paidAt?: string
   status: OrderStatus
   createdAt: string
   updatedAt: string

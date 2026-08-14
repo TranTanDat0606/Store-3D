@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Package,
   X,
+  ImageOff,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -31,6 +32,38 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useEffect } from 'react'
+import type { Product } from '@/types'
+import { formatCurrency, resolveImageUrl } from '@/lib'
+
+function SearchSuggestions({ products }: { products: Product[] }) {
+  if (products.length === 0) return null
+  return (
+    <div className="flex gap-2 overflow-x-auto p-3">
+      {products.map((p) => (
+        <Link
+          key={p._id}
+          to={`/san-pham/${p.slug}`}
+          className="flex w-24 shrink-0 flex-col items-center gap-2 rounded-lg p-2 text-center transition-colors hover:bg-accent"
+        >
+          <div className="bg-muted flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg">
+            {p.images[0] ? (
+              <img
+                src={resolveImageUrl(p.images[0])}
+                alt={p.name}
+                loading="lazy"
+                className="size-full object-cover"
+              />
+            ) : (
+              <ImageOff className="text-muted-foreground size-6" />
+            )}
+          </div>
+          <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
+          <span className="text-primary text-xs font-semibold">{formatCurrency(p.salePrice)}</span>
+        </Link>
+      ))}
+    </div>
+  )
+}
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
@@ -41,18 +74,18 @@ export function Navbar() {
 
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 300)
-  const [searchResults, setSearchResults] = useState<{ name: string; slug: string }[]>([])
+  const [searchResults, setSearchResults] = useState<Product[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    if (debouncedSearch.trim().length < 2) {
+    if (!debouncedSearch.trim()) {
       setSearchResults([])
       return
     }
     let cancelled = false
     void import('@/services/productApi').then(({ productApi }) =>
       productApi.list({ search: debouncedSearch.trim(), limit: 5 }).then(({ data }) => {
-        if (!cancelled) setSearchResults(data.map((p) => ({ name: p.name, slug: p.slug })))
+        if (!cancelled) setSearchResults(data)
       })
     )
     return () => {
@@ -120,17 +153,8 @@ export function Navbar() {
             onBlur={() => setTimeout(() => setSearchResults([]), 200)}
           />
           {searchResults.length > 0 && (
-            <div className="absolute top-full right-0 left-0 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg">
-              {searchResults.map((item) => (
-                <Link
-                  key={item.slug}
-                  to={`/san-pham/${item.slug}`}
-                  className="hover:bg-accent flex items-center gap-2 px-3 py-2 text-sm"
-                >
-                  <Search className="text-muted-foreground size-3.5" />
-                  {item.name}
-                </Link>
-              ))}
+            <div className="absolute top-full right-0 left-0 mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
+              <SearchSuggestions products={searchResults} />
             </div>
           )}
         </form>
@@ -218,7 +242,13 @@ export function Navbar() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm sản phẩm..."
               className="bg-muted/50 pl-9"
+              onBlur={() => setTimeout(() => setSearchResults([]), 200)}
             />
+            {searchResults.length > 0 && (
+              <div className="mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
+                <SearchSuggestions products={searchResults} />
+              </div>
+            )}
           </form>
           <nav className="flex flex-col gap-2">
             <Link to="/" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">

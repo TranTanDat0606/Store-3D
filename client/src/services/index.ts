@@ -144,3 +144,19 @@ export const uploadApi = {
     return apiClient.post<ApiResponse<{ url: string }>>('/upload', form).then((r) => r.data.data.url)
   },
 }
+
+export interface QrPaymentInfo {
+  bank: { bin: string; accountNumber: string; accountName: string; bankName: string }
+  qrDataUrl: string
+  orderCode: string
+  amount: number
+  expiresAt: string
+}
+
+export const paymentApi = {
+  generateQr: (orderId: string) =>
+    apiClient.post<ApiResponse<QrPaymentInfo>>(`/orders/${orderId}/payment-qr`).then((r) => r.data.data),
+
+  simulateWebhook: (orderCode: string, amount: number) =>
+    apiClient.post<ApiResponse<{ status: string }>>('/payment/webhook/simulate', { orderCode, amount }).then((r) => r.data.data),
+}

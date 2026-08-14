@@ -15,6 +15,7 @@ const LoginPage = lazy(() => import('@/pages/auth/login-page'))
 const RegisterPage = lazy(() => import('@/pages/auth/register-page'))
 const CheckoutPage = lazy(() => import('@/pages/checkout-page'))
 const OrderSuccessPage = lazy(() => import('@/pages/order-success-page'))
+const QrPaymentPage = lazy(() => import('@/pages/qr-payment-page'))
 const AccountDashboardPage = lazy(() => import('@/pages/account/dashboard-page'))
 const OrdersPage = lazy(() => import('@/pages/account/orders-page'))
 const OrderDetailPage = lazy(() => import('@/pages/account/order-detail-page'))
@@ -62,6 +63,7 @@ function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route path="thanh-toan" element={<CheckoutPage />} />
                   <Route path="thanh-toan-thanh-cong/:id" element={<OrderSuccessPage />} />
+                  <Route path="thanh-toan-qr/:id" element={<QrPaymentPage />} />
                   <Route path="danh-gia/:slug" element={<ReviewFormPage />} />
                   <Route path="tai-khoan" element={<AccountLayout />}>
                     <Route index element={<AccountDashboardPage />} />

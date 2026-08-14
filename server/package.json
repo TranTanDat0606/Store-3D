@@ -7,6 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "test": "tsx --test tests/vietQr.test.ts tests/payment.test.ts",
     "seed": "tsx src/services/seed.ts",
     "seed:prod": "node dist/services/seed.js"
   },
@@ -27,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.1",
     "multer": "^2.2.0",
+    "qrcode": "^1.5.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -37,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.3.0",
+    "@types/qrcode": "^1.5.6",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
   }

@@ -30,3 +30,8 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+<!-- 
+Admin: admin@store3d.com / admin123
+Khách hàng (user): khach@store3d.com / khach123456 
+-->

@@ -12,6 +12,7 @@ import authRoutes from './routes/auth';
 import productRoutes from './routes/product';
 import categoryRoutes from './routes/category';
 import orderRoutes from './routes/order';
+import paymentRoutes from './routes/payment';
 import wishlistRoutes from './routes/wishlist';
 import couponRoutes from './routes/coupon';
 import reviewRoutes from './routes/review';
@@ -51,6 +52,7 @@ export function createApp() {
   app.use('/api/products', productRoutes);
   app.use('/api/categories', categoryRoutes);
   app.use('/api/orders', orderRoutes);
+  app.use('/api/payment', paymentRoutes);
   app.use('/api/wishlist', wishlistRoutes);
   app.use('/api/coupons', couponRoutes);
   app.use('/api/reviews', reviewRoutes);
