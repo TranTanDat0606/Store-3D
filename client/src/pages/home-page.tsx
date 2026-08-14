@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Box, Flame, Layers, Printer, Sparkles, Truck } from 'lucide-react'
+import { ArrowRight, Box, Printer, Sparkles, Truck } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
+import { CategoriesSection } from '@/components/home/categories-section'
+import { HotSaleSection } from '@/components/home/hot-sale-section'
 import { Button } from '@/components/ui/button'
 import type { Category, Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,15 +39,6 @@ function HeroShowcase({ products }: { products: Product[] }) {
     </div>
   )
 }
-
-const CATEGORY_ACCENTS = [
-  'from-rose-500/70 to-orange-500/50',
-  'from-cyan-500/70 to-blue-600/50',
-  'from-emerald-500/70 to-teal-600/50',
-  'from-violet-500/70 to-purple-600/50',
-  'from-amber-500/70 to-orange-500/50',
-  'from-blue-500/70 to-indigo-600/50',
-]
 
 export default function HomePage() {
   const { user } = useAuth()
@@ -139,62 +132,15 @@ export default function HomePage() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <h2 className="text-2xl font-bold sm:text-3xl">Danh mục sản phẩm</h2>
-              <p className="text-muted-foreground mt-1">Khám phá theo danh mục bạn yêu thích</p>
+        <section className="relative overflow-hidden border-b bg-gradient-to-b from-muted/40 to-transparent py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl font-bold sm:text-3xl">Danh mục sản phẩm</h2>
+                <p className="text-muted-foreground mt-1">Khám phá theo danh mục bạn yêu thích</p>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-            {categories.map((cat, i) => {
-              const accent = CATEGORY_ACCENTS[i % CATEGORY_ACCENTS.length]
-              if (i === 0) {
-                return (
-                  <Link
-                    key={cat._id}
-                    to={`/san-pham?categorySlug=${cat.slug}`}
-                    className={cn(
-                      'group relative col-span-2 flex min-h-44 flex-col justify-end overflow-hidden rounded-2xl border bg-gradient-to-br p-5 text-white shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl sm:col-span-2 lg:col-span-3',
-                      accent
-                    )}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center opacity-25">
-                      {cat.image ? (
-                        <img src={resolveImageUrl(cat.image)} alt="" className="size-40 object-cover" />
-                      ) : (
-                        <Layers className="size-24" />
-                      )}
-                    </div>
-                    <span className="relative text-lg font-bold drop-shadow">{cat.name}</span>
-                    {cat.description && (
-                      <span className="relative line-clamp-2 text-xs text-white/80">{cat.description}</span>
-                    )}
-                  </Link>
-                )
-              }
-              return (
-                <Link
-                  key={cat._id}
-                  to={`/san-pham?categorySlug=${cat.slug}`}
-                  className="group flex flex-col items-center gap-3 rounded-xl border bg-card p-4 text-center transition-all hover:-translate-y-1 hover:shadow-md"
-                >
-                  <div className="bg-muted relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg">
-                    {cat.image ? (
-                      <img
-                        src={resolveImageUrl(cat.image)}
-                        alt={cat.name}
-                        loading="lazy"
-                        className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <Layers className="text-muted-foreground size-8" />
-                    )}
-                  </div>
-                  <span className="text-sm font-medium">{cat.name}</span>
-                </Link>
-              )
-            })}
+            <CategoriesSection categories={categories} />
           </div>
         </section>
       )}
@@ -227,32 +173,7 @@ export default function HomePage() {
       </section>
 
       {/* Hot Sale */}
-      {!hotLoading && hotSale.length > 0 && (
-        <section className="border-t bg-gradient-to-b from-transparent to-slate-900/5 py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="mb-8 flex items-end justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Flame className="text-destructive size-6" />
-                  <h2 className="text-2xl font-bold sm:text-3xl">Hot Sale</h2>
-                </div>
-                <p className="text-muted-foreground mt-1">Ưu đãi giảm giá tốt nhất đang diễn ra</p>
-              </div>
-              <Button variant="ghost" asChild>
-                <Link to="/san-pham">
-                  Xem tất cả
-                  <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {hotSale.map((product, i) => (
-                <ProductCard key={product._id} product={product} index={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {!hotLoading && <HotSaleSection products={hotSale} />}
     </div>
   )
 }
