@@ -39,15 +39,6 @@ function HeroShowcase({ products }: { products: Product[] }) {
   )
 }
 
-const CATEGORY_ACCENTS = [
-  'from-rose-500/70 to-orange-500/50',
-  'from-cyan-500/70 to-blue-600/50',
-  'from-emerald-500/70 to-teal-600/50',
-  'from-violet-500/70 to-purple-600/50',
-  'from-amber-500/70 to-orange-500/50',
-  'from-blue-500/70 to-indigo-600/50',
-]
-
 export default function HomePage() {
   const { user } = useAuth()
   const [featured, setFeatured] = useState<Product[]>([])
@@ -148,7 +139,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
-            {categories.map((cat, i) => {
+            {categories.map((cat) => {
               
               return (
                 <Link
