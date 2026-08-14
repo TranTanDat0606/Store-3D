@@ -73,8 +73,7 @@ Status: Approved
 
 `server/src/models/Order.ts`:
 
-- Extend `PaymentStatus`: `unpaid`, `pending_payment`, `payment_received`,
-  `paid`.
+- Extend `PaymentStatus`: `unpaid`, `pending_payment`, `paid`.
 - Add to `payment`: `orderCode?: string` (indexed, `ST3D-XXXXXX`), `qrExpiresAt?: Date`.
 - Add `paidAt?: Date`.
 
@@ -104,11 +103,8 @@ unpaid (COD) ── unchanged, fulfillment drives order.status
     - require `payment.status === 'pending_payment'` (else 409/400).
     - require `payment.qrExpiresAt > now` (expired → 400, no state change).
     - require `amount === order.total` (mismatch → 400, no state change).
-    - within one update: walk `payment.status` through the documented flow
-      `pending_payment → payment_received → paid` and set `paidAt=now`,
-      `order.status='confirmed'`. `payment_received` is a transient stage
-      recorded in the same write — the values the frontend observes are
-      `pending_payment` and `paid`.
+    - within one atomic update: set `payment.status='paid'`, `paidAt=now`,
+      `order.status='confirmed'`.
   - `getQrStatus(orderId, userId)` → minimal public status for polling.
 
 ### D. Backend — routes (server)
@@ -134,7 +130,7 @@ Add to `.env` + `server/src/config/index.ts`:
 ### F. Frontend — types + API (client)
 
 `client/src/types/index.ts`:
-- `PaymentStatus = 'unpaid' | 'pending_payment' | 'payment_received' | 'paid'`
+- `PaymentStatus = 'unpaid' | 'pending_payment' | 'paid'`
 - `Order.payment` gains `orderCode?: string`, `qrExpiresAt?: string`,
   `paidAt?: string`.
 
