@@ -11,6 +11,7 @@ export function resolveImageUrl(src?: string | null): string {
   if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) return src
   if (src.startsWith('/')) {
     const origin = API_URL.replace(/\/api\/?$/, '')
+    if (!origin) return src
     return `${origin}${src}`
   }
   return src

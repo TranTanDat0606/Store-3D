@@ -2,8 +2,11 @@ node_modules/
 dist/
 .data/
 .env
+.env.development
+.env.production
 *.log
 .DS_Store
 uploads/
 *.png
 .playwright-mcp/
+.vercel
