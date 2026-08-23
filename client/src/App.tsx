@@ -23,6 +23,7 @@ const WishlistPage = lazy(() => import('@/pages/account/wishlist-page'))
 const ProfilePage = lazy(() => import('@/pages/account/profile-page'))
 const ChangePasswordPage = lazy(() => import('@/pages/account/change-password-page'))
 const ReviewFormPage = lazy(() => import('@/pages/review-form-page'))
+const ContactPage = lazy(() => import('@/pages/contact-page'))
 
 const AdminDashboardPage = lazy(() => import('@/pages/admin/dashboard-page'))
 const AdminProductsPage = lazy(() => import('@/pages/admin/products-page'))
@@ -54,6 +55,7 @@ function App() {
                 <Route index element={<HomePage />} />
                 <Route path="san-pham" element={<ProductListPage />} />
                 <Route path="san-pham/:slug" element={<ProductDetailPage />} />
+                <Route path="lien-he" element={<ContactPage />} />
 
                 <Route element={<GuestOnlyRoute />}>
                   <Route path="dang-nhap" element={<LoginPage />} />

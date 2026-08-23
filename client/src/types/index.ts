@@ -143,11 +143,22 @@ export interface ApiResponse<T> {
   message: string
   data: T
   pagination?: PaginationMeta
+  meta?: Record<string, unknown>
   errors?: unknown[]
+}
+
+export interface ReviewEligibility {
+  product: string
+  purchased: boolean
+  hasReviewed: boolean
+  canReview: boolean
+  review: Review | null
 }
 
 export interface StatsOverview {
   totalRevenue: number
+  todayRevenue: number
+  monthRevenue: number
   totalOrders: number
   totalProducts: number
   totalCustomers: number
@@ -157,6 +168,15 @@ export interface StatsOverview {
 
 export interface RevenuePoint {
   date: string
+  revenue: number
+}
+
+export type RevenuePeriod = 'day' | 'week' | 'month' | 'year'
+
+export interface RevenuePeriodResult {
+  period: RevenuePeriod
+  from: string
+  to: string
   revenue: number
   orders: number
 }

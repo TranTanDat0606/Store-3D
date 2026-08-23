@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dang-nhap
+Disallow: /dang-ky
+Disallow: /tai-khoan
+Disallow: /thanh-toan
+Disallow: /thanh-toan-qr
+Disallow: /thanh-toan-thanh-cong
+Disallow: /danh-gia
+
+Sitemap: https://store3d.example.com/sitemap.xml

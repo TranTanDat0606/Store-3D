@@ -22,6 +22,16 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'cancelled', label: 'Đã hủy' },
 ]
 
+// One-way workflow — an order may only move forward along this chain.
+// Mirrors server ALLOWED_NEXT_STATUS; cancelled is reachable only from pending.
+const ALLOWED_NEXT: Record<OrderStatus, OrderStatus[]> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['shipping'],
+  shipping: ['completed'],
+  completed: [],
+  cancelled: [],
+}
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
@@ -153,14 +163,23 @@ export default function AdminOrdersPage() {
 
                   <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
                     <span className="text-sm text-slate-400">Cập nhật trạng thái:</span>
-                    <Select value={order.status} onValueChange={(v) => changeStatus(order._id, v as OrderStatus)}>
+                    <Select
+                      value={order.status}
+                      onValueChange={(v) => changeStatus(order._id, v as OrderStatus)}
+                    >
                       <SelectTrigger className="w-[180px] border-white/10 bg-slate-950/60 text-slate-100">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="border-white/10 bg-slate-900 text-slate-100">
-                        {STATUS_OPTIONS.filter((o) => o.value).map((o) => (
-                          <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                        ))}
+                        {STATUS_OPTIONS.filter((o) => o.value).map((o) => {
+                          const opt = o.value as OrderStatus
+                          const selectable = opt === order.status || ALLOWED_NEXT[order.status].includes(opt)
+                          return (
+                            <SelectItem key={o.value} value={o.value} disabled={!selectable}>
+                              {o.label}
+                            </SelectItem>
+                          )
+                        })}
                       </SelectContent>
                     </Select>
                     <Badge variant="outline" className="border-white/10 text-slate-300">

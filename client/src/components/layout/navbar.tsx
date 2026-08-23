@@ -35,32 +35,51 @@ import { useEffect } from 'react'
 import type { Product } from '@/types'
 import { formatCurrency, resolveImageUrl } from '@/lib'
 
-function SearchSuggestions({ products }: { products: Product[] }) {
-  if (products.length === 0) return null
+function SearchSuggestions({ products, query, onSelect }: { products: Product[]; query: string; onSelect: () => void }) {
   return (
-    <div className="flex gap-2 overflow-x-auto p-3">
-      {products.map((p) => (
+    <div>
+      <ul className="max-h-96 overflow-y-auto">
+        {products.map((p) => (
+          <li key={p._id}>
+            <Link
+              to={`/san-pham/${p.slug}`}
+              onClick={onSelect}
+              className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-accent"
+            >
+              <div className="bg-muted flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                {p.images[0] ? (
+                  <img
+                    src={resolveImageUrl(p.images[0])}
+                    alt={p.name}
+                    loading="lazy"
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <ImageOff className="text-muted-foreground size-5" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-2 text-sm font-medium">{p.name}</p>
+              </div>
+              <span className="text-primary shrink-0 text-sm font-semibold tabular-nums">
+                {formatCurrency(p.salePrice)}
+              </span>
+            </Link>
+          </li>
+        ))}
+        {products.length === 0 && (
+          <li className="text-muted-foreground px-3 py-6 text-center text-sm">Không tìm thấy sản phẩm phù hợp</li>
+        )}
+      </ul>
+      <div className="border-t">
         <Link
-          key={p._id}
-          to={`/san-pham/${p.slug}`}
-          className="flex w-24 shrink-0 flex-col items-center gap-2 rounded-lg p-2 text-center transition-colors hover:bg-accent"
+          to={`/san-pham?search=${encodeURIComponent(query)}`}
+          onClick={onSelect}
+          className="hover:bg-accent text-primary flex items-center justify-center gap-1 px-3 py-2.5 text-sm font-medium"
         >
-          <div className="bg-muted flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg">
-            {p.images[0] ? (
-              <img
-                src={resolveImageUrl(p.images[0])}
-                alt={p.name}
-                loading="lazy"
-                className="size-full object-cover"
-              />
-            ) : (
-              <ImageOff className="text-muted-foreground size-6" />
-            )}
-          </div>
-          <span className="line-clamp-2 text-xs font-medium">{p.name}</span>
-          <span className="text-primary text-xs font-semibold">{formatCurrency(p.salePrice)}</span>
+          Xem tất cả kết quả cho “{query}”
         </Link>
-      ))}
+      </div>
     </div>
   )
 }
@@ -84,7 +103,7 @@ export function Navbar() {
     }
     let cancelled = false
     void import('@/services/productApi').then(({ productApi }) =>
-      productApi.list({ search: debouncedSearch.trim(), limit: 5 }).then(({ data }) => {
+      productApi.list({ search: debouncedSearch.trim(), limit: 8 }).then(({ data }) => {
         if (!cancelled) setSearchResults(data)
       })
     )
@@ -141,6 +160,9 @@ export function Navbar() {
           <Link to="/san-pham?featured=true" className={navLink}>
             Nổi bật
           </Link>
+          <Link to="/lien-he" className={navLink}>
+            Liên hệ
+          </Link>
         </nav>
 
         <form onSubmit={submitSearch} className="relative ml-auto hidden w-full max-w-xs sm:block md:max-w-sm">
@@ -152,9 +174,16 @@ export function Navbar() {
             className="bg-muted/50 pl-9 pr-4"
             onBlur={() => setTimeout(() => setSearchResults([]), 200)}
           />
-          {searchResults.length > 0 && (
-            <div className="absolute top-full right-0 left-0 mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
-              <SearchSuggestions products={searchResults} />
+          {search.trim() && (
+            <div className="absolute top-full right-0 mt-2 w-[min(26rem,90vw)] overflow-hidden rounded-xl border bg-popover shadow-lg">
+              <SearchSuggestions
+                products={searchResults}
+                query={search.trim()}
+                onSelect={() => {
+                  setSearch('')
+                  setSearchResults([])
+                }}
+              />
             </div>
           )}
         </form>
@@ -244,9 +273,16 @@ export function Navbar() {
               className="bg-muted/50 pl-9"
               onBlur={() => setTimeout(() => setSearchResults([]), 200)}
             />
-            {searchResults.length > 0 && (
+            {search.trim() && (
               <div className="mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
-                <SearchSuggestions products={searchResults} />
+                <SearchSuggestions
+                products={searchResults}
+                query={search.trim()}
+                onSelect={() => {
+                  setSearch('')
+                  setSearchResults([])
+                }}
+              />
               </div>
             )}
           </form>
@@ -259,6 +295,9 @@ export function Navbar() {
             </Link>
             <Link to="/san-pham?featured=true" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
               Nổi bật
+            </Link>
+            <Link to="/lien-he" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
+              Liên hệ
             </Link>
           </nav>
         </div>

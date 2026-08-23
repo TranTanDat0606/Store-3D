@@ -126,8 +126,13 @@
 `/` Trang chủ → `/san-pham` danh sách → `/san-pham/:slug` chi tiết
 `/gio-hang` giỏ → `/thanh-toan` checkout → `/thanh-toan-qr/:id` QR payment → `/tai-khoan/don-hang` đơn hàng
 `/dang-nhap`, `/dang-ky` auth
+`/lien-he` liên hệ
 `/tai-khoan/*` (profile, don-hang, yeu-thich, doi-mat-khau)
-`/admin/*` (dashboard, san-pham, don-hang, khach-hang, danh-gia, ma-giam-gia, thong-ke)
+`/admin/*` (dashboard, san-pham, don-hang, khach-hang, danh-gia, ma-giam-gia, thong-ke) — **loại khỏi index SEO**
+
+### Cấu hình SEO
+- `client/public/sitemap.xml`: cấu trúc chuẩn sitemap, chỉ gồm các trang công khai (`/`, `/san-pham`, `/san-pham?featured=true`, `/lien-he`, `/dang-nhap`, `/dang-ky`), domain thay thế `https://store3d.example.com`.
+- `client/public/robots.txt`: cho phép `/:`, chặn `/admin`, `/tai-khoan`, `/thanh-toan*`, `/danh-gia`, `/dang-nhap`, `/dang-ky`; khai báo `Sitemap:` trỏ tới `/sitemap.xml`.
 
 ## 6. Workflow (đề xuất khi gen bằng Stitch AI)
 

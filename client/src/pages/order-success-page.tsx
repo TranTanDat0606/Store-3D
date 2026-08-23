@@ -3,16 +3,22 @@ import { Link, useParams } from 'react-router-dom'
 import { CheckCircle2, Package } from 'lucide-react'
 import { orderApi } from '@/services'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrderStatusBadge } from '@/components/order/order-status-badge'
-import { formatCurrency } from '@/lib'
+import { ReviewProductAction } from '@/components/review/review-action'
+import { useReviewEligibility } from '@/hooks/useReviewEligibility'
+import { formatCurrency, resolveImageUrl } from '@/lib'
 import type { Order } from '@/types'
 
 export default function OrderSuccessPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const productIds: string[] =
+    order?.items.map((i) => (typeof i.product === 'object' ? i.product._id : i.product)) ?? []
+  const eligibilityMap = useReviewEligibility(productIds)
 
   useEffect(() => {
     if (!id) return
@@ -69,6 +75,36 @@ export default function OrderSuccessPage() {
               <span className="text-muted-foreground">Tổng thanh toán</span>
               <span className="text-xl font-bold text-primary">{formatCurrency(order.total)}</span>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {order && (
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="text-lg">Sản phẩm đã mua</CardTitle>
+            <p className="text-muted-foreground text-sm">
+              Bạn có thể đánh giá sản phẩm sau khi nhận được hàng.
+            </p>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {order.items.map((item) => {
+              const prod = typeof item.product === 'object' ? item.product : null
+              const productId: string = typeof item.product === 'object' ? item.product._id : item.product
+              const eligibility = eligibilityMap[productId]
+              return (
+                <div key={item._id} className="flex items-center gap-4 py-3">
+                  <div className="bg-muted flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                    <img src={resolveImageUrl(item.image)} alt={item.name} className="size-full object-cover" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-1 text-sm font-medium">{item.name}</p>
+                    <p className="text-muted-foreground text-xs">x{item.quantity} · {formatCurrency(item.price * item.quantity)}</p>
+                  </div>
+                  <ReviewProductAction slug={prod?.slug} eligibility={eligibility} />
+                </div>
+              )
+            })}
           </CardContent>
         </Card>
       )}

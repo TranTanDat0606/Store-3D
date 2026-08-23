@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SlidersHorizontal, Search, X } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
@@ -19,6 +19,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Category, PaginationMeta, Product } from '@/types'
 import { useDebounce } from '@/hooks/useDebounce'
+import { formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
 
 const SORT_OPTIONS = [
   { value: 'newest', label: 'Mới nhất' },
@@ -30,6 +31,56 @@ const SORT_OPTIONS = [
 
 const MATERIALS = ['PLA', 'PETG', 'ABS', 'Resin'] as const
 const PRINTER_TYPES = ['FDM', 'Resin Printer'] as const
+
+/** Horizontal result row used when searching — image left, info right. */
+function SearchResultRow({ product }: { product: Product }) {
+  const discountPercent = calculateDiscountPercent(product.originalPrice, product.salePrice)
+  return (
+    <div className="bg-card/60 hover:border-primary/40 flex flex-col gap-4 rounded-2xl border p-4 transition-colors sm:flex-row sm:items-center">
+      <Link
+        to={`/san-pham/${product.slug}`}
+        className="bg-muted relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-xl sm:w-28 sm:aspect-square"
+      >
+        {product.images[0] ? (
+          <img src={resolveImageUrl(product.images[0])} alt={product.name} loading="lazy" className="size-full object-cover" />
+        ) : (
+          <span className="text-muted-foreground text-xs">No image</span>
+        )}
+        {discountPercent > 0 && (
+          <span className="bg-destructive absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-bold text-white">
+            -{discountPercent}%
+          </span>
+        )}
+      </Link>
+
+      <div className="min-w-0 flex-1">
+        <Link to={`/san-pham/${product.slug}`} className="hover:text-primary line-clamp-1 font-semibold">
+          {product.name}
+        </Link>
+        {product.description && (
+          <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{product.description}</p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-primary text-lg font-extrabold">{formatCurrency(product.salePrice)}</span>
+          {discountPercent > 0 && (
+            <span className="text-muted-foreground line-through">{formatCurrency(product.originalPrice)}</span>
+          )}
+          {product.stock > 0 && <span className="text-muted-foreground text-xs">Còn {product.stock}</span>}
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-3">
+        {product.stock <= 0 ? (
+          <span className="text-destructive text-sm font-medium">Hết hàng</span>
+        ) : (
+          <Button asChild>
+            <Link to={`/san-pham/${product.slug}`}>Xem sản phẩm</Link>
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -338,11 +389,19 @@ export default function ProductListPage() {
             />
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-                {products.map((product, i) => (
-                  <ProductCard key={product._id} product={product} index={i} />
-                ))}
-              </div>
+              {search ? (
+                <div className="flex flex-col gap-4">
+                  {products.map((product) => (
+                    <SearchResultRow key={product._id} product={product} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
+                  {products.map((product, i) => (
+                    <ProductCard key={product._id} product={product} index={i} />
+                  ))}
+                </div>
+              )}
               {meta && <Pagination meta={meta} onPageChange={(p) => updateParams({ page: String(p) }, { keepPage: true })} />}
             </>
           )}

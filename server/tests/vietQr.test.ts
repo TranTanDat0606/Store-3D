@@ -1,31 +1,31 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildVietQrPayload, crc16, getBankName, renderQrDataUrl } from '../src/services/vietQrService';
+import { buildVietQrQuickLink, getBankName } from '../src/services/vietQrService';
 
-const bank = { bin: '970418', accountNumber: '123456789012', accountName: 'STORE 3D' };
+const bank = { bin: '970423', accountNumber: '70877769859', accountName: 'TRAN TAN DAT' };
 
-test('buildVietQrPayload emits EMVCo-compliant payload', () => {
-  const payload = buildVietQrPayload(bank, 150000, 'ST3D-ABCDEF');
-  assert.ok(payload.startsWith('000201010212'));
-  assert.ok(payload.includes('A000000727'));
-  assert.ok(payload.includes('970418'));
-  assert.ok(payload.includes('123456789012'));
-  assert.ok(payload.includes('150000'));
-  assert.ok(payload.includes('ST3D-ABCDEF'));
-  assert.match(payload, /6304[0-9A-F]{4}$/);
+test('buildVietQrQuickLink returns the official VietQR Quick Link', () => {
+  const url = buildVietQrQuickLink({ ...bank, amount: 250000, content: 'ST3D-ABCDEF' });
+  assert.ok(url.startsWith('https://img.vietqr.io/image/970423-70877769859-qr_only.png?'));
+  assert.ok(url.includes('amount=250000'));
+  assert.ok(url.includes('addInfo=ST3D-ABCDEF'));
+  assert.ok(url.includes('accountName=TRAN+TAN+DAT'));
 });
 
-test('crc16 matches reference CCITT value', () => {
-  assert.equal(crc16('123456789'), 0x29b1);
+test('buildVietQrQuickLink URL-encodes the account name', () => {
+  const url = buildVietQrQuickLink({ ...bank, accountName: 'Trần Tấn Đạt', amount: 100000, content: 'ST3D-TEST001' });
+  assert.ok(url.includes('accountName=Tr%E1%BA%A7n+T%E1%BA%A5n+%C4%90%E1%BA%A1t'));
+});
+
+test('official VietQR CDN serves a QR image for the generated link', async () => {
+  const link = buildVietQrQuickLink({ ...bank, amount: 250000, content: 'ST3D-TEST001' });
+  const res = await fetch(link);
+  assert.equal(res.ok, true);
+  assert.match(res.headers.get('content-type') ?? '', /^image\//);
 });
 
 test('getBankName resolves known and unknown BINs', () => {
+  assert.equal(getBankName('970423'), 'TPBank – Tiên Phong Bank');
   assert.equal(getBankName('970418'), 'Vietcombank');
   assert.equal(getBankName('999999'), 'Ngân hàng (999999)');
-});
-
-test('renderQrDataUrl returns a PNG data URL', async () => {
-  const url = await renderQrDataUrl('0002010102122615A0000007270124980123456');
-  assert.ok(url.startsWith('data:image/png;base64,'));
-  assert.ok(url.length > 100);
 });

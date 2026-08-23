@@ -26,6 +26,7 @@ import type { PaginationMeta, User } from '@/types'
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [meta, setMeta] = useState<PaginationMeta | null>(null)
+  const [adminCount, setAdminCount] = useState<number | undefined>(undefined)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
@@ -49,6 +50,7 @@ export default function AdminUsersPage() {
         if (cancelled) return
         setUsers(res.data)
         setMeta(res.pagination)
+        setAdminCount(res.meta?.adminCount)
       })
       .catch(() => {})
       .finally(() => {
@@ -58,6 +60,9 @@ export default function AdminUsersPage() {
       cancelled = true
     }
   }, [page, debouncedSearch])
+
+  // The system must always keep at least one admin account.
+  const isLastAdmin = (user: User) => user.role === 'admin' && adminCount === 1
 
   const updateUser = (updated: User) => {
     setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)))
@@ -98,6 +103,11 @@ export default function AdminUsersPage() {
       <div>
         <h1 className="text-2xl font-bold">Quản lý khách hàng</h1>
         <p className="text-muted-foreground">{meta ? `${meta.total} người dùng` : ''}</p>
+        {adminCount !== undefined && (
+          <p className="text-muted-foreground mt-1 text-xs">
+            Hệ thống luôn giữ ít nhất một tài khoản admin ({adminCount} admin hiện tại).
+          </p>
+        )}
       </div>
 
       <div className="relative max-w-sm">
@@ -167,7 +177,14 @@ export default function AdminUsersPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleRole(user)}
-                        title={user.role === 'admin' ? 'Hạ xuống khách hàng' : 'Nâng lên admin'}
+                        disabled={isLastAdmin(user)}
+                        title={
+                          isLastAdmin(user)
+                            ? 'Không thể hạ quyền admin cuối cùng của hệ thống'
+                            : user.role === 'admin'
+                              ? 'Hạ xuống khách hàng'
+                              : 'Nâng lên admin'
+                        }
                       >
                         {user.role === 'admin' ? <ShieldX className="size-4" /> : <ShieldCheck className="size-4" />}
                         {user.role === 'admin' ? 'Hạ' : 'Admin'}
@@ -183,7 +200,7 @@ export default function AdminUsersPage() {
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" title="Xóa">
+                          <Button variant="ghost" size="sm" title={isLastAdmin(user) ? 'Không thể xóa admin cuối cùng' : 'Xóa'} disabled={isLastAdmin(user)}>
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
                         </AlertDialogTrigger>

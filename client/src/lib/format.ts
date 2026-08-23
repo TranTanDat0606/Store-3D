@@ -28,3 +28,15 @@ export function calculateDiscountPercent(originalPrice: number, salePrice: numbe
   if (!originalPrice || originalPrice <= salePrice) return 0
   return Math.round(((originalPrice - salePrice) / originalPrice) * 100)
 }
+
+/** Formats a bank account number for display only (e.g. 70877769859 → 7087 7769 859). */
+export function formatAccountNumber(accountNumber: string): string {
+  const digits = accountNumber.replace(/\D/g, '')
+  if (digits.length === 11) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 8)} ${digits.slice(8)}`
+  }
+  if (digits.length === 10) {
+    return `${digits.slice(0, 3)} ${digits.slice(3, 7)} ${digits.slice(7)}`
+  }
+  return accountNumber
+}

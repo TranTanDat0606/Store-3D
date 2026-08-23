@@ -5,7 +5,7 @@ import { orderApi, paymentApi, type QrPaymentInfo } from '@/services'
 import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { formatCurrency } from '@/lib'
+import { formatCurrency, formatAccountNumber } from '@/lib'
 
 type QrState = 'loading' | 'waiting' | 'paid' | 'expired' | 'failed'
 
@@ -161,8 +161,8 @@ export default function QrPaymentPage() {
               <QrCode className="size-5" />
             </div>
             <div>
-              <h1 className="font-bold">Thanh toán bằng mã QR</h1>
-              <p className="text-muted-foreground text-xs">Chuyển khoản ngân hàng</p>
+              <h1 className="font-bold">Thanh toán chuyển khoản</h1>
+              <p className="text-muted-foreground text-xs">TPBank – Tiên Phong Bank</p>
             </div>
           </div>
 
@@ -178,7 +178,7 @@ export default function QrPaymentPage() {
 
           <div className="my-5 flex justify-center">
             <div className="rounded-2xl border bg-white p-3">
-              <img src={qr.qrDataUrl} alt="Mã thanh toán" className="size-56" />
+              <img src={qr.qrUrl} alt="Mã thanh toán VietQR" className="size-56" />
             </div>
           </div>
 
@@ -186,8 +186,8 @@ export default function QrPaymentPage() {
 
           <div className="rounded-xl border bg-muted/30 px-4 py-3">
             <BankRow label="Ngân hàng" value={qr.bank.bankName} />
-            <BankRow label="Số tài khoản" value={qr.bank.accountNumber} />
-            <BankRow label="Chủ tài khoản" value={qr.bank.accountName} />
+            <BankRow label="Số tài khoản" value={formatAccountNumber(qr.bank.accountNumber)} />
+            <BankRow label="Chủ tài khoản" value={qr.bank.accountDisplayName || qr.bank.accountName} />
             <BankRow label="Số tiền" value={formatCurrency(qr.amount)} />
             <div className="flex items-center justify-between gap-4 py-1.5 text-sm">
               <span className="text-muted-foreground">Nội dung CK</span>
@@ -199,6 +199,19 @@ export default function QrPaymentPage() {
                 {copied && <span className="text-emerald-600">Đã chép</span>}
               </span>
             </div>
+          </div>
+
+          <div className="mt-4 space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <CheckCircle2 className="text-primary size-4" />
+              Các bước thanh toán
+            </p>
+            <ol className="text-muted-foreground list-decimal space-y-1 pl-5 text-xs">
+              <li>Quét mã QR bằng ứng dụng ngân hàng/phương thức thanh toán.</li>
+              <li>Kiểm tra đúng ngân hàng, tài khoản và <span className="font-semibold text-foreground">số tiền {formatCurrency(qr.amount)}</span>.</li>
+              <li>Xác nhận và hoàn tất chuyển khoản, giữ nguyên nội dung chuyển khoản.</li>
+              <li>Chờ xác nhận thanh toán — đơn hàng sẽ được cập nhật tự động.</li>
+            </ol>
           </div>
 
           <p className="mt-4 text-center text-xs text-muted-foreground">

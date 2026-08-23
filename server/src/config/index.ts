@@ -33,6 +33,7 @@ export const config = {
     bin: process.env.BANK_BIN || '',
     accountNumber: process.env.BANK_ACCOUNT_NUMBER || '',
     accountName: process.env.BANK_ACCOUNT_NAME || '',
+    accountDisplayName: process.env.BANK_ACCOUNT_DISPLAY_NAME || process.env.BANK_ACCOUNT_NAME || '',
   },
   qrTtlMinutes: Number(process.env.QR_TTL_MINUTES) || 5,
   paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',

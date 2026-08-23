@@ -9,6 +9,11 @@ interface DailyRevenuePoint {
 export class StatsService {
   /** Overview cards: total revenue, orders, products, customers. */
   async overview() {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const paidNotCancelled = { 'payment.status': PaymentStatus.Paid, status: { $ne: OrderStatus.Cancelled } };
+
     const [
       revenueResult,
       totalOrders,
@@ -16,22 +21,33 @@ export class StatsService {
       totalCustomers,
       pendingOrders,
       completedOrders,
+      todayRevenueResult,
+      monthRevenueResult,
     ] = await Promise.all([
-      Order.aggregate([
-        {
-          $match: { 'payment.status': PaymentStatus.Paid, status: { $ne: OrderStatus.Cancelled } },
-        },
-        { $group: { _id: null, total: { $sum: '$total' } } },
-      ]),
+      Order.aggregate([{ $match: paidNotCancelled }, { $group: { _id: null, total: { $sum: '$total' } } }]),
       Order.countDocuments(),
       Product.countDocuments(),
       User.countDocuments({ role: UserRole.Customer }),
       Order.countDocuments({ status: OrderStatus.Pending }),
       Order.countDocuments({ status: OrderStatus.Completed }),
+      Order.aggregate([
+        { $match: paidNotCancelled },
+        { $addFields: { revenueDate: { $ifNull: ['$paidAt', '$updatedAt'] } } },
+        { $match: { revenueDate: { $gte: startOfToday } } },
+        { $group: { _id: null, total: { $sum: '$total' } } },
+      ]),
+      Order.aggregate([
+        { $match: paidNotCancelled },
+        { $addFields: { revenueDate: { $ifNull: ['$paidAt', '$updatedAt'] } } },
+        { $match: { revenueDate: { $gte: startOfMonth } } },
+        { $group: { _id: null, total: { $sum: '$total' } } },
+      ]),
     ]);
 
     return {
       totalRevenue: revenueResult[0]?.total ?? 0,
+      todayRevenue: todayRevenueResult[0]?.total ?? 0,
+      monthRevenue: monthRevenueResult[0]?.total ?? 0,
       totalOrders,
       totalProducts,
       totalCustomers,
@@ -51,12 +67,13 @@ export class StatsService {
         $match: {
           'payment.status': PaymentStatus.Paid,
           status: { $ne: OrderStatus.Cancelled },
-          createdAt: { $gte: since },
         },
       },
+      { $addFields: { revenueDate: { $ifNull: ['$paidAt', '$updatedAt'] } } },
+      { $match: { revenueDate: { $gte: since } } },
       {
         $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$revenueDate' } },
           revenue: { $sum: '$total' },
           orders: { $sum: 1 },
         },
@@ -78,6 +95,39 @@ export class StatsService {
       });
     }
     return points;
+  }
+
+  /** Revenue + order count for a relative period: day / week / month / year. */
+  async revenueByPeriod(period: 'day' | 'week' | 'month' | 'year') {
+    const now = new Date();
+    let from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (period === 'week') {
+      from.setDate(from.getDate() - ((from.getDay() + 6) % 7)); // Monday of current week
+    } else if (period === 'month') {
+      from = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === 'year') {
+      from = new Date(now.getFullYear(), 0, 1);
+    }
+
+    const rows = await Order.aggregate([
+      {
+        $match: {
+          'payment.status': PaymentStatus.Paid,
+          status: { $ne: OrderStatus.Cancelled },
+        },
+      },
+      { $addFields: { revenueDate: { $ifNull: ['$paidAt', '$updatedAt'] } } },
+      { $match: { revenueDate: { $gte: from } } },
+      { $group: { _id: null, revenue: { $sum: '$total' }, orders: { $sum: 1 } } },
+    ]);
+
+    return {
+      period,
+      from: from.toISOString(),
+      to: now.toISOString(),
+      revenue: rows[0]?.revenue ?? 0,
+      orders: rows[0]?.orders ?? 0,
+    };
   }
 
   /** Top selling products by quantity sold. */

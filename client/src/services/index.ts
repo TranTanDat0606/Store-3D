@@ -1,7 +1,7 @@
 import apiClient from './apiClient'
 export { productApi, categoryApi } from './productApi'
 export type { ProductPayload, ProductQuery, ProductListResult } from './productApi'
-import type { ApiResponse, Coupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, User, StatsOverview, RevenuePoint, BestSellingProduct, OrdersByStatus } from '@/types'
+import type { ApiResponse, Coupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus } from '@/types'
 
 export interface OrderItemInput {
   product: string
@@ -87,6 +87,9 @@ export const reviewApi = {
       pagination: r.data.pagination!,
     })),
 
+  me: (productId: string) =>
+    apiClient.get<ApiResponse<ReviewEligibility>>(`/reviews/me/${productId}`).then((r) => r.data.data),
+
   create: (data: { product: string; rating: number; comment?: string; images?: string[] }) =>
     apiClient.post<ApiResponse<Review>>('/reviews', data).then((r) => r.data.data),
 
@@ -106,11 +109,16 @@ export const reviewApi = {
     apiClient.delete<ApiResponse<null>>(`/reviews/admin/${id}`).then((r) => r.data.data),
 }
 
+export interface UserListResult extends ListResult<User> {
+  meta?: { adminCount?: number }
+}
+
 export const userApi = {
-  list: (params: { page?: number; limit?: number; search?: string } = {}) =>
+  list: (params: { page?: number; limit?: number; search?: string } = {}): Promise<UserListResult> =>
     apiClient.get<ApiResponse<User[]>>('/users', { params }).then((r) => ({
       data: r.data.data,
       pagination: r.data.pagination!,
+      meta: r.data.meta,
     })),
 
   updateRole: (id: string, role: User['role']) =>
@@ -130,6 +138,9 @@ export const statsApi = {
   revenue: (days = 30) =>
     apiClient.get<ApiResponse<RevenuePoint[]>>('/admin/stats/revenue', { params: { days } }).then((r) => r.data.data),
 
+  revenuePeriod: (period: RevenuePeriod) =>
+    apiClient.get<ApiResponse<RevenuePeriodResult>>('/admin/stats/revenue-period', { params: { period } }).then((r) => r.data.data),
+
   bestSelling: (limit = 5) =>
     apiClient.get<ApiResponse<BestSellingProduct[]>>('/admin/stats/best-selling', { params: { limit } }).then((r) => r.data.data),
 
@@ -146,8 +157,8 @@ export const uploadApi = {
 }
 
 export interface QrPaymentInfo {
-  bank: { bin: string; accountNumber: string; accountName: string; bankName: string }
-  qrDataUrl: string
+  bank: { bin: string; accountNumber: string; accountName: string; accountDisplayName?: string; bankName: string }
+  qrUrl: string
   orderCode: string
   amount: number
   expiresAt: string

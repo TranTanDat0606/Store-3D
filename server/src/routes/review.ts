@@ -13,7 +13,8 @@ router.get('/product/:productId', reviewController.listByProduct);
 router.get('/admin', requireAuth, requireAdmin, reviewController.listAll);
 router.delete('/admin/:id', requireAuth, requireAdmin, reviewController.adminRemove);
 
-// Customer: create/update/delete their own reviews
+// Customer: create/update/delete their own reviews + check eligibility
+router.get('/me/:productId', requireAuth, reviewController.myEligibility);
 router.post('/', requireAuth, validateRequest(createReviewSchema), reviewController.create);
 router.put('/:id', requireAuth, validateRequest(updateReviewSchema), reviewController.update);
 router.delete('/:id', requireAuth, reviewController.remove);

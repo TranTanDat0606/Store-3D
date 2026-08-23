@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { DollarSign, Package, ShoppingCart, Users, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
+import { DollarSign, Package, ShoppingCart, Users, Clock, CheckCircle2, TrendingUp, type LucideIcon } from 'lucide-react'
 import {
   Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { statsApi, orderApi } from '@/services'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { OrderStatusBadge } from '@/components/order/order-status-badge'
 import { formatCurrency, formatDateTime, cn } from '@/lib'
-import type { BestSellingProduct, Order, OrdersByStatus, RevenuePoint, StatsOverview } from '@/types'
+import type { BestSellingProduct, Order, OrdersByStatus, RevenuePeriod, RevenuePoint, StatsOverview } from '@/types'
 
 const STATUS_COLORS: Record<string, string> = {
   pending: '#f59e0b',
@@ -27,6 +28,13 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Đã hủy',
 }
 
+const PERIOD_LABELS: Record<RevenuePeriod, string> = {
+  day: 'Hôm nay',
+  week: 'Tuần này',
+  month: 'Tháng này',
+  year: 'Năm nay',
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<StatsOverview | null>(null)
   const [revenue, setRevenue] = useState<RevenuePoint[]>([])
@@ -34,6 +42,9 @@ export default function AdminDashboardPage() {
   const [bestSelling, setBestSelling] = useState<BestSellingProduct[]>([])
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+  const [period, setPeriod] = useState<RevenuePeriod>('month')
+  const [periodRevenue, setPeriodRevenue] = useState<number | null>(null)
+  const [periodOrders, setPeriodOrders] = useState<number>(0)
 
   useEffect(() => {
     let cancelled = false
@@ -61,6 +72,13 @@ export default function AdminDashboardPage() {
     }
   }, [])
 
+  useEffect(() => {
+    void statsApi.revenuePeriod(period).then((r) => {
+      setPeriodRevenue(r.revenue)
+      setPeriodOrders(r.orders)
+    })
+  }, [period])
+
   const chartData = useMemo(
     () => revenue.map((r) => ({ ...r, date: r.date.slice(5) })),
     [revenue]
@@ -82,8 +100,13 @@ export default function AdminDashboardPage() {
     )
   }
 
-  const statCards = [
-    { label: 'Tổng doanh thu', value: formatCurrency(stats?.totalRevenue ?? 0), icon: DollarSign, accent: 'from-emerald-400 to-teal-500', glow: 'shadow-emerald-500/20' },
+  const statCards: {
+    label: string
+    value: string
+    icon: LucideIcon
+    accent: string
+    glow: string
+  }[] = [
     { label: 'Tổng đơn hàng', value: String(stats?.totalOrders ?? 0), icon: ShoppingCart, accent: 'from-cyan-400 to-blue-500', glow: 'shadow-cyan-500/20' },
     { label: 'Tổng sản phẩm', value: String(stats?.totalProducts ?? 0), icon: Package, accent: 'from-violet-400 to-purple-500', glow: 'shadow-violet-500/20' },
     { label: 'Khách hàng', value: String(stats?.totalCustomers ?? 0), icon: Users, accent: 'from-amber-400 to-orange-500', glow: 'shadow-amber-500/20' },
@@ -92,6 +115,36 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
+          <CardContent className="flex items-center justify-between gap-3 p-5">
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-slate-400">Doanh thu</p>
+                <Select value={period} onValueChange={(v) => setPeriod(v as RevenuePeriod)}>
+                  <SelectTrigger size="sm" className="h-6 border-white/10 bg-white/5 px-2 text-xs text-slate-300">
+                    <SelectValue placeholder="Chọn kỳ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PERIOD_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="mt-1 text-2xl font-bold text-white">
+                {periodRevenue == null
+                  ? <Skeleton className="h-7 w-28 bg-white/10" />
+                  : formatCurrency(periodRevenue)}
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                {periodOrders} đơn trong kỳ · Tổng cộng: {formatCurrency(stats?.totalRevenue ?? 0)}
+              </p>
+            </div>
+            <div className={cn('flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg', 'from-emerald-400 to-teal-500', 'shadow-emerald-500/20')}>
+              <DollarSign className="size-6 text-white" />
+            </div>
+          </CardContent>
+        </Card>
         {statCards.map((card) => (
           <Card key={card.label} className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
             <CardContent className="flex items-center justify-between p-5">

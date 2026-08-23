@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/order/order-status-badge'
+import { ReviewProductAction } from '@/components/review/review-action'
+import { useReviewEligibility } from '@/hooks/useReviewEligibility'
 import { formatCurrency, formatDateTime, resolveImageUrl } from '@/lib'
 import type { Order } from '@/types'
 
@@ -15,6 +17,10 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+
+  const productIds: string[] =
+    order?.items.map((i) => (typeof i.product === 'object' ? i.product._id : i.product)) ?? []
+  const eligibilityMap = useReviewEligibility(productIds)
 
   useEffect(() => {
     if (!id) return
@@ -89,25 +95,33 @@ export default function OrderDetailPage() {
               <CardTitle className="text-base">Sản phẩm</CardTitle>
             </CardHeader>
             <CardContent className="divide-y">
-              {order.items.map((item) => (
-                <div key={item._id} className="flex items-center gap-4 py-3">
-                  <div className="bg-muted flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                    <img src={resolveImageUrl(item.image)} alt={item.name} className="size-full object-cover" />
+              {order.items.map((item) => {
+                const prod = typeof item.product === 'object' ? item.product : null
+                const productId: string = typeof item.product === 'object' ? item.product._id : item.product
+                const eligibility = eligibilityMap[productId]
+                return (
+                  <div key={item._id} className="flex items-center gap-4 py-3">
+                    <div className="bg-muted flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+                      <img src={resolveImageUrl(item.image)} alt={item.name} className="size-full object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to={`/san-pham/${prod?.slug ?? ''}`}
+                        className="hover:text-primary line-clamp-1 text-sm font-medium"
+                      >
+                        {item.name}
+                      </Link>
+                      <p className="text-muted-foreground text-sm">x{item.quantity}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="text-sm font-medium">
+                        {formatCurrency(item.price * item.quantity)}
+                      </span>
+                      <ReviewProductAction slug={prod?.slug} eligibility={eligibility} />
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      to={`/san-pham/${typeof item.product === 'object' ? item.product.slug : ''}`}
-                      className="hover:text-primary line-clamp-1 text-sm font-medium"
-                    >
-                      {item.name}
-                    </Link>
-                    <p className="text-muted-foreground text-sm">x{item.quantity}</p>
-                  </div>
-                  <span className="text-sm font-medium">
-                    {formatCurrency(item.price * item.quantity)}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </CardContent>
           </Card>
 

@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import { Order, OrderStatus, PaymentMethod, PaymentStatus } from '../models';
 import { AppError } from '../utils/AppError';
 import { config } from '../config';
-import { buildVietQrPayload, getBankName, renderQrDataUrl } from './vietQrService';
+import { buildVietQrQuickLink, getBankName } from './vietQrService';
 
 export function generateOrderCode(): string {
   return `ST3D-${randomBytes(3).toString('hex').toUpperCase()}`;
@@ -64,22 +64,25 @@ export class PaymentService {
       },
     );
 
-    const qrDataUrl = await renderQrDataUrl(
-      buildVietQrPayload(
-        { bin: config.bank.bin, accountNumber: config.bank.accountNumber, accountName: config.bank.accountName },
-        order.total,
-        orderCode,
-      ),
-    );
+    // Official VietQR Quick Link, rendered by the VietQR CDN from the trusted
+    // server-side order data (amount + orderCode). No manual QR generation.
+    const qrUrl = buildVietQrQuickLink({
+      bin: config.bank.bin,
+      accountNumber: config.bank.accountNumber,
+      accountName: config.bank.accountName,
+      amount: order.total,
+      content: orderCode,
+    });
 
     return {
       bank: {
         bin: config.bank.bin,
         accountNumber: config.bank.accountNumber,
         accountName: config.bank.accountName,
+        accountDisplayName: config.bank.accountDisplayName,
         bankName: getBankName(config.bank.bin),
       },
-      qrDataUrl,
+      qrUrl,
       orderCode,
       amount: order.total,
       expiresAt: qrExpiresAt,

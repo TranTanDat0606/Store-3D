@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Review, Product } from '../models';
+import { Review, Product, Order, OrderItem, OrderStatus, PaymentStatus } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 
@@ -20,6 +20,43 @@ export class ReviewService {
     return review;
   }
 
+  /**
+   * A user may review a product only after a qualifying purchase: they own an
+   * order containing the product and that order is either fully paid or has
+   * been delivered (completed).
+   */
+  private async findQualifyingOrder(userId: string, productId: string) {
+    const orderItems = await OrderItem.find({ product: productId }).select('order');
+    const orderIds = orderItems.map((oi) => oi.order);
+    return Order.findOne({
+      _id: { $in: orderIds },
+      user: userId,
+      $or: [
+        { status: OrderStatus.Completed },
+        { 'payment.status': PaymentStatus.Paid },
+      ],
+    });
+  }
+
+  /** Whether the current user may review a product (purchase check). */
+  async getMyEligibility(userId: string, productId: string) {
+    const product = await Product.findById(productId);
+    if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
+
+    const [purchased, existing] = await Promise.all([
+      this.findQualifyingOrder(userId, productId),
+      Review.findOne({ user: userId, product: productId }),
+    ]);
+
+    return {
+      product: productId,
+      purchased: Boolean(purchased),
+      hasReviewed: Boolean(existing),
+      canReview: Boolean(purchased) && !existing,
+      review: existing,
+    };
+  }
+
   async create(userId: string, data: { product: string; rating: number; comment: string; images: string[] }) {
     const product = await Product.findById(data.product);
     if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
@@ -27,7 +64,13 @@ export class ReviewService {
     const existing = await Review.findOne({ user: userId, product: data.product });
     if (existing) throw new AppError('Bạn đã đánh giá sản phẩm này', 409);
 
-    const review = await Review.create({ ...data, user: userId });
+    // Only customers who actually bought (and received) the product may review it.
+    const qualifyingOrder = await this.findQualifyingOrder(userId, data.product);
+    if (!qualifyingOrder) {
+      throw new AppError('Bạn cần mua và nhận được sản phẩm này trước khi đánh giá', 403);
+    }
+
+    const review = await Review.create({ ...data, user: userId, order: qualifyingOrder._id });
     await this.updateProductRating(data.product);
     return this.getById(String(review._id));
   }

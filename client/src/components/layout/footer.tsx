@@ -85,6 +85,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/lien-he" className="hover:text-foreground transition-colors">
+                  Liên hệ
+                </Link>
+              </li>
+              <li>
                 <Link to="/tai-khoan/yeu-thich" className="hover:text-foreground transition-colors">
                   Danh sách yêu thích
                 </Link>

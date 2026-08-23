@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
+  CheckCircle2,
   Heart,
   Minus,
   Plus,
@@ -21,7 +22,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn, formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
 import { toast } from 'sonner'
-import type { Product, Review } from '@/types'
+import type { Product, Review, ReviewEligibility } from '@/types'
 
 function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg' }) {
   return (
@@ -55,6 +56,24 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description')
   const [loginOpen, setLoginOpen] = useState(false)
+  const [reviewEligibility, setReviewEligibility] = useState<ReviewEligibility | null>(null)
+
+  useEffect(() => {
+    if (!product || !isAuthenticated) {
+      setReviewEligibility(null)
+      return
+    }
+    let cancelled = false
+    reviewApi
+      .me(product._id)
+      .then((el) => {
+        if (!cancelled) setReviewEligibility(el)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [product, isAuthenticated])
 
   useEffect(() => {
     let cancelled = false
@@ -376,9 +395,28 @@ export default function ProductDetailPage() {
                 <p className="text-muted-foreground mt-2 text-sm">
                   {product.reviewCount} đánh giá
                 </p>
-                <Button className="mt-4 w-full" asChild>
-                  <Link to={`/danh-gia/${product.slug}`}>Viết đánh giá</Link>
-                </Button>
+                {!isAuthenticated ? (
+                  <Button className="mt-4 w-full" variant="outline" onClick={() => setLoginOpen(true)}>
+                    Đăng nhập để đánh giá
+                  </Button>
+                ) : reviewEligibility?.canReview ? (
+                  <Button className="mt-4 w-full" asChild>
+                    <Link to={`/danh-gia/${product.slug}`}>Viết đánh giá</Link>
+                  </Button>
+                ) : reviewEligibility?.hasReviewed ? (
+                  <div className="text-emerald-600 dark:text-emerald-400 mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm font-medium">
+                    <CheckCircle2 className="size-4" />
+                    Đã đánh giá
+                  </div>
+                ) : (
+                  <Button
+                    className="mt-4 w-full"
+                    disabled
+                    title="Chỉ khách hàng đã mua và nhận được sản phẩm này mới có thể đánh giá"
+                  >
+                    Cần mua hàng để đánh giá
+                  </Button>
+                )}
               </div>
 
               {/* Reviews list */}

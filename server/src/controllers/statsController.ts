@@ -15,6 +15,14 @@ export const statsController = {
     return successResponse(res, data);
   }),
 
+  revenuePeriod: asyncHandler(async (req, res: Response) => {
+    const period = ['day', 'week', 'month', 'year'].includes(String(req.query.period))
+      ? (String(req.query.period) as 'day' | 'week' | 'month' | 'year')
+      : 'month';
+    const data = await statsService.revenueByPeriod(period);
+    return successResponse(res, data);
+  }),
+
   bestSelling: asyncHandler(async (req, res: Response) => {
     const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 5));
     const data = await statsService.bestSelling(limit);

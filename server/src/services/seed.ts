@@ -57,6 +57,13 @@ export async function seedDatabase(options: SeedOptions = {}) {
       avatar: svgDataUri('Admin', 0, 200),
     });
     console.log('[Seed] Created admin admin@store3d.com / admin123');
+  } else if (admin.role !== UserRole.Admin) {
+    await User.updateOne(
+      { _id: admin._id },
+      { $set: { role: UserRole.Admin } },
+      { runValidators: true },
+    );
+    console.log('[Seed] Fixed admin role for admin@store3d.com');
   }
 
   if (!customer) {

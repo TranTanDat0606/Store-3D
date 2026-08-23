@@ -13,6 +13,7 @@ interface ApiResponseOptions {
   status?: number;
   message?: string;
   pagination?: PaginationMeta;
+  meta?: Record<string, unknown>;
 }
 
 /** Standard API response envelope: { success, message, data, pagination, errors } */
@@ -21,12 +22,13 @@ export function successResponse<T>(
   data: T,
   options: ApiResponseOptions = {},
 ) {
-  const { status = 200, message = 'Thành công', pagination } = options;
+  const { status = 200, message = 'Thành công', pagination, meta } = options;
   return res.status(status).json({
     success: true,
     message,
     data,
     ...(pagination ? { pagination } : {}),
+    ...(meta ? { meta } : {}),
   });
 }
 

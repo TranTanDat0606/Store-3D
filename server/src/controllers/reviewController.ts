@@ -11,6 +11,12 @@ export const reviewController = {
     return successResponse(res, result.data, { pagination: result.pagination });
   }),
 
+  /** Current user's review eligibility for a product (purchase check). */
+  myEligibility: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const result = await reviewService.getMyEligibility(req.user!._id, req.params.productId);
+    return successResponse(res, result);
+  }),
+
   create: asyncHandler(async (req: AuthRequest, res: Response) => {
     const review = await reviewService.create(req.user!._id, req.body);
     return successResponse(res, review, { status: 201, message: 'Gửi đánh giá thành công' });

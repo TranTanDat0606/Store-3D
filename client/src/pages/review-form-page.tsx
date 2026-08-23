@@ -3,11 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Star } from 'lucide-react'
+import { CheckCircle2, ShieldAlert, Star } from 'lucide-react'
 import { cn, resolveImageUrl } from '@/lib/utils'
 import { productApi, reviewApi } from '@/services'
 import { getErrorMessage } from '@/services/apiClient'
-import type { Product } from '@/types'
+import type { Product, ReviewEligibility } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -73,6 +73,8 @@ export default function ReviewFormPage() {
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [eligibility, setEligibility] = useState<ReviewEligibility | null>(null)
+  const [eligibilityLoading, setEligibilityLoading] = useState(false)
 
   const form = useForm<ReviewValues>({
     resolver: zodResolver(reviewSchema),
@@ -101,6 +103,24 @@ export default function ReviewFormPage() {
       cancelled = true
     }
   }, [slug])
+
+  useEffect(() => {
+    if (!product) return
+    let cancelled = false
+    setEligibilityLoading(true)
+    reviewApi
+      .me(product._id)
+      .then((el) => {
+        if (!cancelled) setEligibility(el)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setEligibilityLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [product])
 
   const onSubmit = async (values: ReviewValues) => {
     if (!product) return
@@ -158,6 +178,33 @@ export default function ReviewFormPage() {
             </div>
           </div>
 
+          {eligibilityLoading ? (
+            <div className="text-muted-foreground flex items-center justify-center gap-2 py-10 text-sm">
+              <span className="size-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+              Đang kiểm tra...
+            </div>
+          ) : eligibility && !eligibility.purchased ? (
+            <Alert variant="destructive" className="mb-6">
+              <ShieldAlert className="size-4" />
+              <AlertDescription>
+                Bạn cần mua và nhận được sản phẩm này trước khi đánh giá.{' '}
+                <Link to={`/san-pham/${product.slug}`} className="font-medium underline">
+                  Xem sản phẩm
+                </Link>
+              </AlertDescription>
+            </Alert>
+          ) : eligibility && eligibility.hasReviewed ? (
+            <Alert className="mb-6 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+              <CheckCircle2 className="size-4" />
+              <AlertDescription>
+                Bạn đã đánh giá sản phẩm này rồi.{' '}
+                <Link to={`/san-pham/${product.slug}`} className="font-medium underline">
+                  Quay lại sản phẩm
+                </Link>
+              </AlertDescription>
+            </Alert>
+          ) : (
+          <>
           {error && (
             <Alert variant="destructive" className="mb-6">
               <AlertDescription>{error}</AlertDescription>
@@ -211,6 +258,8 @@ export default function ReviewFormPage() {
               </Button>
             </form>
           </Form>
+          </>
+          )}
         </CardContent>
       </Card>
     </div>

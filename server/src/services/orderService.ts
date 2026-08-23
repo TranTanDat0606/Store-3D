@@ -9,6 +9,20 @@ interface CouponApplication {
   discount: number;
 }
 
+/**
+ * One-way order workflow. Admin may only move an order forward along the
+ * linear chain: pending → confirmed → shipping → completed.
+ * A pending order may additionally be cancelled. Backward/skipped
+ * transitions are rejected on the backend (not just in the UI).
+ */
+export const ALLOWED_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
+  [OrderStatus.Pending]: [OrderStatus.Confirmed, OrderStatus.Cancelled],
+  [OrderStatus.Confirmed]: [OrderStatus.Shipping],
+  [OrderStatus.Shipping]: [OrderStatus.Completed],
+  [OrderStatus.Completed]: [],
+  [OrderStatus.Cancelled]: [],
+};
+
 /** Validates a coupon code against the subtotal. Returns null when no coupon given. */
 async function resolveCoupon(code: string | undefined, subtotal: number): Promise<CouponApplication | null> {
   if (!code) return null;
@@ -187,9 +201,47 @@ export class OrderService {
     const order = await Order.findById(id);
     if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
 
+    // One-way workflow: only the next valid status is allowed. Same-status
+    // no-op updates are permitted (e.g. admin only marking a payment).
+    if (data.status !== order.status) {
+      const allowed = ALLOWED_NEXT_STATUS[order.status as OrderStatus] ?? [];
+      if (!allowed.includes(data.status as OrderStatus)) {
+        throw new AppError('Không thể chuyển trạng thái đơn hàng ngược hoặc bỏ qua các bước', 400);
+      }
+    }
+
+    // Restore stock when an order is cancelled (only pending orders can be
+    // cancelled, and they had their stock decremented at creation time).
+    if (data.status === OrderStatus.Cancelled && order.status !== OrderStatus.Cancelled) {
+      const items = await OrderItem.find({ order: order._id }).select('product quantity');
+      if (items.length > 0) {
+        await Product.bulkWrite(
+          items.map((item) => ({
+            updateOne: {
+              filter: { _id: item.product },
+              update: { $inc: { stock: item.quantity } },
+            },
+          })),
+        );
+      }
+    }
+
     const updates: Record<string, unknown> = { status: data.status };
     if (data.paymentStatus) {
       updates['payment.status'] = data.paymentStatus;
+      if (data.paymentStatus === PaymentStatus.Paid && !order.paidAt) {
+        updates.paidAt = new Date();
+      }
+    }
+
+    // Completing an order means the revenue is realized: mark it paid even
+    // for COD (which has no bank reconcile step). Cash completed orders were
+    // previously stuck on 'unpaid' and never appeared in revenue stats.
+    if (data.status === OrderStatus.Completed && order.payment?.status !== PaymentStatus.Paid) {
+      updates['payment.status'] = PaymentStatus.Paid;
+      if (!order.paidAt) {
+        updates.paidAt = new Date();
+      }
     }
 
     const updated = await Order.findByIdAndUpdate(id, { $set: updates }, { new: true })

@@ -8,7 +8,10 @@ import { AppError } from '../utils/AppError';
 export const userController = {
   list: asyncHandler(async (req, res: Response) => {
     const result = await userService.list(req.query as Record<string, unknown>);
-    return successResponse(res, result.data, { pagination: result.pagination });
+    return successResponse(res, result.data, {
+      pagination: result.pagination,
+      meta: { adminCount: result.adminCount },
+    });
   }),
 
   getById: asyncHandler(async (req, res: Response) => {

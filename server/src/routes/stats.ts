@@ -8,6 +8,7 @@ router.use(requireAuth, requireAdmin);
 
 router.get('/overview', statsController.overview);
 router.get('/revenue', statsController.revenueByDay);
+router.get('/revenue-period', statsController.revenuePeriod);
 router.get('/best-selling', statsController.bestSelling);
 router.get('/orders-by-status', statsController.ordersByStatus);
 
