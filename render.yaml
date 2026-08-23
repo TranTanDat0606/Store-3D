@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: store3d-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: CLIENT_URL
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX
+        value: 300
+      - key: AUTH_RATE_LIMIT_MAX
+        value: 20
+      - key: BANK_BIN
+        value: 970423
+      - key: BANK_ACCOUNT_NUMBER
+        value: "70877769859"
+      - key: BANK_ACCOUNT_NAME
+        value: TRAN TAN DAT
+      - key: BANK_ACCOUNT_DISPLAY_NAME
+        value: Trần Tấn Đạt
+      - key: QR_TTL_MINUTES
+        value: "5"
