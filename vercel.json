@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install --omit=dev && cd client && NODE_ENV=development npm ci && cd ../server && NODE_ENV=development npm ci",
-  "buildCommand": "cd server && npx tsc && cd ../client && npm run build",
+  "installCommand": "npm install && cd client && NODE_ENV=development npm ci && cd ../server && NODE_ENV=development npm ci",
+  "buildCommand": "cd server && npx esbuild ../api/server.ts --bundle --platform=node --target=node20 --format=cjs --outfile=../api/server.js --resolve-extensions=.ts,.js,.json --packages=external && rm ../api/server.ts && cd ../client && npm run build",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "rewrites": [
