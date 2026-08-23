@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { ApiResponse } from '@/types'
 
-export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '')
+export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api')
 
 if (!API_URL && !import.meta.env.DEV) {
   console.error('[Store3D] Missing VITE_API_URL env variable. API calls will fail in production.')
