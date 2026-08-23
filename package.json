@@ -1,5 +1,0 @@
-{
-  "name": "store3d",
-  "private": true,
-  "workspaces": ["client", "server"]
-}
