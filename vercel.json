@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd client && npm install && ls node_modules/.bin/tsc",
+  "installCommand": "cd client && rm -rf node_modules && npm install && ls node_modules/.bin/tsc",
   "buildCommand": "cd client && node_modules/.bin/tsc -b && node_modules/.bin/vite build",
   "outputDirectory": "client/dist",
   "rewrites": [
