@@ -27,7 +27,7 @@ let appPromise: Promise<any> | null = null;
 async function getApp() {
   if (!appPromise) {
     appPromise = (async () => {
-      const { createApp } = await import('../server/src/app');
+      const { createApp } = await import('../server/dist/app');
       return createApp();
     })();
   }
