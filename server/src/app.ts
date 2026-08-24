@@ -4,7 +4,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import { corsOptions } from './config/cors';
-import { config } from './config';
 import { globalLimiter } from './config/rateLimit';
 import { notFoundHandler } from './middleware/notFound';
 import { errorHandler } from './middleware/errorHandler';
@@ -33,9 +32,6 @@ export function createApp() {
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
   app.use(globalLimiter);
-
-  // Serve uploaded images statically.
-  app.use('/uploads', express.static(config.uploadDir));
 
   // Health check
   app.get('/api/health', (_req, res) => {

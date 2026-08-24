@@ -19,6 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -38,6 +39,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/multer": "^2.2.0",
     "@types/node": "^22.3.0",
+    "esbuild": "^0.28.2",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
   }

@@ -1,28 +1,14 @@
 import { Router } from 'express';
 import multer from 'multer';
-import path from 'path';
-import crypto from 'crypto';
-import fs from 'fs';
 import { requireAuth, requireAdmin } from '../middleware/auth';
-import { config } from '../config';
 import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    fs.mkdirSync(config.uploadDir, { recursive: true });
-    cb(null, config.uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || '.png';
-    cb(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`);
-  },
-});
+import cloudinary from '../config/cloudinary';
 
 const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
     else cb(new AppError('Chỉ chấp nhận file ảnh', 400));
@@ -40,7 +26,26 @@ router.post(
     if (!req.file) {
       throw new AppError('Vui lòng chọn file ảnh', 400);
     }
-    return successResponse(res, { url: `/uploads/${req.file.filename}` }, { message: 'Tải ảnh thành công' });
+
+    const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'store3d/products',
+          transformation: [
+            { width: 1200, height: 1200, crop: 'limit' },
+            { quality: 'auto' },
+            { fetch_format: 'auto' },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result!);
+        },
+      );
+      stream.end(req.file!.buffer);
+    });
+
+    return successResponse(res, { url: result.secure_url }, { message: 'Tải ảnh thành công' });
   }),
 );
 

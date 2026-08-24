@@ -1,4 +1,3 @@
-import path from 'path';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,7 +27,11 @@ export const config = {
     max: Number(process.env.RATE_LIMIT_MAX) || 300,
     authMax: Number(process.env.AUTH_RATE_LIMIT_MAX) || 20,
   },
-  uploadDir: process.env.UPLOAD_DIR || path.resolve(__dirname, '../../uploads'),
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+    apiKey: process.env.CLOUDINARY_API_KEY || '',
+    apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+  },
   bank: {
     bin: process.env.BANK_BIN || '',
     accountNumber: process.env.BANK_ACCOUNT_NUMBER || '',
