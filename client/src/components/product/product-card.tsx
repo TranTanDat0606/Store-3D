@@ -88,7 +88,7 @@ export const ProductCard = memo(function ProductCard({
             src={resolveImageUrl(product.images?.[0] ?? '')}
             alt={product.name}
             loading="lazy"
-            className="relative size-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            className="relative size-full object-contain transition-transform duration-700 ease-out group-hover:scale-110"
           />
 
           {/* light reflection */}

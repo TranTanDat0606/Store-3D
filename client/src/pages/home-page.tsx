@@ -28,7 +28,7 @@ function HeroShowcase({ products }: { products: Product[] }) {
           transition={{ duration: 0.6, delay: i * 0.15 }}
           whileHover={{ scale: 1.05, rotate: 0 }}
         >
-          <img src={resolveImageUrl(p.images?.[0] ?? '')} alt={p.name} className="aspect-square w-full object-cover" />
+          <img src={resolveImageUrl(p.images?.[0] ?? '')} alt={p.name} className="aspect-square w-full object-contain" />
           <div className="p-3">
             <p className="line-clamp-1 text-xs font-semibold text-slate-100">{p.name}</p>
             <p className="text-sm font-bold text-cyan-300">{formatCurrency(p.salePrice)}</p>

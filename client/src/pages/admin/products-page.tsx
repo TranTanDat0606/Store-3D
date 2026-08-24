@@ -480,7 +480,7 @@ export default function AdminProductsPage() {
           </DialogHeader>
           {preview && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <img src={resolveImageUrl(preview.images[0] ?? '')} alt={preview.name} className="aspect-square w-full rounded-xl border border-white/10 object-cover" />
+              <img src={resolveImageUrl(preview.images[0] ?? '')} alt={preview.name} className="aspect-square w-full rounded-xl border border-white/10 object-contain" />
               <div className="space-y-3 text-sm text-slate-300">
                 <p>
                   <span className="text-slate-400">Danh mục: </span>

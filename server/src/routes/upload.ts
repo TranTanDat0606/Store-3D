@@ -37,7 +37,7 @@ router.post(
         {
           folder: 'store3d/products',
           transformation: [
-            { width: 1200, height: 1200, crop: 'limit' },
+            { width: 800, height: 800, crop: 'pad', background: 'white' },
             { quality: 'auto' },
             { fetch_format: 'auto' },
           ],

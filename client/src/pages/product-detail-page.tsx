@@ -198,7 +198,7 @@ export default function ProductDetailPage() {
             <img
               src={resolveImageUrl(images[activeImage])}
               alt={product.name}
-              className="size-full object-cover"
+              className="size-full object-contain"
             />
             {discountPercent > 0 && (
               <Badge className="bg-destructive absolute top-4 left-4 text-white">

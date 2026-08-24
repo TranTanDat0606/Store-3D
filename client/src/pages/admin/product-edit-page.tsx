@@ -199,7 +199,7 @@ export default function AdminProductEditPage() {
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl">
             {previewImage ? (
               <div className="group relative">
-                <img src={previewImage} alt={form.name || 'Xem trước'} className="aspect-square w-full object-cover" />
+                <img src={previewImage} alt={form.name || 'Xem trước'} className="aspect-square w-full object-contain" />
               </div>
             ) : (
               <div className="flex aspect-square items-center justify-center text-sm text-slate-500">
