@@ -45,9 +45,7 @@ export function errorHandler(
     }
   }
 
-  if (config.env === 'development') {
-    console.error('[Error]', err);
-  }
+  console.error('[Error]', err.message, err.stack);
 
   return errorResponse(res, statusCode, message);
 }
