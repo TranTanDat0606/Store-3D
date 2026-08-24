@@ -28,16 +28,24 @@ if (!cached) {
 }
 
 async function connectDB() {
-  if (cached.conn && mongoose.connection.readyState === 1) return cached.conn;
+  console.log('[API] connectDB called, readyState:', mongoose.connection.readyState);
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    console.log('[API] Using cached connection');
+    return cached.conn;
+  }
+  console.log('[API] Creating new connection...');
   cached.conn = null;
   cached.promise = null;
   cached.promise = mongoose.connect(MONGODB_URI, {
     bufferCommands: false,
     serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 5000,
   });
   try {
     cached.conn = await cached.promise;
+    console.log('[API] MongoDB connected, readyState:', mongoose.connection.readyState);
   } catch (e) {
+    console.error('[API] MongoDB connection error:', e);
     cached.promise = null;
     throw e;
   }
