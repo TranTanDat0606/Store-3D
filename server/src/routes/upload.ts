@@ -5,6 +5,7 @@ import { AppError } from '../utils/AppError';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
 import cloudinary from '../config/cloudinary';
+import { config } from '../config';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -25,6 +26,10 @@ router.post(
   asyncHandler(async (req, res) => {
     if (!req.file) {
       throw new AppError('Vui lòng chọn file ảnh', 400);
+    }
+
+    if (!config.cloudinary.cloudName || !config.cloudinary.apiKey || !config.cloudinary.apiSecret) {
+      throw new AppError('Cloudinary chưa được cấu hình. Vui lòng thiết lập CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET.', 500);
     }
 
     const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {

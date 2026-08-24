@@ -35,7 +35,10 @@ export function errorHandler(
     message = 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn';
   } else if (err.name === 'MulterError') {
     statusCode = 400;
-    message = err.message === 'File too large' ? 'File ảnh quá lớn (tối đa 2MB)' : 'File tải lên không hợp lệ';
+    message = err.message === 'File too large' ? 'File ảnh quá lớn (tối đa 5MB)' : 'File tải lên không hợp lệ';
+  } else if (err.name === 'CloudinaryError' || err.message?.includes('cloudinary') || err.message?.includes('Cloudinary')) {
+    statusCode = 502;
+    message = 'Tải ảnh lên đám mây thất bại. Vui lòng thử lại sau.';
   } else {
     const mongoErr = err as MongoError;
     if (mongoErr.code === 11000) {
