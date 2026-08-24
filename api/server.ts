@@ -52,6 +52,7 @@ async function getApp() {
         crossOriginResourcePolicy: { policy: 'cross-origin' },
       })
     );
+    app.set('trust proxy', 1);
     app.use(cors(corsOptions));
     app.use(cookieParser());
     app.use(express.json({ limit: '15mb' }));
