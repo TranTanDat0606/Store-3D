@@ -34,4 +34,11 @@ export const couponController = {
     const result = await couponService.apply(req.body);
     return successResponse(res, result, { message: 'Áp dụng mã giảm giá thành công' });
   }),
+
+  /** Public: list available coupons for a given subtotal. */
+  available: asyncHandler(async (req, res: Response) => {
+    const subtotal = Number(req.query.subtotal) || 0;
+    const coupons = await couponService.listAvailable(subtotal);
+    return successResponse(res, coupons);
+  }),
 };

@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Mail, MapPin, MessageCircle, Phone, Send, Box } from 'lucide-react'
+import { contactApi } from '@/services'
+import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -41,15 +43,19 @@ export default function ContactPage() {
     defaultValues: { fullname: '', email: '', phone: '', message: '' },
   })
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: ContactValues) => {
     setSubmitting(true)
-    // Frontend-only: no contact API exists. Simulate a clean submit.
-    await new Promise((resolve) => setTimeout(resolve, 600))
-    setSubmitting(false)
-    setSent(true)
-    form.reset()
-    toast.success('Gửi liên hệ thành công', { description: 'Store 3D sẽ phản hồi bạn trong thời gian sớm nhất.' })
-    setTimeout(() => setSent(false), 6000)
+    try {
+      await contactApi.submit(values)
+      setSent(true)
+      form.reset()
+      toast.success('Gửi liên hệ thành công', { description: 'Store 3D sẽ phản hồi bạn trong thời gian sớm nhất.' })
+      setTimeout(() => setSent(false), 6000)
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (

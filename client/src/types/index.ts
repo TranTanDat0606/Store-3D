@@ -125,6 +125,27 @@ export interface Coupon {
   expiredDate: string
   quantity: number
   usedCount: number
+  minOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CouponWithAvailability extends Coupon {
+  isApplicable: boolean
+  reason?: string
+}
+
+export interface News {
+  _id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  thumbnail: string
+  category: string
+  author: string
+  status: 'draft' | 'published'
+  publishedAt?: string
   createdAt: string
   updatedAt: string
 }

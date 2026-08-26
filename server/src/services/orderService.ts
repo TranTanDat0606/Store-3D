@@ -17,7 +17,7 @@ interface CouponApplication {
  */
 export const ALLOWED_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.Pending]: [OrderStatus.Confirmed, OrderStatus.Cancelled],
-  [OrderStatus.Confirmed]: [OrderStatus.Shipping],
+  [OrderStatus.Confirmed]: [OrderStatus.Shipping, OrderStatus.Cancelled],
   [OrderStatus.Shipping]: [OrderStatus.Completed],
   [OrderStatus.Completed]: [],
   [OrderStatus.Cancelled]: [],
@@ -245,6 +245,47 @@ export class OrderService {
     }
 
     const updated = await Order.findByIdAndUpdate(id, { $set: updates }, { new: true })
+      .populate('items')
+      .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
+    return updated;
+  }
+
+  /** Customer: cancel their own order (pending or confirmed only). */
+  async cancelByUser(userId: string, orderId: string, reason?: string) {
+    const order = await Order.findById(orderId);
+    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+    if (String(order.user) !== userId) throw new AppError('Không có quyền hủy đơn hàng này', 403);
+
+    const cancellableStatuses: OrderStatus[] = [OrderStatus.Pending, OrderStatus.Confirmed];
+    if (!cancellableStatuses.includes(order.status as OrderStatus)) {
+      throw new AppError('Không thể hủy đơn hàng ở trạng thái này', 400);
+    }
+
+    // Restore stock
+    const items = await OrderItem.find({ order: order._id }).select('product quantity');
+    if (items.length > 0) {
+      await Product.bulkWrite(
+        items.map((item) => ({
+          updateOne: {
+            filter: { _id: item.product },
+            update: { $inc: { stock: item.quantity } },
+          },
+        })),
+      );
+    }
+
+    // Restore coupon usage
+    if (order.coupon?.code) {
+      await Coupon.updateOne(
+        { code: order.coupon.code },
+        { $inc: { usedCount: -1 } },
+      );
+    }
+
+    const updates: Record<string, unknown> = { status: OrderStatus.Cancelled };
+    if (reason) updates['note'] = (order.note ? order.note + '\n' : '') + `Lý do hủy: ${reason}`;
+
+    const updated = await Order.findByIdAndUpdate(orderId, { $set: updates }, { new: true })
       .populate('items')
       .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
     return updated;

@@ -1,7 +1,7 @@
 import apiClient from './apiClient'
 export { productApi, categoryApi } from './productApi'
 export type { ProductPayload, ProductQuery, ProductListResult } from './productApi'
-import type { ApiResponse, Coupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus } from '@/types'
+import type { ApiResponse, Coupon, CouponWithAvailability, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News } from '@/types'
 
 export interface OrderItemInput {
   product: string
@@ -47,6 +47,9 @@ export const orderApi = {
 
   adminUpdateStatus: (id: string, data: { status: OrderStatus; paymentStatus?: 'unpaid' | 'paid' }) =>
     apiClient.put<ApiResponse<Order>>(`/orders/admin/${id}/status`, data).then((r) => r.data.data),
+
+  cancelByUser: (id: string, reason?: string) =>
+    apiClient.post<ApiResponse<Order>>(`/orders/${id}/cancel`, { reason }).then((r) => r.data.data),
 }
 
 export const wishlistApi = {
@@ -78,6 +81,9 @@ export const couponApi = {
 
   apply: (code: string, subtotal: number) =>
     apiClient.post<ApiResponse<{ coupon: Coupon; discount: number }>>('/coupons/apply', { code, subtotal }).then((r) => r.data.data),
+
+  available: (subtotal: number) =>
+    apiClient.get<ApiResponse<CouponWithAvailability[]>>('/coupons/available', { params: { subtotal } }).then((r) => r.data.data),
 }
 
 export const reviewApi = {
@@ -170,4 +176,41 @@ export const paymentApi = {
 
   simulateWebhook: (orderCode: string, amount: number) =>
     apiClient.post<ApiResponse<{ status: string }>>('/payment/webhook/simulate', { orderCode, amount }).then((r) => r.data.data),
+}
+
+export const contactApi = {
+  submit: (data: { fullname: string; email: string; phone: string; message: string }) =>
+    apiClient.post<ApiResponse<{ success: boolean; message: string }>>('/contact', data).then((r) => r.data.data),
+}
+
+export const newsApi = {
+  list: (params: { page?: number; limit?: number; category?: string } = {}) =>
+    apiClient.get<ApiResponse<News[]>>('/news', { params }).then((r) => ({
+      data: r.data.data,
+      pagination: r.data.pagination!,
+    })),
+
+  getBySlug: (slug: string) =>
+    apiClient.get<ApiResponse<News>>(`/news/${slug}`).then((r) => r.data.data),
+
+  categories: () =>
+    apiClient.get<ApiResponse<string[]>>('/news/categories').then((r) => r.data.data),
+
+  adminList: (params: { page?: number; limit?: number; search?: string; status?: string } = {}) =>
+    apiClient.get<ApiResponse<News[]>>('/news/admin/all', { params }).then((r) => ({
+      data: r.data.data,
+      pagination: r.data.pagination!,
+    })),
+
+  adminGetById: (id: string) =>
+    apiClient.get<ApiResponse<News>>(`/news/admin/${id}`).then((r) => r.data.data),
+
+  adminCreate: (data: Partial<News>) =>
+    apiClient.post<ApiResponse<News>>('/news/admin', data).then((r) => r.data.data),
+
+  adminUpdate: (id: string, data: Partial<News>) =>
+    apiClient.put<ApiResponse<News>>(`/news/admin/${id}`, data).then((r) => r.data.data),
+
+  adminRemove: (id: string) =>
+    apiClient.delete<ApiResponse<null>>(`/news/admin/${id}`).then((r) => r.data.data),
 }

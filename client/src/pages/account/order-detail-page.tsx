@@ -1,15 +1,27 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Ban } from 'lucide-react'
 import { orderApi } from '@/services'
 import { EmptyState } from '@/components/common/empty-state'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/order/order-status-badge'
 import { ReviewProductAction } from '@/components/review/review-action'
 import { useReviewEligibility } from '@/hooks/useReviewEligibility'
 import { formatCurrency, formatDateTime, resolveImageUrl } from '@/lib'
+import { getErrorMessage } from '@/services/apiClient'
+import { toast } from 'sonner'
 import type { Order } from '@/types'
 
 export default function OrderDetailPage() {
@@ -17,6 +29,9 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
 
   const productIds: string[] =
     order?.items.map((i) => (typeof i.product === 'object' ? i.product._id : i.product)) ?? []
@@ -41,6 +56,22 @@ export default function OrderDetailPage() {
       cancelled = true
     }
   }, [id])
+
+  const handleCancelOrder = async () => {
+    if (!order) return
+    setCancelling(true)
+    try {
+      const updated = await orderApi.cancelByUser(order._id, cancelReason || undefined)
+      setOrder(updated)
+      setCancelDialogOpen(false)
+      setCancelReason('')
+      toast.success('Hủy đơn hàng thành công')
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+    } finally {
+      setCancelling(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -85,6 +116,12 @@ export default function OrderDetailPage() {
         <div className="flex items-center gap-2">
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.payment.status} />
+          {['pending', 'confirmed'].includes(order.status) && (
+            <Button variant="destructive" size="sm" onClick={() => setCancelDialogOpen(true)}>
+              <Ban className="size-4" />
+              Hủy đơn hàng
+            </Button>
+          )}
         </div>
       </div>
 
@@ -185,6 +222,43 @@ export default function OrderDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hủy đơn hàng?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc muốn hủy đơn hàng #{order._id.slice(-8).toUpperCase()}? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-2">
+            <p className="text-sm font-medium">Lý do hủy đơn:</p>
+            {['Tôi muốn thay đổi sản phẩm', 'Đặt nhầm', 'Tìm thấy sản phẩm khác', 'Không còn nhu cầu', 'Lý do khác'].map((reason) => (
+              <label key={reason} className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="cancelReason"
+                  value={reason}
+                  checked={cancelReason === reason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="accent-destructive"
+                />
+                {reason}
+              </label>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Giữ đơn hàng</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={handleCancelOrder}
+              disabled={cancelling}
+            >
+              {cancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

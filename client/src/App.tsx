@@ -24,6 +24,8 @@ const ProfilePage = lazy(() => import('@/pages/account/profile-page'))
 const ChangePasswordPage = lazy(() => import('@/pages/account/change-password-page'))
 const ReviewFormPage = lazy(() => import('@/pages/review-form-page'))
 const ContactPage = lazy(() => import('@/pages/contact-page'))
+const NewsPage = lazy(() => import('@/pages/news-page'))
+const NewsDetailPage = lazy(() => import('@/pages/news-detail-page'))
 
 const AdminDashboardPage = lazy(() => import('@/pages/admin/dashboard-page'))
 const AdminProductsPage = lazy(() => import('@/pages/admin/products-page'))
@@ -33,6 +35,7 @@ const AdminCouponsPage = lazy(() => import('@/pages/admin/coupons-page'))
 const AdminReviewsPage = lazy(() => import('@/pages/admin/reviews-page'))
 const AdminUsersPage = lazy(() => import('@/pages/admin/users-page'))
 const AdminProductEditPage = lazy(() => import('@/pages/admin/product-edit-page'))
+const AdminNewsPage = lazy(() => import('@/pages/admin/news-page'))
 
 function PageFallback() {
   return (
@@ -56,6 +59,8 @@ function App() {
                 <Route path="san-pham" element={<ProductListPage />} />
                 <Route path="san-pham/:slug" element={<ProductDetailPage />} />
                 <Route path="lien-he" element={<ContactPage />} />
+                <Route path="tin-tuc" element={<NewsPage />} />
+                <Route path="tin-tuc/:slug" element={<NewsDetailPage />} />
 
                 <Route element={<GuestOnlyRoute />}>
                   <Route path="dang-nhap" element={<LoginPage />} />
@@ -88,6 +93,7 @@ function App() {
                   <Route path="ma-giam-gia" element={<AdminCouponsPage />} />
                   <Route path="danh-gia" element={<AdminReviewsPage />} />
                   <Route path="khach-hang" element={<AdminUsersPage />} />
+                  <Route path="bai-viet" element={<AdminNewsPage />} />
                 </Route>
               </Route>
 

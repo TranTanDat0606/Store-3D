@@ -18,6 +18,8 @@ import reviewRoutes from './routes/review';
 import userRoutes from './routes/user';
 import statsRoutes from './routes/stats';
 import uploadRoutes from './routes/upload';
+import contactRoutes from './routes/contact';
+import newsRoutes from './routes/news';
 
 export function createApp() {
   const app = express();
@@ -55,6 +57,8 @@ export function createApp() {
   app.use('/api/users', userRoutes);
   app.use('/api/admin/stats', statsRoutes);
   app.use('/api/upload', uploadRoutes);
+  app.use('/api/contact', contactRoutes);
+  app.use('/api/news', newsRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -7,6 +7,7 @@ import { createCouponSchema, updateCouponSchema, applyCouponSchema } from '../va
 const router = Router();
 
 // Public
+router.get('/available', couponController.available);
 router.post('/apply', requireAuth, validateRequest(applyCouponSchema), couponController.apply);
 
 // Admin CRUD

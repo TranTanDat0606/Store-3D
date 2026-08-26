@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Banknote, CreditCard, ShoppingBag, Tag, X } from 'lucide-react'
+import { Banknote, CreditCard, CheckCircle2, ChevronDown, ChevronUp, ShoppingBag, Tag, X } from 'lucide-react'
 import { orderApi, couponApi, type CreateOrderPayload } from '@/services'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/common/empty-state'
 import { cn, formatCurrency, resolveImageUrl } from '@/lib'
-import type { Coupon, PaymentMethod } from '@/types'
+import type { Coupon, CouponWithAvailability, PaymentMethod } from '@/types'
 import {
   Form,
   FormControl,
@@ -50,6 +50,9 @@ export default function CheckoutPage() {
   const [applying, setApplying] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [showCoupons, setShowCoupons] = useState(false)
+  const [availableCoupons, setAvailableCoupons] = useState<CouponWithAvailability[]>([])
+  const [loadingCoupons, setLoadingCoupons] = useState(false)
 
   const form = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -86,6 +89,42 @@ export default function CheckoutPage() {
     setAppliedCoupon(null)
     setDiscount(0)
   }
+
+  const applyCouponWithCode = async (code: string) => {
+    if (!code.trim()) return
+    setApplying(true)
+    setError('')
+    try {
+      const result = await couponApi.apply(code.trim(), subtotal)
+      setAppliedCoupon(result.coupon)
+      setDiscount(result.discount)
+      setCouponCode('')
+      setShowCoupons(false)
+      toast.success('Áp dụng mã giảm giá thành công')
+    } catch (err) {
+      setError(getErrorMessage(err))
+    } finally {
+      setApplying(false)
+    }
+  }
+
+  const fetchAvailableCoupons = useCallback(async () => {
+    if (showCoupons && subtotal > 0 && !appliedCoupon) {
+      setLoadingCoupons(true)
+      try {
+        const coupons = await couponApi.available(subtotal)
+        setAvailableCoupons(coupons)
+      } catch {
+        setAvailableCoupons([])
+      } finally {
+        setLoadingCoupons(false)
+      }
+    }
+  }, [showCoupons, subtotal, appliedCoupon])
+
+  useEffect(() => {
+    fetchAvailableCoupons()
+  }, [fetchAvailableCoupons])
 
   const onSubmit = async (values: CheckoutValues) => {
     if (items.length === 0) return
@@ -296,22 +335,93 @@ export default function CheckoutPage() {
                   <span className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
                     <Tag className="size-4" />
                     {appliedCoupon.code}
+                    <span className="text-emerald-600/70 dark:text-emerald-400/70 text-xs">
+                      (-{appliedCoupon.type === 'percent' ? `${appliedCoupon.discount}%` : formatCurrency(appliedCoupon.discount)})
+                    </span>
                   </span>
                   <button onClick={removeCoupon} aria-label="Xóa mã giảm giá">
                     <X className="size-4 hover:text-destructive" />
                   </button>
                 </div>
               ) : (
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Nhập mã giảm giá"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    className="h-9"
-                  />
-                  <Button variant="outline" size="sm" onClick={applyCoupon} disabled={applying}>
-                    Áp dụng
-                  </Button>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCoupons(!showCoupons)}
+                    className="flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors hover:border-primary/40"
+                  >
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Tag className="size-4" />
+                      Chọn hoặc nhập mã giảm giá
+                    </span>
+                    {showCoupons ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                  </button>
+
+                  {showCoupons && (
+                    <div className="mt-2 space-y-3 rounded-lg border p-3">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Nhập mã khuyến mãi..."
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          className="h-9 font-mono"
+                        />
+                        <Button variant="outline" size="sm" onClick={applyCoupon} disabled={applying || !couponCode.trim()}>
+                          Áp dụng
+                        </Button>
+                      </div>
+
+                      {loadingCoupons ? (
+                        <div className="text-muted-foreground flex items-center justify-center gap-2 py-4 text-sm">
+                          <span className="size-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+                          Đang tải...
+                        </div>
+                      ) : availableCoupons.length > 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-muted-foreground text-xs font-medium">Mã đang khả dụng:</p>
+                          {availableCoupons.map((c) => (
+                            <div
+                              key={c._id}
+                              className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
+                                c.isApplicable ? 'hover:border-primary/40 hover:bg-primary/5' : 'opacity-60'
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <p className="font-mono text-sm font-bold">{c.code}</p>
+                                <p className="text-muted-foreground text-xs">
+                                  {c.type === 'percent' ? `Giảm ${c.discount}%` : `Giảm ${formatCurrency(c.discount)}`}
+                                </p>
+                                {c.minOrder > 0 && (
+                                  <p className="text-muted-foreground text-xs">
+                                    Đơn tối thiểu {formatCurrency(c.minOrder)}
+                                  </p>
+                                )}
+                                {!c.isApplicable && c.reason && (
+                                  <p className="text-destructive text-xs">{c.reason}</p>
+                                )}
+                              </div>
+                              {c.isApplicable && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCouponCode(c.code)
+                                    applyCouponWithCode(c.code)
+                                  }}
+                                  disabled={applying}
+                                >
+                                  <CheckCircle2 className="size-4" />
+                                  Dùng
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : subtotal > 0 ? (
+                        <p className="text-muted-foreground py-2 text-center text-sm">Không có mã giảm giá khả dụng</p>
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

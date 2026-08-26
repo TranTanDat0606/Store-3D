@@ -46,4 +46,11 @@ export const orderController = {
     const order = await orderService.updateStatus(req.params.id, req.body);
     return successResponse(res, order, { message: 'Cập nhật trạng thái đơn hàng thành công' });
   }),
+
+  /** Customer: cancel their own order. */
+  cancelByUser: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const { reason } = req.body || {};
+    const order = await orderService.cancelByUser(req.user!._id, req.params.id, reason);
+    return successResponse(res, order, { message: 'Hủy đơn hàng thành công' });
+  }),
 };

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   Box,
   Search,
@@ -90,6 +90,12 @@ export function Navbar() {
   const { products: wishlist } = useWishlist()
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
+  const { pathname, search: locationSearch } = useLocation()
+
+  const isActive = (path: string, exact = false) => {
+    if (exact) return pathname === path
+    return pathname === path || pathname.startsWith(path + '/')
+  }
 
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 300)
@@ -125,9 +131,6 @@ export function Navbar() {
     navigate('/')
   }
 
-  const navLink =
-    'text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'
-
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
@@ -151,16 +154,19 @@ export function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex lg:ml-4">
-          <Link to="/" className={navLink}>
+          <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/', true) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Trang chủ
           </Link>
-          <Link to="/san-pham" className={navLink}>
+          <Link to="/san-pham" className={`text-sm font-medium transition-colors ${isActive('/san-pham', true) && !locationSearch.includes('featured') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Sản phẩm
           </Link>
-          <Link to="/san-pham?featured=true" className={navLink}>
+          <Link to="/san-pham?featured=true" className={`text-sm font-medium transition-colors ${isActive('/san-pham') && locationSearch.includes('featured') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Nổi bật
           </Link>
-          <Link to="/lien-he" className={navLink}>
+          <Link to="/tin-tuc" className={`text-sm font-medium transition-colors ${isActive('/tin-tuc') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+            Tin tức
+          </Link>
+          <Link to="/lien-he" className={`text-sm font-medium transition-colors ${isActive('/lien-he', true) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Liên hệ
           </Link>
         </nav>
@@ -287,16 +293,19 @@ export function Navbar() {
             )}
           </form>
           <nav className="flex flex-col gap-2">
-            <Link to="/" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
+            <Link to="/" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/', true) ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Trang chủ
             </Link>
-            <Link to="/san-pham" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
+            <Link to="/san-pham" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham', true) && !locationSearch.includes('featured') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Sản phẩm
             </Link>
-            <Link to="/san-pham?featured=true" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
+            <Link to="/san-pham?featured=true" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham') && locationSearch.includes('featured') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Nổi bật
             </Link>
-            <Link to="/lien-he" className="hover:bg-accent rounded-md px-3 py-2 text-sm font-medium">
+            <Link to="/tin-tuc" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/tin-tuc') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
+              Tin tức
+            </Link>
+            <Link to="/lien-he" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/lien-he', true) ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Liên hệ
             </Link>
           </nav>

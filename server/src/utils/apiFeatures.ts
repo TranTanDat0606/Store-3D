@@ -31,8 +31,9 @@ export async function apiFeatures<T>(
   const finalFilter: FilterQuery<T> = { ...filter };
 
   if (search && searchFields && searchFields.length > 0) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     finalFilter.$or = searchFields.map((field) => ({
-      [field]: { $regex: search, $options: 'i' },
+      [field]: { $regex: escaped, $options: 'i' },
     })) as FilterQuery<T>['$or'];
   }
 

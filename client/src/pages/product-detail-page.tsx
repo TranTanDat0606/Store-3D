@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   CheckCircle2,
   Heart,
@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Star,
   Truck,
+  Zap,
 } from 'lucide-react'
 import { productApi, reviewApi } from '@/services'
 import { useCart } from '@/contexts/CartContext'
@@ -43,6 +44,7 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'lg
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const { addItem } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
   const { isAuthenticated } = useAuth()
@@ -131,6 +133,16 @@ export default function ProductDetailPage() {
     }
     addItem(product, quantity)
     toast.success('Đã thêm vào giỏ hàng', { description: product.name })
+  }
+
+  const handleBuyNow = () => {
+    if (!product || isOutOfStock) return
+    if (!isAuthenticated) {
+      setLoginOpen(true)
+      return
+    }
+    addItem(product, 1)
+    navigate('/thanh-toan')
   }
 
   const handleWishlist = async () => {
@@ -291,6 +303,17 @@ export default function ProductDetailPage() {
               >
                 <ShoppingBag className="size-5" />
                 {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+              </Button>
+
+              <Button
+                size="lg"
+                variant="default"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleBuyNow}
+                disabled={isOutOfStock}
+              >
+                <Zap className="size-5" />
+                Mua ngay
               </Button>
 
               <Button

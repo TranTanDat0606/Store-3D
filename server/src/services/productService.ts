@@ -196,7 +196,106 @@ export class ProductService {
   }
 
   async featured(params: Record<string, unknown>) {
-    return this.list({ ...params, featured: 'true', status: ProductStatus.Active });
+    const { page, limit } = parsePagination(params);
+    const matchStage: Record<string, unknown> = { status: ProductStatus.Active };
+
+    const [total, docs] = await Promise.all([
+      Product.countDocuments(matchStage),
+      Product.aggregate([
+        { $match: matchStage },
+        {
+          $lookup: {
+            from: 'orderitems',
+            localField: '_id',
+            foreignField: 'product',
+            as: '_orderItems',
+          },
+        },
+        {
+          $addFields: {
+            _sold: { $sum: '$_orderItems.quantity' },
+            _discountPercent: {
+              $cond: [
+                { $gt: ['$originalPrice', 0] },
+                {
+                  $multiply: [
+                    { $divide: [{ $subtract: ['$originalPrice', '$salePrice'] }, '$originalPrice'] },
+                    100,
+                  ],
+                },
+                0,
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            maxSold: { $max: '$_sold' },
+            docs: { $push: '$$ROOT' },
+          },
+        },
+        { $unwind: '$docs' },
+        {
+          $addFields: {
+            'docs._normalizedSold': {
+              $cond: [
+                { $gt: ['$maxSold', 0] },
+                { $divide: ['$docs._sold', '$maxSold'] },
+                0,
+              ],
+            },
+          },
+        },
+        {
+          $addFields: {
+            'docs._featuredScore': {
+              $add: [
+                { $multiply: [{ $divide: ['$docs._discountPercent', 100] }, 0.6] },
+                { $multiply: ['$docs._normalizedSold', 0.4] },
+              ],
+            },
+          },
+        },
+        { $sort: { 'docs._featuredScore': -1, 'docs._id': 1 } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        {
+          $replaceRoot: {
+            newRoot: '$docs',
+          },
+        },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'category',
+            foreignField: '_id',
+            as: '_category',
+          },
+        },
+        { $unwind: { path: '$_category', preserveNullAndEmptyArrays: true } },
+        {
+          $project: {
+            name: 1, slug: 1, description: 1, images: 1, material: 1, printerType: 1,
+            size: 1, stock: 1, originalPrice: 1, salePrice: 1, rating: 1, reviewCount: 1,
+            status: 1, featured: 1, createdAt: 1, updatedAt: 1, category: '$_category',
+          },
+        },
+      ]),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    return {
+      data: docs as InstanceType<typeof Product>[],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    };
   }
 
   async create(data: CreateProductInput) {

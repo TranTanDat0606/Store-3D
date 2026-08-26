@@ -40,4 +40,11 @@ export const config = {
   },
   qrTtlMinutes: Number(process.env.QR_TTL_MINUTES) || 5,
   paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',
+  smtp: {
+    host: process.env.SMTP_HOST || '',
+    port: Number(process.env.SMTP_PORT) || 587,
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
+  },
+  supportEmail: process.env.SUPPORT_EMAIL || 'support@store3d.com',
 } as const;

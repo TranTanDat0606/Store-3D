@@ -12,6 +12,7 @@ export interface ICoupon {
   expiredDate: Date;
   quantity: number;
   usedCount: number;
+  minOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +50,11 @@ const couponSchema = new Schema<ICoupon>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    minOrder: {
+      type: Number,
+      min: [0, 'Giá trị tối thiểu không được âm'],
+      default: 0,
     },
   },
   { timestamps: true },

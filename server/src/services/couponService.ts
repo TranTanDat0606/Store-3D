@@ -51,6 +51,9 @@ export class CouponService {
     if (!coupon) throw new AppError('Mã giảm giá không tồn tại', 400);
     if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
     if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+    if (coupon.minOrder > 0 && data.subtotal < coupon.minOrder) {
+      throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
+    }
 
     let discount = 0;
     if (coupon.type === CouponType.Percent) {
@@ -60,6 +63,23 @@ export class CouponService {
     }
 
     return { coupon, discount };
+  }
+
+  /** List coupons available for a given subtotal. */
+  async listAvailable(subtotal: number) {
+    const now = new Date();
+    const coupons = await Coupon.find({
+      expiredDate: { $gt: now },
+      $expr: { $or: [{ $eq: ['$quantity', 0] }, { $lt: ['$usedCount', '$quantity'] }] },
+    }).sort({ createdAt: -1 });
+
+    return coupons.map((c) => ({
+      ...c.toObject(),
+      isApplicable: subtotal >= (c.minOrder || 0),
+      reason: subtotal < (c.minOrder || 0)
+        ? `Đơn tối thiểu ${c.minOrder.toLocaleString('vi-VN')}đ`
+        : undefined,
+    }));
   }
 }
 

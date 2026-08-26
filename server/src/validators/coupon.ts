@@ -7,6 +7,7 @@ export const createCouponSchema = z.object({
   type: z.enum([CouponType.Percent, CouponType.Fixed]).default(CouponType.Percent),
   expiredDate: z.coerce.date({ errorMap: () => ({ message: 'Ngày hết hạn không hợp lệ' }) }),
   quantity: z.coerce.number().int().min(0, 'Số lượng không được âm').default(0),
+  minOrder: z.coerce.number().min(0).optional().default(0),
 });
 
 export const updateCouponSchema = createCouponSchema.partial();

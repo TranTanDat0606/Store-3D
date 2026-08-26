@@ -13,6 +13,7 @@ router.put('/admin/:id/status', requireAuth, requireAdmin, validateRequest(updat
 // Customer routes
 router.post('/', requireAuth, validateRequest(createOrderSchema), orderController.create);
 router.get('/mine', requireAuth, validateRequest(orderQuerySchema, 'query'), orderController.mine);
+router.post('/:id/cancel', requireAuth, orderController.cancelByUser);
 router.get('/:id', requireAuth, orderController.getById);
 router.post('/:id/payment-qr', requireAuth, orderController.createPaymentQr);
 

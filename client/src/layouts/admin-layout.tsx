@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { Box, ChevronLeft, LayoutDashboard, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
+import { Box, ChevronLeft, LayoutDashboard, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ const navLinks = [
   { to: '/admin/ma-giam-gia', label: 'Mã giảm giá', icon: Ticket },
   { to: '/admin/danh-gia', label: 'Đánh giá', icon: Star },
   { to: '/admin/khach-hang', label: 'Khách hàng', icon: Users },
+  { to: '/admin/bai-viet', label: 'Bài viết', icon: Newspaper },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
@@ -22,6 +23,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/ma-giam-gia': 'Mã giảm giá',
   '/admin/danh-gia': 'Đánh giá',
   '/admin/khach-hang': 'Khách hàng',
+  '/admin/bai-viet': 'Bài viết',
 }
 
 export function AdminLayout() {

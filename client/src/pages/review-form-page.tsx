@@ -24,7 +24,7 @@ import { toast } from 'sonner'
 
 const reviewSchema = z.object({
   rating: z.number().min(1, 'Vui lòng chọn số sao').max(5),
-  comment: z.string().trim().min(1, 'Vui lòng nhập nội dung đánh giá').max(1000, 'Bình luận tối đa 1000 ký tự'),
+  comment: z.string().trim().max(1000, 'Bình luận tối đa 1000 ký tự'),
 })
 
 type ReviewValues = z.infer<typeof reviewSchema>
@@ -232,10 +232,10 @@ export default function ReviewFormPage() {
                 name="comment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nhận xét</FormLabel>
+                    <FormLabel>Nhận xét (không bắt buộc)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                        placeholder="Nhận xét của bạn về sản phẩm (không bắt buộc)..."
                         rows={5}
                         disabled={submitting}
                         {...field}
