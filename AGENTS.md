@@ -4,7 +4,8 @@
 
 Store3D is a Vietnamese e-commerce platform for 3D-printed models. React 19 + Vite + Tailwind CSS frontend, Express + MongoDB backend. All UI text is Vietnamese.
 
-**Before making any changes, read:**
+**Before making any changes, read (in order of priority):**
+- `.ai/CANONICAL_CONTEXT.md` — **canonical source of truth**; when conflicts arise, prefer this over all other `.ai/` docs
 - `.ai/PROJECT.md` — purpose, users, features, constraints
 - `.ai/ARCHITECTURE.md` — full technical architecture
 - `.ai/CURRENT_STATE.md` — what's implemented, known issues, tech debt

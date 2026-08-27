@@ -11,16 +11,14 @@ client/src/
 ├── components/
 │   ├── ui/            # 20 shadcn/ui primitives (button, card, dialog, form, input, table, tabs, etc.)
 │   ├── layout/        # navbar.tsx, footer.tsx
-│   ├── common/        # breadcrumb, empty-state, error-state, pagination, star-rating
-│   ├── product/       # product-card, product-card-skeleton, product-gallery, product-gallery-mobile,
-│   │                  # product-lightbox, purchase-panel, mobile-purchase-bar, product-tabs,
-│   │                  # use-purchase-panel (shared hook)
+│   ├── common/        # breadcrumb, empty-state, error-state, pagination
+│   ├── product/       # product-card, product-card-skeleton
 │   ├── cart/          # cart-drawer
 │   ├── auth/          # login-prompt-dialog
 │   ├── admin/         # image-upload
 │   ├── home/          # hot-sale-section
 │   ├── order/         # order-status-badge
-│   └── review/        # review-action, rating-summary, review-card
+│   └── review/        # review-action
 ├── contexts/          # AuthContext, CartContext, WishlistContext, ThemeContext
 ├── hooks/             # useDebounce, useLocalStorage, useReviewEligibility
 ├── layouts/           # main-layout, account-layout, admin-layout

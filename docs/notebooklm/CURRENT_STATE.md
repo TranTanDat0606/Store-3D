@@ -10,7 +10,7 @@
 
 ### Fully Implemented
 - **Product catalog:** List, search, filter by category, sort, pagination, featured products, related products
-- **Product detail:** Immersive gallery-first layout with lightbox (double-click zoom, keyboard nav), desktop sticky purchase panel, mobile fixed bottom bar, tabbed content (Mô tả / Thông số / Đánh giá), rating summary bar chart, review cards, related products. Shared purchase state via `usePurchasePanel` hook.
+- **Product detail:** Image gallery, ratings, material/printer type/size info, stock display, wishlist toggle, add to cart
 - **Shopping cart:** Add/remove/update quantity, persisted to localStorage, cart drawer UI
 - **Checkout:** Shipping info form, payment method selection (cash on delivery / bank transfer), coupon application
 - **QR payment:** VietQR code generation with countdown timer, bank info display, copy-to-clipboard
@@ -50,35 +50,6 @@
 | 2026-08-14 | Admin categories/products page redesign, QR payment, search suggestions |
 | 2026-08-26 | News/blog backend implementation |
 | 2026-08-28 | Vercel deployment fixes, Cloudinary integration, various bug fixes |
-| 2026-08-28 | Product Detail page redesign: 10 new components, `product-detail-page.tsx` rewritten, lightbox/gallery/purchase/review architecture, commit `bf2c7ab` pushed to origin/master |
-
-## Product Detail Component Architecture (2026-08-28)
-
-The Product Detail page (`product-detail-page.tsx`) was completely rewritten to compose dedicated child components:
-
-**New components created:**
-- `components/common/star-rating.tsx` — Reusable star rating display
-- `components/product/use-purchase-panel.ts` — Shared purchase state/hook (called ONCE in page)
-- `components/product/product-gallery.tsx` — Desktop gallery (vertical thumbnails + hero image)
-- `components/product/product-gallery-mobile.tsx` — Mobile gallery (swipeable carousel + dots)
-- `components/product/product-lightbox.tsx` — Full-screen lightbox with double-click zoom
-- `components/product/purchase-panel.tsx` — Desktop sticky purchase panel
-- `components/product/mobile-purchase-bar.tsx` — Mobile fixed bottom bar
-- `components/product/product-tabs.tsx` — Tab bar + content (Mô tả / Thông số / Đánh giá)
-- `components/review/rating-summary.tsx` — Rating bar chart + contextual CTA
-- `components/review/review-card.tsx` — Individual review display
-
-**Architecture rules:**
-- `usePurchasePanel` is called exactly once in `ProductDetailPage`
-- Returned state passed as props to both `PurchasePanel` and `MobilePurchaseBar`
-- Neither `PurchasePanel` nor `MobilePurchaseBar` calls the hook themselves
-- Desktop/mobile switching uses CSS visibility (`hidden lg:block` / `block lg:hidden`), not JS breakpoints
-- The "Tạm tính" (subtotal) price preview is intentionally NOT displayed
-
-**Known bugs / fixes applied:**
-- Lightbox zoom: changed from `onClick` to `onDoubleClick` to prevent accidental zoom
-- Wishlist Heart button: added `aria-label` for accessibility
-- Mobile bottom bar: `pb-20 lg:pb-0` padding prevents content overlap
 
 ## Known Bugs / Issues
 
