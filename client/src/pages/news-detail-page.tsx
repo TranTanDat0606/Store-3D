@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   Calendar,
   Newspaper,
-  User,
+
   Clock,
   Share2,
   Bookmark,

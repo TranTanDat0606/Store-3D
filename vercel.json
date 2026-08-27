@@ -2,7 +2,6 @@
   "installCommand": "npm install --omit=dev && cd client && NODE_ENV=development npm ci && cd ../server && NODE_ENV=development npm ci",
   "buildCommand": "cd client && npm run build",
   "outputDirectory": "client/dist",
-  "framework": "vite",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/server" }
   ]

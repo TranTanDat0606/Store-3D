@@ -5,7 +5,7 @@ import { newsApi } from '@/services'
 import { Breadcrumb } from '@/components/common/breadcrumb'
 import { Pagination } from '@/components/common/pagination'
 import { EmptyState } from '@/components/common/empty-state'
-import { Button } from '@/components/ui/button'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn, formatDate, resolveImageUrl } from '@/lib'

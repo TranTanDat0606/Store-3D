@@ -8,7 +8,7 @@ import { HotSaleSection } from '@/components/home/hot-sale-section'
 import { Button } from '@/components/ui/button'
 import type { Category, Product } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
-import { cn, formatCurrency, resolveImageUrl } from '@/lib'
+import { formatCurrency, resolveImageUrl } from '@/lib'
 import { motion } from 'framer-motion'
 
 function HeroShowcase({ products }: { products: Product[] }) {
