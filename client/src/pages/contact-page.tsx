@@ -23,7 +23,7 @@ const contactSchema = z.object({
   fullname: z.string().trim().min(2, 'Vui lòng nhập họ và tên').max(100, 'Họ tên tối đa 100 ký tự'),
   email: z.string().email('Email không hợp lệ'),
   phone: z.string().regex(/^[0-9+\-\s]{8,15}$/, 'Số điện thoại không hợp lệ'),
-  message: z.string().trim().min(10, 'Nội dung tối thiểu 10 ký tự').max(2000, 'Nội dung tối đa 2000 ký tự'),
+  message: z.string().trim().min(1, 'Vui lòng nhập nội dung').max(1000, 'Nội dung tối đa 1000 ký tự'),
 })
 
 type ContactValues = z.infer<typeof contactSchema>
@@ -160,7 +160,7 @@ export default function ContactPage() {
                     <FormItem>
                       <FormLabel>Nội dung</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Nội dung cần hỗ trợ..." rows={5} {...field} disabled={submitting} />
+                        <Textarea placeholder="Hãy mô tả vấn đề bạn đang gặp phải..." rows={6} maxLength={1000} {...field} disabled={submitting} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

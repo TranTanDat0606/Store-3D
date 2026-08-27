@@ -150,6 +150,23 @@ export interface News {
   updatedAt: string
 }
 
+export type ContactStatus = 'new' | 'in_progress' | 'resolved' | 'closed'
+
+export interface ContactRequest {
+  _id: string
+  userId?: string
+  fullname: string
+  email: string
+  phone: string
+  subject: string
+  message: string
+  status: ContactStatus
+  adminNote?: string
+  resolvedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface PaginationMeta {
   page: number
   limit: number

@@ -1,6 +1,8 @@
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { Box, ChevronLeft, LayoutDashboard, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
+import { Box, ChevronLeft, LayoutDashboard, MessageCircleQuestion, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { contactApi } from '@/services'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +15,7 @@ const navLinks = [
   { to: '/admin/danh-gia', label: 'Đánh giá', icon: Star },
   { to: '/admin/khach-hang', label: 'Khách hàng', icon: Users },
   { to: '/admin/bai-viet', label: 'Bài viết', icon: Newspaper },
+  { to: '/admin/ho-tro', label: 'Hỗ trợ', icon: MessageCircleQuestion },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
@@ -24,11 +27,22 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/danh-gia': 'Đánh giá',
   '/admin/khach-hang': 'Khách hàng',
   '/admin/bai-viet': 'Bài viết',
+  '/admin/ho-tro': 'Hỗ trợ',
 }
 
 export function AdminLayout() {
   const { user } = useAuth()
   const { pathname } = useLocation()
+  const [newSupportCount, setNewSupportCount] = useState(0)
+
+  useEffect(() => {
+    contactApi.adminCountNew().then(setNewSupportCount).catch(() => {})
+    const interval = setInterval(() => {
+      contactApi.adminCountNew().then(setNewSupportCount).catch(() => {})
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
   const title =
     PAGE_TITLES[pathname] ??
     (pathname.startsWith('/admin/san-pham/') ? 'Chi tiết sản phẩm' : 'Quản trị')
@@ -45,13 +59,15 @@ export function AdminLayout() {
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/10 bg-slate-900/60 backdrop-blur-xl lg:flex">
           <div className="flex items-center gap-3 px-5 py-5">
-            <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-10 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20">
-              <Box className="size-5 text-white" />
-            </span>
-            <div>
-              <p className="font-bold leading-tight text-white">Store 3D</p>
-              <p className="text-xs text-slate-400">Quản trị</p>
-            </div>
+            <Link to="/" className="flex items-center gap-3">
+              <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-10 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20">
+                <Box className="size-5 text-white" />
+              </span>
+              <div>
+                <p className="font-bold leading-tight text-white">Store 3D</p>
+                <p className="text-xs text-slate-400">Quản trị</p>
+              </div>
+            </Link>
           </div>
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {navLinks.map((link) => (
@@ -70,6 +86,11 @@ export function AdminLayout() {
               >
                 <link.icon className="size-4" />
                 {link.label}
+                {link.to === '/admin/ho-tro' && newSupportCount > 0 && (
+                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                    {newSupportCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -81,9 +102,11 @@ export function AdminLayout() {
           <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <div className="flex items-center gap-3">
-                <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-9 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20 lg:hidden">
-                  <Box className="size-5 text-white" />
-                </span>
+                <Link to="/" className="flex items-center gap-3">
+                  <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-9 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20 lg:hidden">
+                    <Box className="size-5 text-white" />
+                  </span>
+                </Link>
                 <h1 className="text-lg font-bold text-white sm:text-xl">{title}</h1>
               </div>
               <div className="flex items-center gap-4">
@@ -117,6 +140,11 @@ export function AdminLayout() {
                 >
                   <link.icon className="size-4" />
                   {link.label}
+                  {link.to === '/admin/ho-tro' && newSupportCount > 0 && (
+                    <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white leading-none">
+                      {newSupportCount}
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>

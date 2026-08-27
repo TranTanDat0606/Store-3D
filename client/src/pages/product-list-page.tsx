@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { SlidersHorizontal, Search, X } from 'lucide-react'
+import { SlidersHorizontal, Search, X, Loader2 } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
@@ -100,7 +100,7 @@ export default function ProductListPage() {
   const sort = searchParams.get('sort') ?? 'newest'
 
   const [searchInput, setSearchInput] = useState(search)
-  const debouncedSearch = useDebounce(searchInput, 400)
+  const debouncedSearch = useDebounce(searchInput, 200)
 
   useEffect(() => {
     setSearchInput(search)
@@ -292,8 +292,23 @@ export default function ProductListPage() {
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Tìm kiếm sản phẩm..."
-            className="pl-9"
+            className="pl-9 pr-9"
           />
+          {searchInput && (
+            <div className="absolute top-1/2 right-3 -translate-y-1/2">
+              {searchInput !== debouncedSearch ? (
+                <Loader2 className="text-muted-foreground size-4 animate-spin" />
+              ) : (
+                <button
+                  onClick={() => setSearchInput('')}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Xóa tìm kiếm"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Select value={sort} onValueChange={(v) => updateParams({ sort: v })}>

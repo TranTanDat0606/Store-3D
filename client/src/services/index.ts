@@ -1,7 +1,7 @@
 import apiClient from './apiClient'
 export { productApi, categoryApi } from './productApi'
 export type { ProductPayload, ProductQuery, ProductListResult } from './productApi'
-import type { ApiResponse, Coupon, CouponWithAvailability, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News } from '@/types'
+import type { ApiResponse, Coupon, CouponWithAvailability, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
 
 export interface OrderItemInput {
   product: string
@@ -179,8 +179,26 @@ export const paymentApi = {
 }
 
 export const contactApi = {
-  submit: (data: { fullname: string; email: string; phone: string; message: string }) =>
-    apiClient.post<ApiResponse<{ success: boolean; message: string }>>('/contact', data).then((r) => r.data.data),
+  submit: (data: { fullname: string; email: string; phone: string; message: string; subject?: string }) =>
+    apiClient.post<ApiResponse<{ success: boolean; message: string; id?: string }>>('/contact', data).then((r) => r.data.data),
+
+  adminList: (params: { page?: number; limit?: number; status?: string; search?: string } = {}) =>
+    apiClient.get<ApiResponse<ContactRequest[]>>('/contact/admin', { params }).then((r) => ({
+      data: r.data.data,
+      pagination: r.data.pagination!,
+    })),
+
+  adminGetById: (id: string) =>
+    apiClient.get<ApiResponse<ContactRequest>>(`/contact/admin/${id}`).then((r) => r.data.data),
+
+  adminUpdateStatus: (id: string, status: string, adminNote?: string) =>
+    apiClient.put<ApiResponse<ContactRequest>>(`/contact/admin/${id}/status`, { status, adminNote }).then((r) => r.data.data),
+
+  adminAddNote: (id: string, adminNote: string) =>
+    apiClient.put<ApiResponse<ContactRequest>>(`/contact/admin/${id}/note`, { adminNote }).then((r) => r.data.data),
+
+  adminCountNew: () =>
+    apiClient.get<ApiResponse<{ count: number }>>('/contact/admin/new-count').then((r) => r.data.data.count),
 }
 
 export const newsApi = {

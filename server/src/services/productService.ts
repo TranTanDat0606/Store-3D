@@ -55,7 +55,7 @@ export class ProductService {
     if (params.sort === 'discount') {
       return this.listDiscounted(params);
     }
-    const options = { ...parsePagination(params), searchFields: ['name', 'description'] };
+    const options = { ...parsePagination(params), searchFields: ['name'] };
     const filter = this.buildFilter(params);
 
     return apiFeatures(Product.find().populate('category', 'name slug image'), filter, options);

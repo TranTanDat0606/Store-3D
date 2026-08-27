@@ -402,8 +402,9 @@ export default function CheckoutPage() {
                               </div>
                               {c.isApplicable && (
                                 <Button
-                                  variant="ghost"
+                                  variant="outline"
                                   size="sm"
+                                  className="border-orange-400 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 dark:border-orange-500/50 dark:bg-orange-500/10 dark:text-orange-400 dark:hover:bg-orange-500/20"
                                   onClick={() => {
                                     setCouponCode(c.code)
                                     applyCouponWithCode(c.code)

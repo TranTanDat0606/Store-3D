@@ -26,7 +26,7 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
 // Mirrors server ALLOWED_NEXT_STATUS; cancelled is reachable only from pending.
 const ALLOWED_NEXT: Record<OrderStatus, OrderStatus[]> = {
   pending: ['confirmed', 'cancelled'],
-  confirmed: ['shipping'],
+  confirmed: ['shipping', 'cancelled'],
   shipping: ['completed'],
   completed: [],
   cancelled: [],

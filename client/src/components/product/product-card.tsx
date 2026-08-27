@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Plus, ShoppingBag, Star } from 'lucide-react'
+import { Heart, ShoppingBag, Star } from 'lucide-react'
 import { memo, useState } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
@@ -115,19 +115,6 @@ export const ProductCard = memo(function ProductCard({
             )}
           </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleWishlist}
-            className={cn(
-              'absolute top-3 right-3 size-9 rounded-full border border-border/60 bg-background/80 shadow-sm backdrop-blur-md transition-all hover:scale-110 hover:border-destructive/40 dark:border-white/10',
-              wishlisted && 'border-destructive/50 text-destructive'
-            )}
-            aria-label={wishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
-          >
-            <Heart className={cn('size-4', wishlisted && 'fill-current')} />
-          </Button>
-
           {isOutOfStock && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px]">
               <Badge variant="secondary" className="text-sm">
@@ -136,19 +123,6 @@ export const ProductCard = memo(function ProductCard({
             </div>
           )}
 
-          {/* hover CTA bar (desktop) */}
-          {!hideAddToCart && (
-            <div className="absolute inset-x-0 bottom-0 hidden translate-y-full transition-transform duration-300 ease-out group-hover:translate-y-0 lg:block">
-              <Button
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                className="w-full rounded-none rounded-t-xl bg-primary/95 py-5 text-white backdrop-blur-sm hover:bg-primary"
-              >
-                <Plus className="size-4" />
-                Thêm vào giỏ
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Info */}
@@ -164,27 +138,42 @@ export const ProductCard = memo(function ProductCard({
             )}
           </div>
           <h3 className="line-clamp-2 text-sm leading-snug font-medium">{product.name}</h3>
-          <div className="mt-auto flex items-end justify-between gap-2 pt-2">
-            <div className="flex flex-col">
-              <p className="font-bold text-primary">{formatCurrency(product.salePrice)}</p>
-              {discountPercent > 0 && (
-                <p className="text-muted-foreground text-xs line-through">
-                  {formatCurrency(product.originalPrice)}
-                </p>
+          <div className="mt-auto pt-2">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-end gap-2">
+                <p className="font-bold text-primary">{formatCurrency(product.salePrice)}</p>
+                {discountPercent > 0 && (
+                  <p className="text-muted-foreground text-xs line-through">
+                    {formatCurrency(product.originalPrice)}
+                  </p>
+                )}
+              </div>
+              {!hideAddToCart && (
+                <div className="flex gap-1.5">
+                  <Button
+                    size="sm"
+                    className="flex-1 h-8 text-xs font-medium"
+                    onClick={handleAddToCart}
+                    disabled={isOutOfStock}
+                  >
+                    <ShoppingBag className="size-3.5" />
+                    {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn(
+                      'size-8 shrink-0 rounded-full border-border/60 bg-background/60 backdrop-blur-sm dark:border-white/10',
+                      wishlisted && 'border-destructive/50 text-destructive'
+                    )}
+                    onClick={handleWishlist}
+                    aria-label={wishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+                  >
+                    <Heart className={cn('size-3.5', wishlisted && 'fill-current')} />
+                  </Button>
+                </div>
               )}
             </div>
-            {!hideAddToCart && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-9 shrink-0 rounded-full border-border/60 bg-background/60 backdrop-blur-sm dark:border-white/10 lg:hidden"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                aria-label="Thêm vào giỏ hàng"
-              >
-                <ShoppingBag className="size-4" />
-              </Button>
-            )}
           </div>
         </div>
       </Link>

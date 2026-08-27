@@ -267,8 +267,15 @@ export default function ProductDetailPage() {
             )}
           </div>
 
+          {product.description && (
+            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+              {product.description}
+            </p>
+          )}
+
           <div className="mt-6 space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-3">
+              {/* Quantity */}
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
@@ -295,34 +302,37 @@ export default function ProductDetailPage() {
                 </Button>
               </div>
 
-              <Button
-                size="lg"
-                className="flex-1"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-              >
-                <ShoppingBag className="size-5" />
-                {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
-              </Button>
+              {/* Add to Cart + Like */}
+              <div className="flex gap-3">
+                <Button
+                  size="lg"
+                  className="flex-1"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                >
+                  <ShoppingBag className="size-5" />
+                  {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+                </Button>
 
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={handleWishlist}
+                  className={cn(wishlisted && 'text-destructive border-destructive/50')}
+                >
+                  <Heart className={cn('size-5', wishlisted && 'fill-current')} />
+                </Button>
+              </div>
+
+              {/* Buy Now */}
               <Button
                 size="lg"
-                variant="default"
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                className="w-full bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-lg shadow-red-600/25 text-base font-semibold"
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
               >
                 <Zap className="size-5" />
                 Mua ngay
-              </Button>
-
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handleWishlist}
-                className={cn(wishlisted && 'text-destructive border-destructive/50')}
-              >
-                <Heart className={cn('size-5', wishlisted && 'fill-current')} />
               </Button>
             </div>
           </div>

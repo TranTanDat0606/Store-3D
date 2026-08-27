@@ -7,3 +7,4 @@ export { Wishlist, type IWishlist } from './Wishlist';
 export { Review, type IReview } from './Review';
 export { Coupon, CouponType, type ICoupon } from './Coupon';
 export { News, NewsStatus, type INews } from './News';
+export { ContactRequest, ContactStatus, type IContactRequest } from './ContactRequest';
