@@ -15,7 +15,6 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
   const {
     quantity,
     displayPrice,
-    subtotal,
     isOutOfStock,
     wishlisted,
     setQuantity,
@@ -38,12 +37,6 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
             role="dialog"
             aria-label="Mua hàng"
           >
-            {/* Price preview */}
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-muted-foreground text-sm">Tạm tính</span>
-              <span className="text-lg font-bold text-primary">{formatCurrency(subtotal)}</span>
-            </div>
-
             {/* Quantity */}
             <div className="mb-3 flex items-center gap-3">
               <span className="text-muted-foreground text-sm">Số lượng:</span>

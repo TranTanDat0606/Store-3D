@@ -24,7 +24,6 @@ export function PurchasePanel({ product, purchaseState }: PurchasePanelProps) {
   const {
     quantity,
     displayPrice,
-    subtotal,
     isOutOfStock,
     wishlisted,
     setQuantity,
@@ -71,12 +70,6 @@ export function PurchasePanel({ product, purchaseState }: PurchasePanelProps) {
       {product.description && (
         <p className="text-muted-foreground mt-3 text-sm leading-relaxed">{product.description}</p>
       )}
-
-      {/* Price preview */}
-      <div className="bg-muted/50 mt-4 flex items-center justify-between rounded-xl px-4 py-3">
-        <span className="text-muted-foreground text-sm">Tạm tính</span>
-        <span className="text-lg font-bold text-primary">{formatCurrency(subtotal)}</span>
-      </div>
 
       {/* Quantity + CTAs */}
       <div className="mt-6 space-y-4">
