@@ -222,6 +222,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Lời khuyên cho người mới</h2>
 <p>Bắt đầu với PLA, in chậm để có chất lượng tốt nhất. Đọc kỹ hướng dẫn sử dụng máy in và luôn chú ý đến nhiệt độ, tốc độ in cũng như các thông số cơ bản. Tham gia các cộng đồng 3D printing để học hỏi kinh nghiệm từ những người đi trước.</p>`,
+      thumbnail: svgDataUri('FDM', 0),
       category: '3d-printing',
       author: 'Store3D',
       status: NewsStatus.Published,
@@ -270,6 +271,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Kết luận</h2>
 <p>Nếu bạn mới bắt đầu, hãy chọn PLA. Khi đã quen thuộc và muốn thử thách bản thân, PETG là bước tiếp theo lý tưởng. Chỉ nên chuyển sang ABS khi bạn thực sự cần vật liệu chịu nhiệt cao và đã có máy in phù hợp.</p>`,
+      thumbnail: svgDataUri('Filament', 1),
       category: 'filament',
       author: 'Store3D',
       status: NewsStatus.Published,
@@ -337,6 +339,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Kết luận</h2>
 <p>Hầu hết các lỗi in 3D đều có thể khắc phục được bằng cách điều chỉnh cài đặt và bảo trì máy in thường xuyên. Kiên nhẫn thử nghiệm và ghi lại các thông số tốt nhất cho từng loại vật liệu sẽ giúp bạn in 3D hiệu quả hơn theo thời gian.</p>`,
+      thumbnail: svgDataUri('Lỗi in 3D', 2),
       category: 'tips',
       author: 'Store3D',
       status: NewsStatus.Published,
@@ -408,6 +411,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Kết luận</h2>
 <p>Việc chuẩn bị kỹ trước khi in có vẻ tốn thời gian nhưng thực tế lại giúp bạn tiết kiệm thời gian và vật liệu đáng kể. Một bản in thành công luôn bắt đầu từ sự chuẩn bị chu đáo.</p>`,
+      thumbnail: svgDataUri('Chuẩn bị', 3),
       category: 'tips',
       author: 'Store3D',
       status: NewsStatus.Published,
@@ -461,6 +465,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Kết luận</h2>
 <p>Năm 2026 là năm đầy hứa hẹn cho ngành công nghiệp in 3D với nhiều công nghệ mới giúp việc in 3D trở nên dễ dàng, nhanh chóng và đa dạng hơn bao giờ hết. Việc cập nhật xu hướng sẽ giúp bạn tận dụng tối đa tiềm năng của công nghệ này.</p>`,
+      thumbnail: svgDataUri('Xu hướng', 4),
       category: '3d-printing',
       author: 'Store3D',
       status: NewsStatus.Published,
@@ -532,6 +537,7 @@ export async function seedDatabase(options: SeedOptions = {}) {
 
 <h2>Tiềm năng tương lai</h2>
 <p>Với sự phát triển nhanh chóng của công nghệ và vật liệu, in 3D hứa hẹn sẽ còn được ứng dụng rộng rãi hơn nữa trong tương lai, trở thành một phần không thể thiếu trong cuộc sống hàng ngày.</p>`,
+      thumbnail: svgDataUri('Ứng dụng', 5),
       category: 'general',
       author: 'Store3D',
       status: NewsStatus.Published,
