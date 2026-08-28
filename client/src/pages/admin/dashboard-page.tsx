@@ -74,9 +74,9 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     void statsApi.revenuePeriod(period).then((r) => {
-      setPeriodRevenue(r.revenue)
-      setPeriodOrders(r.orders)
-    })
+      setPeriodRevenue(r?.revenue ?? null)
+      setPeriodOrders(r?.orders ?? [])
+    }).catch(() => {})
   }, [period])
 
   const chartData = useMemo(

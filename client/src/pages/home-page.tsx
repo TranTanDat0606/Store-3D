@@ -129,9 +129,9 @@ export default function HomePage() {
       productApi.hotSale(8),
     ]).then(([featuredResult, cats, hot]) => {
       if (cancelled) return
-      setFeatured(featuredResult.data)
-      setCategories(cats)
-      setHotSale((hot.data ?? []).filter((p) => p.originalPrice > p.salePrice))
+      setFeatured(Array.isArray(featuredResult?.data) ? featuredResult.data : [])
+      setCategories(Array.isArray(cats) ? cats : [])
+      setHotSale((Array.isArray(hot?.data) ? hot.data : []).filter((p) => p.originalPrice > p.salePrice))
     }).catch(() => {
       // errors rendered via empty states
     }).finally(() => {
@@ -247,11 +247,13 @@ export default function HomePage() {
       </section>
 
       {/* Hot Sale */}
-      {!hotLoading && <HotSaleSection products={hotSale} />}
+      <div className={hotLoading ? 'min-h-[400px]' : ''}>
+        {!hotLoading && <HotSaleSection products={hotSale} />}
+      </div>
 
       {/* Categories */}
-      {categories.length > 0 && (
-        <section className="bg-slate-50/80 py-16 dark:bg-transparent">
+      <section className="bg-slate-50/80 py-16 dark:bg-transparent">
+        {categories.length > 0 ? (
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="mb-8 flex items-end justify-between">
               <div>
@@ -284,8 +286,23 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mb-8">
+              <div className="h-8 w-48 rounded bg-slate-200 dark:bg-slate-800" />
+              <div className="mt-2 h-4 w-64 rounded bg-slate-100 dark:bg-slate-800/50" />
+            </div>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-white/5 dark:bg-white/[0.02]">
+                  <div className="aspect-square w-full animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+                  <div className="h-4 w-16 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* Featured products */}
       <section className="bg-white py-16 dark:bg-slate-950/30">

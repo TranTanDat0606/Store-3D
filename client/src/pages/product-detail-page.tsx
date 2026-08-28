@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 import { productApi, reviewApi } from '@/services'
 import { useAuth } from '@/contexts/AuthContext'
-import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
+const LoginPromptDialog = lazy(() => import('@/components/auth/login-prompt-dialog').then(m => ({ default: m.LoginPromptDialog })))
 import { ProductCard } from '@/components/product/product-card'
 import { ProductCardSkeleton } from '@/components/product/product-card-skeleton'
 import { Breadcrumb } from '@/components/common/breadcrumb'
@@ -222,7 +222,7 @@ export default function ProductDetailPage() {
           reviewApi
             .listByProduct(product._id, { limit: 6, page })
             .then((revs) => {
-              setReviews((prev) => [...prev, ...revs.data])
+              setReviews((prev) => [...prev, ...(Array.isArray(revs?.data) ? revs.data : [])])
             })
             .catch(() => {})
         }}
@@ -246,7 +246,9 @@ export default function ProductDetailPage() {
         <MobilePurchaseBar product={product} purchaseState={purchaseState} />
       </div>
 
-      <LoginPromptDialog open={purchaseState.loginOpen} onOpenChange={purchaseState.setLoginOpen} />
+      <Suspense fallback={null}>
+        <LoginPromptDialog open={purchaseState.loginOpen} onOpenChange={purchaseState.setLoginOpen} />
+      </Suspense>
     </div>
   )
 }

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { Heart, ShoppingBag, Star } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, useState, lazy, Suspense } from 'react'
 import { useCart } from '@/contexts/CartContext'
-import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
+const LoginPromptDialog = lazy(() => import('@/components/auth/login-prompt-dialog').then(m => ({ default: m.LoginPromptDialog })))
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -178,7 +178,9 @@ export const ProductCard = memo(function ProductCard({
           </div>
         </div>
       </Link>
-      <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <Suspense fallback={null}>
+        <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      </Suspense>
     </motion.div>
   )
 })

@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Flame, Plus, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Product } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
+const LoginPromptDialog = lazy(() => import('@/components/auth/login-prompt-dialog').then(m => ({ default: m.LoginPromptDialog })))
 import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
@@ -173,7 +173,9 @@ function SpotlightDeal({ product }: { product: Product }) {
           </Button>
         </div>
       </div>
-      <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <Suspense fallback={null}>
+        <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      </Suspense>
     </div>
   )
 }
@@ -244,7 +246,9 @@ function DealRow({ index, product }: { index: number; product: Product }) {
       >
         <Plus className="size-4" />
       </Button>
-      <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <Suspense fallback={null}>
+        <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      </Suspense>
     </Link>
   )
 }

@@ -13,6 +13,17 @@ const apiClient = axios.create({
   timeout: 20000,
 })
 
+apiClient.interceptors.response.use(
+  (response) => {
+    const data = response.data
+    if (typeof data === 'string' || (data != null && typeof data !== 'object')) {
+      return Promise.reject(new Error('Invalid API response format'))
+    }
+    return response
+  },
+  (error) => Promise.reject(error),
+)
+
 // Extract the Vietnamese error message from any error shape.
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {

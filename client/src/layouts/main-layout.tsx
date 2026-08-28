@@ -1,8 +1,10 @@
+import { lazy, Suspense } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
-import { CartDrawer } from '@/components/cart/cart-drawer'
+
+const CartDrawer = lazy(() => import('@/components/cart/cart-drawer').then(m => ({ default: m.CartDrawer })))
 
 function ScrollToTop() {
   const { pathname, search } = useLocation()
@@ -21,7 +23,9 @@ export function MainLayout() {
         <Outlet />
       </main>
       <Footer />
-      <CartDrawer />
+      <Suspense fallback={null}>
+        <CartDrawer />
+      </Suspense>
     </div>
   )
 }
