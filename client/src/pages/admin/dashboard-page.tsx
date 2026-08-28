@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { OrderStatusBadge } from '@/components/order/order-status-badge'
-import { formatCurrency, formatDateTime, cn } from '@/lib'
+import { formatCurrency, formatDateTime, cn, resolveImageUrl } from '@/lib'
 import type { BestSellingProduct, Order, OrdersByStatus, RevenuePeriod, RevenuePoint, StatsOverview } from '@/types'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -252,7 +252,7 @@ export default function AdminDashboardPage() {
                 {bestSelling.map((p, i) => (
                   <div key={p._id} className="flex items-center gap-3">
                     <span className={cn('w-6 text-sm font-bold', i === 0 ? 'text-cyan-400' : 'text-slate-400')}>#{i + 1}</span>
-                    <img src={p.image} alt="" className="size-10 rounded-lg border border-white/10 object-cover" />
+                    <img src={resolveImageUrl(p.image)} alt="" className="size-10 rounded-lg border border-white/10 object-cover" />
                     <div className="min-w-0 flex-1">
                       <Link to="/admin/san-pham" className="line-clamp-1 text-sm font-medium text-slate-100 hover:text-cyan-300">
                         {p.name}

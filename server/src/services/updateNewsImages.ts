@@ -2,12 +2,12 @@ import { connectDB, disconnectDB } from '../database/connect';
 import { News } from '../models';
 
 const NEWS_THUMBNAILS: Record<string, string> = {
-  'fdm-la-gi-huong-dan-nguoi-moi': 'https://images.unsplash.com/photo-1635805737707-575885ab0820?w=800&h=450&fit=crop',
-  'pla-petg-abs-chon-loai-filament-nao': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=450&fit=crop',
-  '5-loi-in-3d-pho-bien-va-cach-khac-phuc': 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=450&fit=crop',
-  'chuan-bi-may-in-3d-truoc-khi-in': 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800&h=450&fit=crop',
-  'xu-huong-cong-nghe-in-3d-2026': 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=800&h=450&fit=crop',
-  'in-3d-ung-dung-o-dau': 'https://images.unsplash.com/photo-1577083552792-a0d461cb1dd6?w=800&h=450&fit=crop',
+  'in-3d-ung-dung-o-dau': 'https://images.unsplash.com/photo-1741848137437-56fb14b7ba87?w=800&h=450&fit=crop',
+  'xu-huong-cong-nghe-in-3d-2026': 'https://images.unsplash.com/photo-1767498051855-f28d8c941b5a?w=800&h=450&fit=crop',
+  'chuan-bi-may-in-3d-truoc-khi-in': 'https://images.unsplash.com/photo-1762579318096-8e9bc45b8feb?w=800&h=450&fit=crop',
+  '5-loi-in-3d-pho-bien-va-cach-khac-phuc': 'https://images.unsplash.com/photo-1758387836566-6a342434f5b4?w=800&h=450&fit=crop',
+  'pla-petg-abs-chon-loai-filament-nao': 'https://images.unsplash.com/photo-1742971239045-afabc9f7d744?w=800&h=450&fit=crop',
+  'fdm-la-gi-huong-dan-nguoi-moi': 'https://images.unsplash.com/photo-1742971500442-8fb8610dfbf5?w=800&h=450&fit=crop',
 };
 
 async function updateNewsThumbnails() {

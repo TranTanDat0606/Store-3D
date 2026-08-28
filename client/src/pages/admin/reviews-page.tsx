@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { formatDateTime } from '@/lib'
+import { formatDateTime, resolveImageUrl } from '@/lib'
 import { toast } from 'sonner'
 import type { PaginationMeta, Review } from '@/types'
 
@@ -135,7 +135,7 @@ export default function AdminReviewsPage() {
                       {review.images.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2">
                           {review.images.map((img, i) => (
-                            <img key={i} src={img} alt="" className="bg-muted size-14 rounded-lg object-cover" />
+                            <img key={i} src={resolveImageUrl(img)} alt="" className="bg-muted size-14 rounded-lg object-cover" />
                           ))}
                         </div>
                       )}

@@ -2,12 +2,12 @@ import { connectDB, disconnectDB } from '../database/connect';
 import { Category } from '../models';
 
 const CATEGORY_IMAGES: Record<string, string> = {
-  'Mô hình nhân vật': 'https://images.unsplash.com/photo-1614294149010-950b698f72c0?w=600&h=400&fit=crop',
-  'Đồ trang trí': 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&h=400&fit=crop',
-  'Mô hình kiến trúc': 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600&h=400&fit=crop',
-  'Đồ dùng hằng ngày': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=400&fit=crop',
-  'Phụ kiện & Cosplay': 'https://images.unsplash.com/photo-1609873814058-a8928924184a?w=600&h=400&fit=crop',
-  'Mô hình máy móc': 'https://images.unsplash.com/photo-1563203369-26f2e4a5ccf7?w=600&h=400&fit=crop',
+  'Mô hình máy móc': 'https://images.unsplash.com/photo-1768909198566-21f1faf5de10?w=600&h=400&fit=crop',
+  'Phụ kiện & Cosplay': 'https://images.unsplash.com/photo-1772535262208-45511a3dd90b?w=600&h=400&fit=crop',
+  'Đồ dùng hằng ngày': 'https://images.unsplash.com/photo-1767363592711-1cda1502284d?w=600&h=400&fit=crop',
+  'Mô hình kiến trúc': 'https://images.unsplash.com/photo-1739133887954-ac18f17d1d5a?w=600&h=400&fit=crop',
+  'Đồ trang trí': 'https://images.unsplash.com/photo-1773578639782-2046b150ce28?w=600&h=400&fit=crop',
+  'Mô hình nhân vật': 'https://images.unsplash.com/photo-1762089423685-60f5cef02cda?w=600&h=400&fit=crop',
 };
 
 async function updateCategoryImages() {
