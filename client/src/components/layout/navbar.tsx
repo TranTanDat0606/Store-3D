@@ -67,9 +67,6 @@ function SearchSuggestions({ products, query, onSelect }: { products: Product[];
             </Link>
           </li>
         ))}
-        {products.length === 0 && (
-          <li className="text-muted-foreground px-3 py-6 text-center text-sm">Không tìm thấy sản phẩm phù hợp</li>
-        )}
       </ul>
       <div className="border-t">
         <Link

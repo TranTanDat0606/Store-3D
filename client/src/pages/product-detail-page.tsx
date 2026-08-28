@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
   if (!product) return null
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-20 pt-8 sm:px-6 lg:pb-0">
+    <div className="mx-auto max-w-7xl px-4 pb-32 pt-8 sm:px-6 lg:pb-0">
       <Breadcrumb
         className="mb-6"
         items={[

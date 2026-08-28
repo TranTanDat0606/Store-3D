@@ -37,6 +37,7 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/users-page'))
 const AdminProductEditPage = lazy(() => import('@/pages/admin/product-edit-page'))
 const AdminNewsPage = lazy(() => import('@/pages/admin/news-page'))
 const AdminSupportPage = lazy(() => import('@/pages/admin/support-page'))
+const NotFoundPage = lazy(() => import('@/pages/not-found-page'))
 
 function PageFallback() {
   return (
@@ -82,6 +83,8 @@ function App() {
                     <Route path="mat-khau" element={<ChangePasswordPage />} />
                   </Route>
                 </Route>
+
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
 
               <Route path="/admin" element={<AdminRoute />}>
@@ -98,7 +101,6 @@ function App() {
                   <Route path="ho-tro" element={<AdminSupportPage />} />
                 </Route>
               </Route>
-              <Route path="*" element={<div>404 - Không tìm thấy trang</div>} />
             </Routes>
           </Suspense>
         </WishlistProvider>
