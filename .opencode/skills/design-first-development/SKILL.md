@@ -9,6 +9,8 @@ description: Use when implementing substantial new features that require UI/visu
 
 A workflow that separates design thinking from code implementation for substantial UI/UX work. Prevents premature coding by enforcing understanding, research, user flow, information architecture, and design exploration before any implementation begins.
 
+This skill integrates with `.ai/CANONICAL_CONTEXT.md` (source of truth) and `.ai/OUTPUT_CONTRACT.md` (stage definitions) to ensure consistent, non-contradictory workflow execution.
+
 ## When to Use
 
 Use this skill when the request involves substantial UI/UX work:
@@ -32,6 +34,38 @@ Do NOT force this skill for:
 - Minor component adjustments
 - Pure backend work
 
+## CONTEXT FIRST — Mandatory Pre-Workflow
+
+Before starting ANY Design / Plan / Implementation task, the agent MUST:
+
+### Step 1: Read Source of Truth
+1. Read `.ai/CANONICAL_CONTEXT.md`
+2. Read `.ai/CURRENT_STATE.md`
+
+### Step 2: Identify Relevant Context
+From CANONICAL_CONTEXT.md, extract and hold in context:
+- **Requirements** (§3) — functional and non-functional requirements relevant to this task
+- **Hard Constraints** (§4, C1–C7) — NEVER violate these
+- **Confirmed Decisions** (§12, D1–D16) — do not override without explicit user approval
+- **Design Direction** (§6) — visual identity, color tokens, component patterns
+- **Information Architecture** (§7) — monorepo structure, routes, state management
+- **Acceptance Criteria** (§9) — what "done" looks like
+- **Open Questions** (§13) — items that may affect this task
+
+### Step 3: Check for Conflicts
+If the user request conflicts with CANONICAL_CONTEXT.md:
+- **STOP** and report the conflict
+- Do NOT silently choose one interpretation
+- Ask the user to resolve before proceeding
+
+### Step 4: Check CURRENT_STATE
+From CURRENT_STATE.md, understand:
+- What is already implemented (avoid duplicating work)
+- Known bugs/issues (avoid introducing regressions)
+- Technical debt (avoid adding to it)
+
+**Do NOT start implementation based on user prompt alone if CANONICAL_CONTEXT.md has relevant information.**
+
 ## HARD GATE — User Approval
 
 The agent MUST NOT proceed to implementation after the design phase until the user explicitly approves the proposed design/plan.
@@ -47,39 +81,51 @@ If the user requests changes, return to the appropriate design phase. Do not int
 
 ## Workflow
 
-### Phase 1 — Understand
+### Phase 1 — Understand (CONTEXT FIRST)
 
-Understand the request before designing. Identify:
+**Before any analysis, complete CONTEXT FIRST steps above.**
+
+Then understand the request. Identify:
 
 - User goal
 - Business goal
 - Target user
 - Required functionality
-- Constraints
-- Existing related pages/components
+- Constraints (from CANONICAL_CONTEXT.md §4 + new task-specific)
+- Existing related pages/components (from CURRENT_STATE.md)
 - Required states
 - Responsive requirements
-- Success criteria
+- Success criteria (from CANONICAL_CONTEXT.md §9)
 
 If requirements are ambiguous, ask focused questions before continuing.
 
 ### Phase 2 — Explore Existing Project
 
-Before proposing UI, inspect the existing repository. Read relevant project memory files (`.ai/PROJECT.md`, `.ai/ARCHITECTURE.md`, `.ai/CURRENT_STATE.md`, `DESIGN.md` when it exists). Examine existing related pages, components, routes, state management, and design tokens.
+Before proposing UI, inspect the existing repository. Read:
+
+1. `.ai/CANONICAL_CONTEXT.md` — project context (primary source)
+2. `.ai/CURRENT_STATE.md` — what's implemented
+3. `DESIGN.md` — design system tokens (when it exists)
+
+Examine existing related pages, components, routes, state management, and design tokens.
 
 Use GitNexus when relationships or impact analysis are important. The goal is to extend the existing system rather than invent a disconnected UI.
 
+**Do NOT read `.ai/PROJECT.md` or `.ai/ARCHITECTURE.md` directly** — CANONICAL_CONTEXT.md consolidates their content.
+
 ### Phase 3 — Research
 
-Use the research hierarchy defined by `AGENTS.md`. Choose tools intentionally:
+Use the research hierarchy defined in CANONICAL_CONTEXT.md §5. Choose tools intentionally:
 
-- **Project knowledge:** Use `.ai/`
+- **Project knowledge:** Use `.ai/CANONICAL_CONTEXT.md`
 - **Codebase relationships:** Use GitNexus
 - **Library/API questions:** Use Context7
 - **Current/external information:** Use web research when necessary
 - **Visual/UI exploration:** Use Stitch
 
 Do not call every tool automatically. Use only the tools that materially improve the result.
+
+Apply research discipline rules from CANONICAL_CONTEXT.md §5.
 
 ### Phase 4 — User Flow
 
@@ -103,7 +149,7 @@ Consider: happy path, empty state, loading state, error state, validation state,
 
 ### Phase 5 — Information Architecture
 
-Define what information belongs on the page and how it is prioritized. Determine:
+Define what information belongs on the page and how it is prioritized. Reference CANONICAL_CONTEXT.md §7 (INFORMATION ARCHITECTURE) for existing structure. Determine:
 
 - Page hierarchy
 - Section hierarchy
@@ -119,23 +165,25 @@ Avoid adding sections merely because they look visually impressive. Every major 
 
 ### Phase 6 — Design Direction
 
-Before calling Stitch, establish a design direction. Define:
+Before calling Stitch, establish a design direction based on CANONICAL_CONTEXT.md §6 (DESIGN DIRECTION). Define:
 
-- Visual hierarchy
+- Visual hierarchy (reuse existing design tokens)
 - Layout structure
-- Typography
-- Color usage
+- Typography (Be Vietnam Pro — see CANONICAL_CONTEXT.md §6)
+- Color usage (Ocean Blue palette — see CANONICAL_CONTEXT.md §6)
 - Spacing
-- Components
+- Components (shadcn/ui patterns — see CANONICAL_CONTEXT.md §6)
 - Interaction patterns
-- Motion/animation
+- Motion/animation (Framer Motion patterns)
 - Responsive behavior
 
 Reuse the existing project design system whenever appropriate. Do not invent a new visual language unless the user explicitly requests a redesign.
 
-### Phase 7 — Stitch
+### Phase 7 — Stitch (EXTERNAL Design Tool)
 
-Use Stitch for visual exploration when appropriate. Provide Stitch with structured requirements including:
+Use Stitch for visual exploration when appropriate. **Stitch is an EXTERNAL tool — its output is DESIGN OUTPUT, not source of truth.**
+
+Provide Stitch with structured requirements including:
 
 - Page purpose
 - Target user
@@ -146,13 +194,17 @@ Use Stitch for visual exploration when appropriate. Provide Stitch with structur
 - Required interactions
 - Required states
 - Responsive requirements
-- Existing design direction
+- Existing design direction (from CANONICAL_CONTEXT.md §6)
 
 When designing a page, request the COMPLETE PAGE rather than isolated components. When the feature requires multiple pages, design the COMPLETE FLOW rather than only one screen.
 
 The design must account for: desktop, tablet (when relevant), mobile, loading, empty, error, success, disabled, validation, and hover/focus/active states where relevant.
 
-Stitch output is a design reference, not automatically approved implementation.
+**Stitch output rules:**
+- Stitch output is a design reference, not automatically approved implementation
+- Do NOT treat Stitch output as source of truth
+- Do NOT change confirmed requirements based on Stitch output
+- If Stitch output contradicts CANONICAL_CONTEXT.md → STOP and report conflict
 
 ### Phase 8 — Design Review
 
@@ -164,9 +216,10 @@ After design exploration, present a concise design proposal to the user. Include
 4. Interaction behavior
 5. Responsive behavior
 6. Important states
-7. Visual direction
+7. Visual direction (reference CANONICAL_CONTEXT.md §6)
 8. What Stitch contributed
 9. Any assumptions
+10. Any conflicts with CANONICAL_CONTEXT.md (if any)
 
 Then STOP.
 
@@ -186,41 +239,119 @@ Re-review
 Approval
 ```
 
-### Phase 9 — Implementation Plan
+### Phase 9 — Implementation Plan (OUTPUT_CONTRACT §4 PLAN)
 
-Only after approval, use Superpowers `writing-plans` when the implementation is substantial. The plan should identify:
+Only after approval, create an implementation plan. Follow the PLAN contract from `.ai/OUTPUT_CONTRACT.md` §4.
+
+The plan must identify:
 
 - Files to create
 - Files to modify
-- Components
+- Components and their relationships
 - State changes
 - API changes if needed
 - Data changes if needed
-- Testing requirements
-- Verification steps
+- Dependencies (new packages, API changes)
+- Risks and mitigation
+- Verification strategy (per OUTPUT_CONTRACT §6)
+- Acceptance criteria (from CANONICAL_CONTEXT.md §9)
 
 Use GitNexus impact analysis before modifying important shared code.
 
-### Phase 10 — Implement
+**Plan rules:**
+- Do NOT change confirmed requirements from CANONICAL_CONTEXT.md
+- Do NOT change architecture decisions without approval
+- Do NOT add dependencies without user approval
+- Present plan for user approval before proceeding
 
-Use Superpowers `executing-plans` when appropriate. Follow the existing project's architecture, coding conventions, design system, state management, and API patterns. Do not perform unrelated refactoring. Do not replace working architecture merely to match the visual design.
+### Phase 10 — Implement (OUTPUT_CONTRACT §5 BUILD)
 
-### Phase 11 — Verify
+Use Superpowers `executing-plans` when appropriate. Follow the BUILD contract from `.ai/OUTPUT_CONTRACT.md` §5.
 
-After implementation, run appropriate verification. Prefer:
+Implementation must comply with:
+- CANONICAL_CONTEXT.md §4 CONSTRAINTS (hard constraints C1–C7)
+- CANONICAL_CONTEXT.md §11 OUTPUT REQUIREMENTS (code style, response format, file naming)
+- Approved design from Phase 8
+- Approved plan from Phase 9
 
-- Build
-- Lint
-- Existing tests
+Follow the existing project's architecture, coding conventions, design system, state management, and API patterns. Do not perform unrelated refactoring. Do not replace working architecture merely to match the visual design.
+
+**Implementation rules:**
+- Do NOT redesign or change architecture outside the approved plan
+- Do NOT violate hard constraints (C1–C7)
+- Do NOT modify unrelated code
+- Do NOT claim completion without verification
+
+### Phase 11 — Verify (OUTPUT_CONTRACT §6 VERIFY)
+
+After implementation, run verification per the VERIFY contract from `.ai/OUTPUT_CONTRACT.md` §6.
+
+Verification must check:
+- CANONICAL_CONTEXT.md §9 ACCEPTANCE CRITERIA
+- CANONICAL_CONTEXT.md §10 VERIFICATION steps
+- Actual browser behavior (not just source code)
+
+Prefer:
+- Build (`npm run build` in `client/` and `server/`)
+- TypeScript check (`npx tsc --noEmit`)
+- Existing tests (`npm test` in `server/`)
 - Playwright browser verification
-- Responsive verification
+- Responsive verification (desktop + mobile)
+- Dark/light mode verification
 - Visual screenshots when useful
 
-For UI work, verify the actual browser result rather than trusting source code alone. Check: layout, typography, spacing, responsive behavior, navigation, interactions, loading/error/empty states, accessibility basics, console errors. Fix issues and verify again.
+For UI work, verify the actual browser result rather than trusting source code alone. Check: layout, typography, spacing, responsive behavior, navigation, interactions, loading/error/empty states, accessibility basics, console errors.
+
+**Verification rules:**
+- If verification FAILS → report the failure clearly, do NOT mark as PASS
+- Fix issues, then verify again
+- Do NOT claim success without running verification
+- Do NOT skip verification steps
 
 ### Phase 12 — Update Memory
 
-After a material UI/UX change, update relevant project memory. At minimum, update `.ai/CURRENT_STATE.md`. Update other memory files only when the architecture, design system, or important project decisions changed. Record important design decisions in `.ai/DECISIONS.md` if that file exists.
+After a material UI/UX change, update relevant project memory. At minimum, update `.ai/CURRENT_STATE.md`. Update other memory files only when the architecture, design system, or important project decisions changed.
+
+Do NOT write Gamma output content back into CANONICAL_CONTEXT.md unless the user explicitly approves that change.
+
+## CONFLICT HANDLING
+
+If the following sources conflict with each other:
+
+| Source | Authority |
+|--------|-----------|
+| User request | Highest — user intent overrides |
+| CANONICAL_CONTEXT.md | Confirmed project requirements/decisions |
+| OUTPUT_CONTRACT.md | Stage definitions and contracts |
+| Design output (Stitch) | Design reference only |
+| Current state | What exists today |
+
+### Conflict Resolution Rules
+
+1. **Detect the conflict** — Do not silently choose one interpretation
+2. **Identify authority** — The source with higher authority wins
+3. **Report to user** — If conflict affects requirements/architecture/design, STOP and ask user to resolve
+4. **CANONICAL_CONTEXT.md is authority** for confirmed project requirements and decisions
+5. **User request is authority** for new requirements (but must be added to CANONICAL_CONTEXT.md before implementation)
+
+### Conflict Examples
+
+| Conflict | Resolution |
+|----------|-----------|
+| User asks for 3D viewer, CANONICAL_CONTEXT says no 3D | Report conflict, ask user to confirm or update CANONICAL_CONTEXT |
+| Stitch output uses wrong color palette | Use CANONICAL_CONTEXT.md §6 color tokens, not Stitch output |
+| Plan suggests changing API response format | Check CANONICAL_CONTEXT.md §11, report if different |
+| Current state shows feature X is implemented | Do not re-implement, verify and build on existing |
+
+## OUTPUT — Presentation/Document Tools
+
+If the workflow requires presentation or document output:
+
+- **Gamma** is an EXTERNAL OUTPUT TOOL (see OUTPUT_CONTRACT.md §7)
+- Gamma output is NOT source of truth
+- Do NOT write Gamma content back into CANONICAL_CONTEXT.md unless user explicitly approves
+- Gamma can generate presentations, documents, visual explanations
+- Gamma reads from CANONICAL_CONTEXT.md for accurate project context
 
 ## Quality Principles
 
@@ -236,6 +367,9 @@ After a material UI/UX change, update relevant project memory. At minimum, updat
 10. Verify the real browser result.
 11. Avoid unnecessary complexity.
 12. Preserve existing working functionality.
+13. **CONTEXT FIRST — always read CANONICAL_CONTEXT.md before starting.**
+14. **OUTPUT contracts define boundaries — do not cross stage responsibilities.**
+15. **Conflicts must be reported, not silently resolved.**
 
 ## Output Behavior
 
@@ -244,7 +378,8 @@ During the design phase, communicate decisions clearly and concisely. Do not dum
 Before approval:
 
 ```text
-Understand
+CONTEXT FIRST (CANONICAL_CONTEXT + CURRENT_STATE)
+→ Understand
 → Explore
 → Research
 → User Flow
@@ -258,9 +393,9 @@ Understand
 After approval:
 
 ```text
-Plan
-→ Implement
-→ Verify
+Plan (per OUTPUT_CONTRACT §4)
+→ Implement (per OUTPUT_CONTRACT §5)
+→ Verify (per OUTPUT_CONTRACT §6)
 → Visual QA
 → Update Memory
 ```
@@ -275,3 +410,7 @@ This skill must never:
 - Skip user approval for substantial design work
 - Treat generated design output as automatically correct
 - Claim visual success without browser verification when browser verification is available
+- Violate hard constraints in CANONICAL_CONTEXT.md §4 (C1–C7)
+- Change confirmed requirements without user approval
+- Silently resolve conflicts between sources
+- Write external tool output back into CANONICAL_CONTEXT.md without approval

@@ -1,148 +1,386 @@
-# Canonical Store3D Project Context
-**Tài liệu tham chiếu chuẩn và duy nhất cho AI Coding Agent**  
-*Cập nhật lần cuối: 28/08/2026* [100] • *Trạng thái: Hoàn tất phê duyệt & triển khai* [100, 123]
+# CANONICAL_CONTEXT — Store3D AI Development Pipeline
+
+> **Source of Truth.** When this file conflicts with other `.ai/` docs, prefer this file.
+> Last updated: 2026-08-28
 
 ---
 
-## 1. Tổng quan Dự án & Mục tiêu [127]
-*   **Định nghĩa:** Store3D là một nền tảng thương mại điện tử (e-commerce) full-stack phục vụ việc kinh doanh các mô hình in 3D (figurines, đồ trang trí, mô hình kiến trúc, phụ kiện) [59, 127].
-*   **Triết lý:** Tập trung tối đa vào hiệu năng hiển thị và trải nghiệm thị giác. Mang lại trải nghiệm **"phòng trưng bày kỹ thuật số" (digital showroom)** cao cấp, mang tính tương lai (futuristic/cyber-premium) nhưng tối giản, mượt mà [16, 64, 105].
-*   **Quyết định cốt lõi:** **Dự án hoàn toàn KHÔNG sử dụng trình dựng hình 3D (Three.js, React Three Fiber, <model-viewer>)** [16, 121]. Store3D là một cửa hàng thương mại điện tử dựa trên thư viện hình ảnh 2D chất lượng cao [16, 121].
+## 1. TASK
+
+Establish a single canonical reference document for the Store3D project that all AI coding agents consult before any code change. This document consolidates project identity, goals, architecture, constraints, decisions, and open questions from scattered `.ai/` files into one authoritative source.
 
 ---
 
-## 2. Xác nhận Trạng thái Product Detail Redesign (APPROVED & IMPLEMENTED) [123]
-*   **Trạng thái:** Đã được phê duyệt và triển khai toàn bộ trên thực tế [123].
-*   **Commit triển khai:** `bf2c7ab` [123].
-*   **Cơ chế usePurchasePanel Hook:** Hook quản lý trạng thái mua hàng `usePurchasePanel` được **gọi duy nhất một lần** tại trang cha `ProductDetailPage` [122]. Toàn bộ dữ liệu trạng thái (state) và các trình xử lý (handlers) được truyền xuống hai component con là `PurchasePanel` (bản desktop) và `MobilePurchaseBar` (bản mobile) thông qua props [122]. Hai component con trình bày này **tuyet doi khong tu goi hook** để tránh phân mảnh hoặc trùng lặp trạng thái [122].
-*   **Loại bỏ "Tạm tính":** Trang chi tiết sản phẩm **hoàn toàn không hiển thị tổng tiền "Tạm tính" (subtotal)** dựa trên số lượng [122]. Nút chỉnh số lượng vẫn hoạt động bình thường nhưng không hiển thị dòng tính subtotal [122].
-*   **Responsive Layout:** Tránh sử dụng JS breakpoint để render có điều kiện, Responsive Product Detail sử dụng thuộc tính **CSS visibility / Tailwind display classes** để ẩn/hiện đồng thời `PurchasePanel` và `MobilePurchaseBar` theo từng kích thước màn hình [34, 35].
-*   **10 Component Mới Đã Triển Khai:** Hệ thống đã tách biệt mã nguồn của `product-detail-page.tsx` thành **10 component độc lập** mới để tối ưu bảo trì [40, 123]:
-    1.  `ProductGallery` (Desktop gallery, thumbnails + hero) [40]
-    2.  `ProductGalleryMobile` (Mobile carousel với dot indicators) [40]
-    3.  `ProductLightbox` (Full-screen lightbox hỗ trợ 2x zoom) [22, 40]
-    4.  `PurchasePanel` (Sticky panel mua hàng cho desktop) [40]
-    5.  `MobilePurchaseBar` (Bottom bar cố định cho mobile) [40]
-    6.  `usePurchasePanel` (Shared custom hook chứa business logic mua hàng) [40]
-    7.  `ProductTabs` (Tab điều khiển: Mô tả / Thông số / Đánh giá) [40]
-    8.  `RatingSummary` (Bảng thống kê sao đánh giá + CTA viết đánh giá) [29, 40]
-    9.  `ReviewCard` (Component kết xuất từng bài đánh giá chi tiết) [30, 40]
-    10. `StarRating` (Common component xử lý hiển thị sao tái sử dụng) [41]
+## 2. OBJECTIVE
+
+Store3D is a Vietnamese e-commerce platform for selling 3D-printed models (figurines, decorative items, architectural models, accessories). It delivers a premium **"digital showroom"** experience with a futuristic/cyber-premium aesthetic.
+
+- **Target users:** Customers (browse, order, pay via QR, review) and Admins (manage products, orders, coupons, users, reviews, news)
+- **Deployment:** Vercel (client + serverless API) + Render (Express server)
+- **Status:** Stable and working. Both client and server deployed to production.
 
 ---
 
-## 3. Phân loại Trạng thái Tính năng và Thành phần Hệ thống
+## 3. REQUIREMENTS
 
-### A. Đã Triển Khai & Đang Sử Dụng (Implemented & Active) [100, 111, 119]
-1.  **Duyệt & Tìm kiếm Sản phẩm:** List, search không phân biệt hoa/thường, bộ lọc theo danh mục, sắp xếp, phân trang [100, 111].
-2.  **Đề xuất tìm kiếm ngang (Horizontal Suggestions):** Nhận diện từ 1 ký tự đầu tiên gõ trên Navbar, tự động gợi ý danh sách card ngang chứa ảnh thu nhỏ và giá thực tế [12, 13, 100].
-3.  **Chi tiết Sản phẩm Redesign:** (Như chi tiết tại Mục 2) [123].
-4.  **Giỏ hàng Drawer:** Mở nhanh từ bên phải bằng hiệu ứng kính mờ (glassmorphism) và chuyển động mượt mà, lưu trữ bền vững tại LocalStorage [100, 111, 150].
-5.  **Luồng Thanh Toán:** Nhập thông tin giao hàng, áp dụng coupon, chọn COD hoặc chuyển khoản ngân hàng [100, 111].
-6.  **Cổng Thanh Toán VietQR:** Tự động tạo mã QR từ dữ liệu đơn hàng (ST3D-XXXXXX), hiển thị thông tin ngân hàng thụ hưởng cấu hình qua `.env`, có countdown 5 phút, tự động polling kiểm tra trạng thái mỗi 3 giây không cần tải lại trang [50, 53, 56, 100].
-7.  **Đồng bộ Wishlist:** Cho phép lưu trữ và đồng bộ hóa danh mục yêu thích trực tiếp trên máy chủ MongoDB [92, 100].
-8.  **Hệ Thống Đánh Giá Gated:** Chỉ cho phép người mua đã hoàn tất đơn hàng (`status === 'completed'`) viết đánh giá kèm tải ảnh [30, 100, 116].
-9.  **Hệ Thống Quản Trị (Admin Panel - Scoped Dark Mode):** [83, 117]
-    *   Dashboard thống kê kinh doanh, vẽ biểu đồ AreaChart doanh thu và PieChart trạng thái đơn hàng (Recharts) [84, 86].
-    *   CRUD Sản phẩm (tích hợp Cloudinary upload, stock, featured toggle) [100, 117].
-    *   CRUD Danh mục dạng bảng thống kê (sử dụng MongoDB Aggregation đếm số lượng sản phẩm liên kết và chặn xóa danh mục chứa sản phẩm) [1, 2, 5].
-    *   CRUD Mã giảm giá (Coupon), quản lý đơn hàng một chiều, duyệt/xóa đánh giá [100, 117].
-    *   Quản trị tài khoản người dùng (role update, kích hoạt/vô hiệu hóa, chặn tuyệt đối xóa Admin cuối cùng của hệ thống) [100, 107].
-10. **Tin tức / Blog & Liên hệ:** Hệ thống CRUD tin tức và form tiếp nhận liên hệ [100].
-11. **Giao diện Sáng/Tối (Light/Dark Theme):** Tích hợp nút chuyển đổi nhanh lưu cấu hình trong LocalStorage, chuyển màu mượt mà [100].
-12. **Tải ảnh đám mây:** Tích hợp trực tiếp Cloudinary (giới hạn tệp 5MB) cho hình ảnh sản phẩm [100, 118].
+### Functional
+- Product browsing: list, search (case-insensitive), filter by category, sort, pagination, featured, related
+- Product detail: immersive gallery-first layout with lightbox, sticky purchase panel (desktop), fixed bottom bar (mobile), tabbed content, rating summary, review cards
+- Shopping cart: add/remove/update quantity, persisted to localStorage, cart drawer UI
+- Checkout: shipping info, payment method (COD / bank transfer), coupon application
+- QR payment: VietQR code generation with countdown timer, polling status every 3 seconds
+- User auth: register, login, logout, profile, password change (JWT httpOnly cookies)
+- Wishlist: add/remove, move to cart, server-side persistence
+- Reviews: purchase-gated (completed order required), CRUD, rating aggregation
+- Admin: dashboard (KPI + Recharts), CRUD products/categories/coupons/orders/users/reviews/news/contacts
+- News/blog: CRUD (admin), public listing, slug-based detail
+- Contact form: submit, admin management
+- Dark/light theme: toggle with localStorage persistence
+- Search suggestions: horizontal scrollable product cards from 1 character input
 
-### B. Đã Loại Bỏ / Khuyên Dùng Ngừng (Deprecated / Removed)
-1.  **Trình dựng 3D (Three.js / React Three Fiber / <model-viewer>):** Tuyệt đối không tích hợp hay cài đặt do thỏa thuận tối ưu hiệu năng [16, 121].
-2.  **Lưu trữ hình ảnh local qua Multer (`/uploads`):** Đã loại bỏ luồng lưu tệp trực tiếp trên đĩa cứng máy chủ. Toàn bộ hình ảnh sản phẩm mới tải lên được lưu trực tiếp trên đám mây Cloudinary [100, 118, 122]. *(Lưu ý: Các ảnh seed cũ hoặc ảnh placeholder base64 vẫn được giữ để đảm bảo tính tương thích nhờ hàm resolveImageUrl)* [46, 118].
-3.  **Giao diện mosaic lưới bất đối xứng (`categories-section.tsx`):** Đã loại bỏ hoàn toàn do rối mắt [48, 122]. Thay thế bằng cách khôi phục bố cục trang chủ nguyên bản: Card đầu tiên là banner màu dốc (gradient) rộng chiếm 2-3 cột, các card danh mục tiếp theo là card ảnh vuông bo góc gọn gàng [51].
-4.  **Các hiệu ứng chuyển động trang trí rườm rà:** Loại bỏ hiệu ứng cuộn trang fade-in so le diện rộng, hiệu ứng chuyển động vẽ rộng biểu đồ đánh giá, thanh tiến trình cuộn trang, và phóng to ảnh `scale-105` khi hover để giữ giao diện chuyên nghiệp [37].
-5.  **Hiển thị "Tạm tính" tại Product Detail:** Đã loại bỏ để tinh giản UI [122].
-
-### C. Được Lên Kế Hoạch Nhưng Chưa Triển Khai (Planned / Backlog) [120]
-1.  **Gửi email thông báo tự động (SMTP / Email Sending):** Khung cấu hình SMTP đã tồn tại trong `.env` nhưng **chưa có mã nguồn xử lý gửi mail thực tế**. Biểu mẫu liên hệ mới gửi mới chỉ lưu vào MongoDB chứ chưa bắn email [101, 103, 120].
-2.  **Webhook Thanh Toán Thực Tế:** Đường dẫn `/api/payment/webhook` đã sẵn sàng nhưng hiện đang hoạt động dựa trên cơ chế giả lập DEV-only (`/webhook/simulate`) do chưa đăng ký và đối soát chữ ký số thực tế với bên thứ ba [101, 103, 120].
-3.  **Tự động cập nhật Sitemap & Robots.txt:** Hiện tại `sitemap.xml` và `robots.txt` vẫn đang là các tệp tĩnh nằm trong thư mục `client/public`, chưa tự động cập nhật động theo các sản phẩm/bài viết mới trong DB [103, 120].
-4.  **Tự động nén / Chuyển đổi định dạng ảnh:** Chưa có logic xử lý nén tự động hoặc xuất ảnh WebP khi upload lên Cloudinary [103, 120].
+### Non-Functional
+- All UI text in Vietnamese
+- Route slugs in Vietnamese without diacritics (`/san-pham`, `/thanh-toan-qr`)
+- Cookie-based auth (JWT in httpOnly cookie, `withCredentials: true`)
+- Zod validation at both client and server boundaries
+- Standard API response envelope: `{ success, message, data, pagination, errors }`
+- Atomic stock decrement with rollback on order creation
+- One-way order status workflow: `pending → confirmed → shipping → completed`
+- Rate limiting: global 300/15min, auth 20/15min
 
 ---
 
-## 4. Quyết Định Kiến Trúc Trọng Yếu [90, 131]
-*   **Cấu trúc Monorepo:** Tách biệt rạch ròi giữa ứng dụng khách `client/` (React SPA) và máy chủ dịch vụ `server/` [59].
-*   **Cookie-Based Auth:** Mã token JWT được lưu trữ kín trong httpOnly cookie (`token`), bật cờ `secure` trên môi trường sản xuất và thuộc tính `sameSite: lax` để phòng chống triệt để lỗ hổng XSS [92, 97, 98]. Axios gửi yêu cầu bắt buộc đính kèm cấu hình `{ withCredentials: true }` [92, 93].
-*   **Xác thực ranh giới (Boundary Validation):** Mọi dữ liệu đầu vào (cả Client-side Form và Server-side Router Middleware) đều được kiểm duyệt cấu trúc nghiêm ngặt thông qua thư viện **Zod Schemas** trước khi đẩy vào Controller [63, 110, 131].
-*   **Phản hồi Chuẩn Hóa:** Toàn bộ API phản hồi về một cấu trúc Envelope duy nhất [60, 94, 110]:
-    `{ success: boolean, message: string, data: {}, pagination: {}, errors: [] }`
-*   **Atomic Stock Decrement:** Luồng tạo đơn hàng thực hiện giảm tồn kho nguyên tử (atomic decrement) của Mongoose, có cơ chế tự động khôi phục dữ liệu (rollback) lập tức nếu xảy ra lỗi giữa chừng [131].
-*   **Quy trình trạng thái một chiều (One-Way Status Workflow):** Trạng thái đơn hàng chỉ được phép đi tiến lên (`pending → confirmed → shipping → completed`) [117, 131]. Hủy đơn hàng chỉ được chấp nhận ở giai đoạn sơ khởi [117, 131].
-*   **Polling thay vì WebSocket:** Quyết định sử dụng Polling HTTP ngắn (mỗi 3 giây) khi trang thanh toán VietQR mở để tiết kiệm tài nguyên máy chủ và dễ dàng bảo trì hệ thống [50, 122].
+## 4. CONSTRAINTS
+
+### Hard Constraints (NEVER violate)
+| # | Constraint | Source |
+|---|-----------|--------|
+| C1 | **No 3D libraries.** Never install Three.js, React Three Fiber, `<model-viewer>`, or any 3D rendering library. Store3D uses 2D image galleries only. | [PROJECT.md, ARCHITECTURE.md] |
+| C2 | **Vietnamese UI.** All user-facing labels, error messages, and notifications must be in Vietnamese. | [PROJECT.md] |
+| C3 | **No client-side tests exist.** Zero test files in `client/`. Do not assume test infrastructure exists. | [CURRENT_STATE.md] |
+| C4 | **Cookie-based auth only.** JWT stored in httpOnly cookie named `token`. Do not switch to Authorization header pattern. | [ARCHITECTURE.md] |
+| C5 | **Do not modify context state files.** Do not alter `AuthContext`, `CartContext`, `WishlistContext`, `ThemeContext` logic unless explicitly tasked. | [AGENTS.md] |
+| C6 | **Client must not control payment status.** All financial state changes must go through backend API/webhook. | [AGENTS.md] |
+| C7 | **Image rendering.** All images from DB must pass through `resolveImageUrl(img)` utility. | [ARCHITECTURE.md] |
+
+### Soft Constraints (Prefer, but exceptions allowed)
+| # | Constraint | Source |
+|---|-----------|--------|
+| S1 | Follow existing layered architecture: Routes → Controllers → Services → Models | [PROJECT.md] |
+| S2 | Use shadcn/ui components from `components/ui/` | [AGENTS.md] |
+| S3 | Use `cn()` utility for class merging | [AGENTS.md] |
+| S4 | Lazy-load page components with `React.lazy()` | [AGENTS.md] |
+| S5 | Use React Hook Form + Zod for form validation | [AGENTS.md] |
+| S6 | Do not refactor unrelated code while working on a feature | [AGENTS.md] |
 
 ---
 
-## 5. Quy Tắc Thiết Kế UI/UX [64, 112]
-*   **Font chữ tiêu chuẩn:** Phông chữ duy nhất được sử dụng là **Be Vietnam Pro** [66].
-*   **Bo góc (Radius):** Quy chuẩn bo góc chung là **10px** (`0.625rem`) [67], riêng các thẻ card sản phẩm sử dụng bo góc **rounded-2xl** [67].
-*   **Palette màu chủ đạo (Ocean Blue):** Giá trị biến `--primary` và `--ring` được cố định về tông màu xanh đại dương (khoảng `250 deg` trong index.css) làm màu chính cho tất cả các nút hành động, mức giá hiển thị và vòng sáng [112, 122].
-*   **Bảng màu Tối (Dark mode):** Kích hoạt bằng cách thêm class `.dark` vào thẻ root, lưu trữ trong LocalStorage [92, 100]. Riêng **hệ thống Admin được ép cứng giao diện tối (Dark mode Only)** thông qua thẻ bọc AdminLayout [83, 85].
-*   **Hiển thị hình ảnh an toàn:** Tất cả các hình ảnh kết xuất từ cơ sở dữ liệu bắt buộc phải đi qua hàm tiện ích `resolveImageUrl(img)` để tự động xử lý các trường hợp: (1) Giữ nguyên chuỗi Base64 placeholder hoặc đường dẫn đầy đủ Unsplash/Cloudinary, (2) Ghép nối VITE_API_URL đối với các ảnh tĩnh local dạng `/uploads/...` cũ [46, 118].
-*   **Ngôn ngữ UI:** Toàn bộ văn bản hiển thị cho khách hàng và quản trị viên bắt buộc phải sử dụng **Tiếng Việt** [59, 130]. Các đường dẫn tĩnh cũng phải là tiếng Việt không dấu chuẩn SEO (`/san-pham`, `/thanh-toan-qr`, `/tai-khoan`) [130].
+## 5. RESEARCH
 
----
+### Research Hierarchy (priority order)
+1. **`.ai/` project memory** — Read first for project-level knowledge
+2. **GitNexus** — Codebase relationships, impact analysis, caller/callee tracing
+3. **Context7** — Library/framework documentation (React, Vite, Tailwind, Express, Mongoose, Zod, Framer Motion, Radix/shadcn)
+4. **Web Research** — Current/external information, API docs, best practices
+5. **Stitch** — UI design exploration, visual references, design system
+6. **Playwright** — Browser verification, visual QA, responsive testing
 
-## 6. Hạn Chế Hiện Tại & Nợ Kỹ Thuật [102, 120]
-*   **Khoản nợ Kiểm thử (Testing Debt):** Phía client không có bất kỳ file test nào (0%); máy chủ backend chỉ có duy nhất 3 kiểm thử đơn vị cơ bản [102, 120].
-*   **Thông tin đăng nhập demo:** Tài khoản dùng thử của Admin (`admin@store3d.com / admin123`) hiện đang bị viết công khai trong tệp `client/README.md` [102, 120].
-*   **Cấu hình CORS:** CORS đang để mở tự do (`*`) khi chạy ở chế độ phát triển (`NODE_ENV !== 'production'`) [102].
-*   **Thiếu Log & Tài liệu:** Dự án chưa tích hợp thư viện ghi nhật ký yêu cầu (như morgan), không có tài liệu hướng dẫn API Swagger/OpenAPI [102].
-*   **Chế độ TypeScript:** Phía máy chủ server chưa bật cấu hình kiểm tra nghiêm ngặt `strict` trong tệp `tsconfig.json` [102, 120].
-
----
-
-## 7. Sơ đồ Luồng Dữ liệu & Kiến trúc cho AI Coding Agent [110, 124, 125]
-
+### Decision Tree
 ```
-                                  CLIENT BROWSER (React SPA)
-                ┌────────────────────────────────────────────────────────────┐
-                │ - Storefront (Home, Details, Cart, Checkout, QR Page)      │
-                │ - Scoped Dark Admin Dashboard (KPI Cards, Recharts, CRUD)  │
-                └──────────────┬──────────────────────────────▲──────────────┘
-                               │                              │
-                               │ HTTPS Axios                  │ HTTP Only Cookie
-                               │ (withCredentials: true) [92] │ (token: JWT) [97]
-                               ▼                              │
-         ┌────────────────────────────────────────────────────┴──────────────┐
-         │                          EXPRESS SERVER                           │
-         │                                                                   │
-         │  [Route Layer]                                                    │
-         │     ├── /api/auth/*, /api/products/*, /api/categories/*           │
-         │     └── /api/orders/*, /api/wishlist/*, /api/payment/* [96]       │
-         │                                                                   │
-         │  [Middleware Layer]                                               │
-         │     ├── Zod Schema Boundary Validation [94]                       │
-         │     ├── requireAuth (JWT cookie parsing) [97]                     │
-         │     └── Centralized Error Handler (AppError) [94]                 │
-         │                                                                   │
-         │  [Controllers & Services]                                         │
-         │     ├── Atomic Stock Management (with rollback) [131]             │
-         │     ├── VietQR Code Generator Service (qrcode) [53]               │
-         │     └── Cloudinary Upload Service [118]                           │
-         └─────────────────────────────┬─────────────────────────────────────┘
-                                       │ Mongoose Schema
-                                       ▼ (ODM Mongoose 8.5) [95, 108]
-                        ┌──────────────────────────────┐
-                        │          MONGODB DB          │
-                        │                              │
-                        │ - Users (Bcrypt) [98]        │
-                        │ - Products (Cloudinary URLs) │
-                        │ - Orders & Coupons [95]      │
-                        └──────────────────────────────┘
+USER REQUEST
+    ↓
+Existing project code? → GitNexus
+    ↓
+Project-specific knowledge? → .ai/
+    ↓
+Library/framework API? → Context7
+    ↓
+Current/external info? → Web Research
+    ↓
+Visual/UI design? → Stitch
+    ↓
+Browser verification? → Playwright
 ```
 
+### Research Discipline
+- Do not research just because a tool exists
+- Use the smallest set of tools needed
+- Prefer primary/official sources
+- Distinguish facts from assumptions
+- Do not invent undocumented project behavior
+- After research, apply findings to the actual repository
+
 ---
 
-## 8. Chỉ thị Vàng khi Phát triển Code (Gold Instructions) [126]
-1.  **Không tự ý cài đặt** Three.js, React Three Fiber, hay bất kỳ thư viện 3D nào vào dự án [16, 121, 126].
-2.  **Luôn bọc** mọi hình ảnh hiển thị bằng hàm tiện ích `resolveImageUrl(img)` để tránh lỗi hiển thị chéo hệ thống giữa ảnh local, base64, và Cloudinary [46, 126].
-3.  **Không chỉnh sửa** hoặc làm thay đổi logic hoạt động của các file quản lý trạng thái nền tảng (`AuthContext`, `CartContext`, `WishlistContext`, `ThemeContext`) [17, 126].
-4.  **Tuyệt đối không** cho phép Client tự ý gửi trạng thái thay đổi thanh toán đơn hàng. Mọi thay đổi trạng thái tài chính của đơn hàng bắt buộc phải do API backend điều phối và đối soát thông qua webhook [49, 126].
-5.  **Mọi nhãn hiển thị UI** và phản hồi thông báo lỗi giao tiếp trực tiếp với người dùng phải viết bằng **Tiếng Việt** [59, 130].
+## 6. DESIGN DIRECTION
+
+### Visual Identity
+- **Aesthetic:** Premium, futuristic, "digital showroom" — dark luxurious backgrounds, glassmorphism, cyan/blue glow, digital grid overlays, hover lift effects
+- **Font:** Be Vietnam Pro (single font family throughout)
+- **Primary color:** Ocean Blue (#3b6ee8 / oklch 0.58 0.165 250)
+- **Radius:** 10px (0.625rem) standard; `rounded-2xl` for product cards
+- **Dark mode:** Toggle with `.dark` class on root, persisted in localStorage. Admin panel is dark-only.
+
+### Color Tokens (Light)
+- background: #ffffff, foreground: #111827
+- primary: #3b6ee8 (buttons, prices, active states)
+- muted: #f7f7f7, card: white, border: #ebebeb
+- amber: #fbbf24 (star ratings)
+- destructive: #e5484d
+
+### Color Tokens (Dark)
+- background: #222222, foreground: #fafafa
+- primary: oklch 0.75 0.14 245 (lighter)
+- card: #343434, border: white 10% opacity
+- muted: #444, muted-foreground: #b4b4b4
+
+### Component Patterns
+- **Navbar:** Sticky, backdrop-blur, 64px height, z-40
+- **Product card:** rounded-2xl, bg-card/50 + backdrop-blur, hover lift with primary glow
+- **Search suggestions:** Horizontal scrollable cards below search input
+- **Buttons:** Primary (primary bg, white text, shadow, 10px radius), Outline (border, transparent bg)
+- **Inputs:** Muted/50 bg, 10px radius
+
+---
+
+## 7. INFORMATION ARCHITECTURE
+
+### Monorepo Structure
+```
+store3D/
+├── client/          # React SPA (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/         # 20 shadcn/ui primitives
+│   │   │   ├── layout/     # navbar, footer
+│   │   │   ├── common/     # breadcrumb, empty-state, error-state, pagination, star-rating
+│   │   │   ├── product/    # product-card, product-card-skeleton, product-gallery,
+│   │   │   │              # product-gallery-mobile, product-lightbox, purchase-panel,
+│   │   │   │              # mobile-purchase-bar, product-tabs, use-purchase-panel
+│   │   │   ├── cart/       # cart-drawer
+│   │   │   ├── auth/       # login-prompt-dialog
+│   │   │   ├── admin/      # image-upload
+│   │   │   ├── home/       # hot-sale-section
+│   │   │   ├── order/      # order-status-badge
+│   │   │   └── review/     # review-action, rating-summary, review-card
+│   │   ├── contexts/       # Auth, Cart, Wishlist, Theme
+│   │   ├── hooks/          # useDebounce, useLocalStorage, useReviewEligibility
+│   │   ├── layouts/        # main-layout, account-layout, admin-layout
+│   │   ├── pages/          # All page components (lazy-loaded)
+│   │   ├── routes/         # guards.tsx (Protected, Admin, GuestOnly)
+│   │   └── utils/          # cn(), apiClient, resolveImageUrl, helpers
+│   └── public/             # Static assets, sitemap.xml, robots.txt
+├── server/          # Express API
+│   └── src/
+│       ├── config/         # env, cors, rateLimit, cloudinary
+│       ├── controllers/    # 11 controllers (thin)
+│       ├── database/       # Mongoose connection
+│       ├── middleware/      # auth, validate, errorHandler, notFound
+│       ├── models/         # 10 Mongoose models
+│       ├── routes/         # 13 route files
+│       ├── services/       # 16 service files (business logic)
+│       ├── utils/          # AppError, apiResponse, apiFeatures, asyncHandler, slugify, token
+│       └── validators/     # 8 Zod schema files
+└── .ai/             # AI context documentation
+```
+
+### Route Map (Client)
+| Group | Routes |
+|-------|--------|
+| Public | `/`, `/san-pham`, `/san-pham/:slug`, `/lien-he`, `/tin-tuc`, `/tin-tuc/:slug` |
+| Guest-only | `/dang-nhap`, `/dang-ky` |
+| Protected | `/thanh-toan`, `/thanh-toan-thanh-cong/:id`, `/thanh-toan-qr/:id`, `/danh-gia/:slug`, `/tai-khoan/*` |
+| Admin | `/admin/*` (requires `role === 'admin'`) |
+
+### State Management
+| Context | Mechanism | Persistence |
+|---------|-----------|-------------|
+| AuthProvider | useReducer (AUTH_START, AUTH_SUCCESS, AUTH_LOGOUT, AUTH_ERROR) | JWT httpOnly cookie |
+| CartProvider | useReducer (ADD_ITEM, REMOVE_ITEM, UPDATE_QUANTITY, CLEAR) | localStorage |
+| WishlistProvider | useState + API calls | Server-side (MongoDB) |
+| ThemeProvider | useState + localStorage | localStorage, toggles `.dark` class |
+
+Provider nesting: StrictMode → ThemeProvider → BrowserRouter → AuthProvider → CartProvider → WishlistProvider → Suspense → Routes
+
+---
+
+## 8. TECHNICAL CONTEXT
+
+### Technology Stack
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| Frontend | React | 19.2.8 |
+| Build | Vite | 8.2.0 |
+| Language | TypeScript | 6.0.2 (client), 5.5.4 (server) |
+| Styling | Tailwind CSS | 4.3.3 |
+| UI Components | shadcn/ui (New York) + Radix UI | Various |
+| Animations | Framer Motion | 13.0.0 |
+| Charts | Recharts | 3.10.1 |
+| Forms | React Hook Form + Zod | 7.84.0 / 4.4.3 |
+| HTTP Client | Axios | 1.19.0 |
+| Routing | React Router DOM | 7.18.2 |
+| Backend | Express | 4.19.2 |
+| Database | MongoDB (Mongoose) | 8.5.1 |
+| Auth | JWT (jsonwebtoken) | 9.0.2 |
+| Password | bcryptjs | 2.4.3 |
+| Image Upload | Cloudinary | 2.10.1 |
+| Validation | Zod | 3.23.8 (server) |
+| Linting | oxlint | 1.75.0 |
+| Deployment | Vercel + Render | — |
+
+### API Base URL
+- Development: `http://localhost:5000/api`
+- Production: `https://<vercel-domain>/api`
+
+### Database Models
+| Model | Key Fields |
+|-------|-----------|
+| User | fullname, email (unique), password (bcrypt, select:false), phone, avatar, role (admin/customer), address, active |
+| Product | name, slug (unique), description, images[], category (ref), material, printerType, size, stock, originalPrice, salePrice, rating, reviewCount, status, featured |
+| Category | name, slug (unique), image, description |
+| Order | user (ref), items[], customer {}, subtotal, discount, shipping, total, coupon, payment {}, status |
+| OrderItem | order (ref), product (ref), name, image, price, quantity |
+| Wishlist | user (ref, unique), products[] (ref) |
+| Review | user (ref), product (ref), order (ref), rating (1-5), comment, images[]. Unique on (user, product) |
+| Coupon | code (unique, uppercase), discount, type (percent/fixed), expiredDate, quantity, usedCount, minOrder |
+| News | title, slug (unique), excerpt, content, thumbnail, category, author, status, publishedAt |
+| ContactRequest | userId (optional ref), fullname, email, phone, subject, message, status, adminNote |
+
+### Deployment
+- **Vercel:** Client SPA from `client/dist`, API rewrites to `/api/server` serverless function
+- **Render:** Node.js free tier, build `npm install && npm run build`, start `node dist/server.js`
+- **Required env:** `MONGODB_URI`, `JWT_SECRET`
+- **Optional env:** `PORT`, `CLIENT_URL`, `RATE_LIMIT_*`, `CLOUDINARY_*`, `BANK_*`, `QR_TTL_MINUTES`, `PAYMENT_WEBHOOK_SECRET`, `SMTP_*`
+
+---
+
+## 9. ACCEPTANCE CRITERIA
+
+### For Any Code Change
+1. Build passes (`npm run build` in `client/` and `server/`)
+2. TypeScript check passes (0 errors)
+3. No regressions in existing functionality
+4. Vietnamese UI text maintained
+5. Existing code patterns followed (layered architecture, response envelope, error handling)
+6. No unrelated code refactored
+
+### For UI Changes
+7. Responsive behavior verified (desktop + mobile)
+8. Dark/light mode both work
+9. `resolveImageUrl()` used for all DB images
+10. Framer Motion animations consistent with existing patterns
+
+### For API Changes
+11. Zod validation at route level
+12. Standard response envelope used
+13. `asyncHandler` wraps async handlers
+14. Vietnamese error messages in Zod schemas and service errors
+
+---
+
+## 10. VERIFICATION
+
+### Build & Lint
+```bash
+# Client
+cd client && npm run build
+cd client && npx tsc --noEmit
+
+# Server
+cd server && npm run build
+cd server && npm test
+```
+
+### Browser Verification
+- Use Playwright for visual QA when available
+- Check: layout, typography, spacing, responsive behavior, navigation, interactions
+- Check: loading, empty, error, success, disabled, validation states
+- Check: console errors, accessibility basics
+
+### Git Verification
+- `git diff` before committing to confirm only intended changes
+- `git status` to ensure clean working tree after commit
+- Verify no unintended files modified
+
+---
+
+## 11. OUTPUT REQUIREMENTS
+
+### Code Style
+- **Server:** Routes → Controllers → Services → Models. Controllers are thin. Services contain business logic.
+- **Client:** Lazy-loaded pages, Context + useReducer for state, shadcn/ui components, `cn()` for classes.
+- **Database:** Models in `server/src/models/`, validators in `server/src/validators/`, services handle Mongoose operations.
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Thành công",
+  "data": {},
+  "pagination": { "page": 1, "limit": 10, "total": 100, "totalPages": 10 },
+  "errors": []
+}
+```
+
+### Error Format
+```json
+{
+  "success": false,
+  "message": "Lỗi validation",
+  "data": null,
+  "pagination": null,
+  "errors": [{ "field": "email", "message": "Email không hợp lệ" }]
+}
+```
+
+### File Naming
+- Components: `kebab-case.tsx` (e.g., `product-gallery.tsx`)
+- Hooks: `use-*.ts` (e.g., `use-purchase-panel.ts`)
+- Pages: `*-page.tsx` (e.g., `product-detail-page.tsx`)
+- Services: `*.service.ts`
+- Validators: `*.validator.ts`
+
+---
+
+## 12. DECISIONS
+
+### Architecture Decisions
+| # | Decision | Rationale | Status |
+|---|---------|-----------|--------|
+| D1 | Monorepo with `client/` and `server/` separation | Clear boundary between frontend and backend | Implemented |
+| D2 | Cookie-based JWT auth (httpOnly, secure, sameSite: lax) | XSS protection, consistent with SPA architecture | Implemented |
+| D3 | Zod validation at both client and server boundaries | Type-safe validation, shared schemas possible | Implemented |
+| D4 | Standard response envelope for all API responses | Consistent API contract for frontend consumption | Implemented |
+| D5 | Atomic stock decrement with rollback | Prevent overselling, data integrity | Implemented |
+| D6 | One-way order status workflow | Financial data integrity, audit trail | Implemented |
+| D7 | Polling (3s) instead of WebSocket for QR payment | Simpler infrastructure, lower server cost on Render free tier | Implemented |
+| D8 | usePurchasePanel hook called once, shared via props | Prevent state duplication between desktop/mobile components | Implemented |
+| D9 | CSS visibility for responsive switching (not JS breakpoints) | Simpler code, no hydration mismatch risk | Implemented |
+| D10 | Remove "Tạm tính" subtotal display from product detail | Simplify UI, reduce redundant price information | Implemented |
+
+### Design Decisions
+| # | Decision | Rationale | Status |
+|---|---------|-----------|--------|
+| D11 | Be Vietnam Pro as sole font family | Consistency, Vietnamese character support | Implemented |
+| D12 | Ocean Blue primary palette (#3b6ee8) | Brand identity, premium feel | Implemented |
+| D13 | 10px standard radius, rounded-2xl for cards | Visual hierarchy, card distinction | Implemented |
+| D14 | Dark mode via `.dark` class + localStorage | Simple toggle, persistence across sessions | Implemented |
+| D15 | Admin panel dark-mode only | Scoped dark mode, distinct from customer UI | Implemented |
+| D16 | No 3D rendering (images only) | Performance, simplicity, cost | Implemented |
+
+---
+
+## 13. OPEN QUESTIONS
+
+| # | Question | Impact | Status |
+|---|---------|--------|--------|
+| Q1 | Should SMTP email sending be implemented for contact form and order notifications? | Feature completeness, user experience | Planned but not started |
+| Q2 | Should the payment webhook be integrated with a real payment provider? | Production payment capability | Planned but not started |
+| Q3 | Should sitemap.xml and robots.txt be dynamically generated? | SEO optimization | Planned but not started |
+| Q4 | Should automatic image optimization (WebP, resizing) be added to Cloudinary uploads? | Performance, bandwidth | Planned but not started |
+| Q5 | Should client-side testing be introduced (vitest/jest)? | Code quality, regression prevention | UNKNOWN — no test infrastructure exists |
+| Q6 | Should TypeScript strict mode be enabled in server tsconfig? | Type safety, catch more bugs at compile time | UNKNOWN |
+| Q7 | Should request logging (morgan) and API documentation (Swagger) be added? | Observability, developer experience | UNKNOWN |
+| Q8 | Should the CORS configuration be tightened in development? | Security in dev environment | UNKNOWN |
+| Q9 | Should the demo credentials in `client/README.md` be removed or obfuscated? | Security if repo is public | UNKNOWN |
+| Q10 | Should CI/CD pipeline (GitHub Actions) be set up? | Automated testing, deployment quality | UNKNOWN |
