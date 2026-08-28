@@ -53,6 +53,7 @@ export function ProductGalleryMobile({ product }: ProductGalleryMobileProps) {
           <img
             src={resolveImageUrl(images[activeImage])}
             alt={product.name}
+            decoding="async"
             className="size-full object-contain"
             draggable={false}
           />

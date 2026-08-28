@@ -221,7 +221,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="ml-1 overflow-hidden rounded-full">
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.fullname} className="size-8 rounded-full object-cover" />
+                    <img src={user.avatar} alt={user.fullname} loading="lazy" decoding="async" className="size-8 rounded-full object-cover" />
                   ) : (
                     <User className="size-5" />
                   )}

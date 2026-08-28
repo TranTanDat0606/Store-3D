@@ -95,7 +95,7 @@ export default function OrderSuccessPage() {
               return (
                 <div key={item._id} className="flex items-center gap-4 py-3">
                   <div className="bg-muted flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                    <img src={resolveImageUrl(item.image)} alt={item.name} className="size-full object-cover" />
+                    <img src={resolveImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" className="size-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-1 text-sm font-medium">{item.name}</p>

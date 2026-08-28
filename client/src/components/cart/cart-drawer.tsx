@@ -134,6 +134,8 @@ export function CartDrawer() {
                           <img
                             src={resolveImageUrl(item.image)}
                             alt={item.name}
+                            loading="lazy"
+                            decoding="async"
                             className="relative size-full object-cover"
                           />
                         </Link>

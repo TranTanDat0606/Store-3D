@@ -312,7 +312,7 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.productId} className="flex items-center gap-3">
                   <div className="bg-muted relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                    <img src={resolveImageUrl(item.image)} alt={item.name} className="size-full object-cover" />
+                    <img src={resolveImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" className="size-full object-cover" />
                     <span className="bg-primary text-primary-foreground absolute -top-0 -right-0 flex size-5 items-center justify-center rounded-bl-lg text-xs font-bold">
                       {item.quantity}
                     </span>

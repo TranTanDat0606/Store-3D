@@ -394,6 +394,8 @@ export default function NewsDetailPage() {
                   <img
                     src={resolveImageUrl(news.thumbnail)}
                     alt={news.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full object-cover"
                     style={{ maxHeight: 480 }}
                   />
@@ -453,6 +455,8 @@ export default function NewsDetailPage() {
                       <img
                         src={resolveImageUrl(item.thumbnail)}
                         alt={item.title}
+                        loading="lazy"
+                        decoding="async"
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (

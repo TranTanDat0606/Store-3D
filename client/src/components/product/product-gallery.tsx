@@ -33,7 +33,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
                 aria-label={`Xem ảnh ${i + 1}`}
                 aria-current={activeImage === i ? 'true' : undefined}
               >
-                <img src={resolveImageUrl(img)} alt="" className="size-full object-cover" />
+                <img src={resolveImageUrl(img)} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
               </button>
             ))}
           </div>
@@ -50,6 +50,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           <img
             src={resolveImageUrl(images[activeImage])}
             alt={product.name}
+            decoding="async"
             className="size-full object-contain"
             draggable={false}
           />

@@ -143,12 +143,13 @@ export default function NewsPage() {
                 <Card className="overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md">
                   <div className="bg-muted relative aspect-video overflow-hidden">
                     {item.thumbnail ? (
-                      <img
-                        src={resolveImageUrl(item.thumbnail)}
-                        alt={item.title}
-                        loading="lazy"
-                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
+            <img
+              src={resolveImageUrl(item.thumbnail)}
+              alt={item.title}
+              loading="lazy"
+              decoding="async"
+              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
                     ) : (
                       <div className="flex size-full items-center justify-center">
                         <Newspaper className="text-muted-foreground size-12" />

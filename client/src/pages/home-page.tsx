@@ -37,6 +37,8 @@ function HeroShowcase({ products }: { products: Product[] }) {
                 <img
                   src={resolveImageUrl(showcase[0].images?.[0] ?? '')}
                   alt={showcase[0].name}
+                  fetchPriority="high"
+                  decoding="async"
                   className="size-full object-contain"
                 />
               </div>
@@ -60,7 +62,7 @@ function HeroShowcase({ products }: { products: Product[] }) {
         >
           <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-blue-500/10 backdrop-blur-md">
             <div className="aspect-square bg-gradient-to-br from-blue-500/20 to-purple-600/10">
-              <img src={resolveImageUrl(showcase[1].images?.[0] ?? '')} alt={showcase[1].name} className="size-full object-contain" />
+              <img src={resolveImageUrl(showcase[1].images?.[0] ?? '')} alt={showcase[1].name} decoding="async" className="size-full object-contain" />
             </div>
             <div className="p-2">
               <p className="line-clamp-1 text-[10px] font-medium text-slate-200">{showcase[1].name}</p>
@@ -81,7 +83,7 @@ function HeroShowcase({ products }: { products: Product[] }) {
         >
           <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-purple-500/10 backdrop-blur-md">
             <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-600/10">
-              <img src={resolveImageUrl(showcase[2].images?.[0] ?? '')} alt={showcase[2].name} className="size-full object-contain" />
+              <img src={resolveImageUrl(showcase[2].images?.[0] ?? '')} alt={showcase[2].name} decoding="async" className="size-full object-contain" />
             </div>
             <div className="p-2">
               <p className="line-clamp-1 text-[10px] font-medium text-slate-200">{showcase[2].name}</p>
@@ -270,6 +272,7 @@ export default function HomePage() {
                         src={resolveImageUrl(cat.image)}
                         alt={cat.name}
                         loading="lazy"
+                        decoding="async"
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (

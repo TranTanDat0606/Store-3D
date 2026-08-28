@@ -136,7 +136,7 @@ export function ProductLightbox({ images, activeIndex, onClose, onNavigate }: Pr
               )}
               aria-label={`Ảnh ${i + 1}`}
             >
-              <img src={resolveImageUrl(img)} alt="" className="size-full object-cover" />
+              <img src={resolveImageUrl(img)} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
             </button>
           ))}
         </div>

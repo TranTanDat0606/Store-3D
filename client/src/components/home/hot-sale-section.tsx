@@ -108,6 +108,7 @@ function SpotlightDeal({ product }: { product: Product }) {
           src={resolveImageUrl(product.images?.[0] ?? '')}
           alt={product.name}
           loading="lazy"
+          decoding="async"
           className="relative size-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
@@ -211,6 +212,7 @@ function DealRow({ index, product }: { index: number; product: Product }) {
           src={resolveImageUrl(product.images?.[0] ?? '')}
           alt=""
           loading="lazy"
+          decoding="async"
           className="relative size-full object-cover"
         />
       </div>

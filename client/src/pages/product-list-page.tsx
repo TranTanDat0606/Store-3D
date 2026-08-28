@@ -42,7 +42,7 @@ function SearchResultRow({ product }: { product: Product }) {
         className="bg-muted relative flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden rounded-xl sm:w-28 sm:aspect-square"
       >
         {product.images[0] ? (
-          <img src={resolveImageUrl(product.images[0])} alt={product.name} loading="lazy" className="size-full object-contain" />
+          <img src={resolveImageUrl(product.images[0])} alt={product.name} loading="lazy" decoding="async" className="size-full object-contain" />
         ) : (
           <span className="text-muted-foreground text-xs">No image</span>
         )}

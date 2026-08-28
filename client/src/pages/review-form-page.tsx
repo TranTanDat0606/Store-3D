@@ -167,6 +167,8 @@ export default function ReviewFormPage() {
               <img
                 src={resolveImageUrl(product.images[0])}
                 alt={product.name}
+                loading="lazy"
+                decoding="async"
                 className="size-16 rounded-lg object-cover"
               />
             ) : (

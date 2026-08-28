@@ -82,6 +82,8 @@ export default function OrdersPage() {
                             key={i}
                             src={resolveImageUrl(item.image)}
                             alt={item.name}
+                            loading="lazy"
+                            decoding="async"
                             className="bg-muted size-12 rounded-full border-2 border-background object-cover"
                           />
                         ))}
