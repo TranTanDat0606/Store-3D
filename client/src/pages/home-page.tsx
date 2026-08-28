@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Box, Layers, Printer, Sparkles, Truck } from 'lucide-react'
+import { ArrowRight, Layers, Sparkles } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
@@ -244,26 +244,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="relative border-y border-slate-200 bg-white py-12 dark:border-white/5 dark:bg-slate-950/50">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 sm:grid-cols-3 sm:px-6">
-          {[
-            { icon: Printer, title: 'In 3D chất lượng cao', desc: 'Chi tiết sắc nét từ máy in FDM và Resin hiện đại', color: 'from-cyan-100 to-blue-50 dark:from-cyan-500/20 dark:to-blue-500/10', iconColor: 'text-cyan-600 dark:text-cyan-400' },
-            { icon: Box, title: 'Sản phẩm độc quyền', desc: 'Thiết kế độc đáo, không đụng hàng trên thị trường', color: 'from-blue-100 to-purple-50 dark:from-blue-500/20 dark:to-purple-500/10', iconColor: 'text-blue-600 dark:text-blue-400' },
-            { icon: Truck, title: 'Giao hàng toàn quốc', desc: 'Đóng gói chắc chắn, giao nhanh 2-5 ngày', color: 'from-purple-100 to-pink-50 dark:from-purple-500/20 dark:to-pink-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
-          ].map((f) => (
-            <div key={f.title} className="group flex items-start gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-5 transition-all hover:border-slate-200 hover:bg-white hover:shadow-md dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-white/10 dark:hover:bg-white/[0.04]">
-              <div className={`bg-gradient-to-br ${f.color} flex size-12 shrink-0 items-center justify-center rounded-xl shadow-lg`}>
-                <f.icon className={`size-6 ${f.iconColor}`} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">{f.title}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{f.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Hot Sale */}
+      {!hotLoading && <HotSaleSection products={hotSale} />}
 
       {/* Categories */}
       {categories.length > 0 && (
@@ -329,8 +311,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Hot Sale */}
-      {!hotLoading && <HotSaleSection products={hotSale} />}
+      {/* CTA / Liên hệ */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 py-16 dark:from-slate-800 dark:to-slate-900">
+        <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-white/10 blur-[80px]" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-cyan-300/20 blur-[60px]" />
+        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
+          <h2 className="text-2xl font-bold text-white sm:text-3xl">
+            Sẵn sàng tạo mô hình của riêng bạn?
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-sm text-white/80">
+            Liên hệ với chúng tôi để được tư vấn miễn phí và báo giá chi tiết.
+          </p>
+          <div className="mt-6">
+            <Button
+              size="lg"
+              className="bg-white px-8 text-base font-semibold text-cyan-600 shadow-lg shadow-black/10 transition-all hover:bg-slate-100 hover:shadow-xl dark:bg-slate-200 dark:text-slate-800 dark:hover:bg-white"
+              asChild
+            >
+              <Link to="/lien-he">
+                Liên hệ ngay
+                <ArrowRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
