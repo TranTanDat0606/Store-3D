@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { CheckCircle2, Package } from 'lucide-react'
+import { CheckCircle2, Package, Gamepad2 } from 'lucide-react'
 import { orderApi } from '@/services'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,10 +11,15 @@ import { useReviewEligibility } from '@/hooks/useReviewEligibility'
 import { formatCurrency, resolveImageUrl } from '@/lib'
 import type { Order } from '@/types'
 
+const MiniGameModal = lazy(() =>
+  import('@/components/mini-game/mini-game-modal').then((m) => ({ default: m.MiniGameModal })),
+)
+
 export default function OrderSuccessPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [gameOpen, setGameOpen] = useState(false)
 
   const productIds: string[] =
     order?.items.map((i) => (typeof i.product === 'object' ? i.product._id : i.product)) ?? []
@@ -110,6 +115,19 @@ export default function OrderSuccessPage() {
       )}
 
       <div className="mt-8 flex justify-center gap-3">
+        {order && order.status === 'completed' && (
+          <Suspense fallback={null}>
+            <Button variant="outline" onClick={() => setGameOpen(true)}>
+              <Gamepad2 className="mr-2 size-4" />
+              Chơi Mini Game nhận quà
+            </Button>
+            <MiniGameModal
+              open={gameOpen}
+              onOpenChange={setGameOpen}
+              orderId={order._id}
+            />
+          </Suspense>
+        )}
         <Button asChild>
           <Link to="/tai-khoan/don-hang">Xem đơn hàng</Link>
         </Button>

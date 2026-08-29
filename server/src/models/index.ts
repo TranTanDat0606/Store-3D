@@ -8,3 +8,5 @@ export { Review, type IReview } from './Review';
 export { Coupon, CouponType, type ICoupon } from './Coupon';
 export { News, NewsStatus, type INews } from './News';
 export { ContactRequest, ContactStatus, type IContactRequest } from './ContactRequest';
+export { GameSession, GameSessionStatus, type IGameSession } from './GameSession';
+export { UserCoupon, UserCouponSource, type IUserCoupon } from './UserCoupon';

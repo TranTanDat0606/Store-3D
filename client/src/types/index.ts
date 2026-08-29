@@ -232,3 +232,17 @@ export interface OrdersByStatus {
   status: OrderStatus
   count: number
 }
+
+export interface UserCoupon {
+  _id: string
+  user: string
+  code: string
+  discount: number
+  type: 'percent'
+  orderId: string
+  source: 'game'
+  expiresAt: string
+  usedAt?: string
+  createdAt: string
+  updatedAt: string
+}

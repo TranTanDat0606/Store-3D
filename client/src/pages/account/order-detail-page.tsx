@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Ban } from 'lucide-react'
+import { ArrowLeft, Ban, Gamepad2 } from 'lucide-react'
 import { orderApi } from '@/services'
 import { EmptyState } from '@/components/common/empty-state'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,10 @@ import { getErrorMessage } from '@/services/apiClient'
 import { toast } from 'sonner'
 import type { Order } from '@/types'
 
+const MiniGameModal = lazy(() =>
+  import('@/components/mini-game/mini-game-modal').then((m) => ({ default: m.MiniGameModal })),
+)
+
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [order, setOrder] = useState<Order | null>(null)
@@ -32,6 +36,7 @@ export default function OrderDetailPage() {
   const [cancelling, setCancelling] = useState(false)
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
+  const [gameOpen, setGameOpen] = useState(false)
 
   const productIds: string[] =
     order?.items.map((i) => (typeof i.product === 'object' ? i.product._id : i.product)) ?? []
@@ -116,6 +121,19 @@ export default function OrderDetailPage() {
         <div className="flex items-center gap-2">
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.payment.status} />
+          {order.status === 'completed' && (
+            <Suspense fallback={null}>
+              <Button variant="outline" size="sm" onClick={() => setGameOpen(true)}>
+                <Gamepad2 className="size-4" />
+                Nhận quà
+              </Button>
+              <MiniGameModal
+                open={gameOpen}
+                onOpenChange={setGameOpen}
+                orderId={order._id}
+              />
+            </Suspense>
+          )}
           {['pending', 'confirmed'].includes(order.status) && (
             <Button variant="destructive" size="sm" onClick={() => setCancelDialogOpen(true)}>
               <Ban className="size-4" />

@@ -1,6 +1,8 @@
 import apiClient from './apiClient'
 export { productApi, categoryApi } from './productApi'
 export type { ProductPayload, ProductQuery, ProductListResult } from './productApi'
+export { rewardApi } from './rewardApi'
+export type { GameStartResponse, GameCompleteResponse, GameReward } from './rewardApi'
 import type { ApiResponse, Coupon, CouponWithAvailability, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
 
 export interface OrderItemInput {

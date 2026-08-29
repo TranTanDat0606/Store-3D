@@ -21,6 +21,7 @@ import uploadRoutes from './routes/upload';
 import contactRoutes from './routes/contact';
 import newsRoutes from './routes/news';
 import aiChatRoutes from './routes/ai-chat';
+import rewardRoutes from './routes/reward';
 
 export function createApp() {
   const app = express();
@@ -61,6 +62,7 @@ export function createApp() {
   app.use('/api/contact', contactRoutes);
   app.use('/api/news', newsRoutes);
   app.use('/api/ai-chat', aiChatRoutes);
+  app.use('/api/rewards', rewardRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
