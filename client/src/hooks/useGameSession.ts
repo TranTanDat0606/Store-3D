@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { rewardApi, type GameCompleteResponse } from '@/services/rewardApi'
+import { getErrorMessage } from '@/services/apiClient'
 
 type GameStatus = 'idle' | 'starting' | 'playing' | 'completing' | 'done'
 
@@ -20,10 +21,13 @@ export function useGameSession() {
     error: null,
   })
 
+  const sessionRef = useRef<string | null>(null)
+
   const startGame = useCallback(async (orderId: string) => {
     setState({ status: 'starting', sessionId: null, expiresAt: null, result: null, error: null })
     try {
       const { sessionId, expiresAt } = await rewardApi.startGame(orderId)
+      sessionRef.current = sessionId
       setState({
         status: 'playing',
         sessionId,
@@ -33,33 +37,34 @@ export function useGameSession() {
       })
       return { sessionId, expiresAt }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Không thể bắt đầu trò chơi'
+      sessionRef.current = null
+      const message = getErrorMessage(err)
       setState((s) => ({ ...s, status: 'idle', error: message }))
       return null
     }
   }, [])
 
   const completeGame = useCallback(async (score: number) => {
-    setState((s) => {
-      if (!s.sessionId) return s
-      return { ...s, status: 'completing' }
-    })
-
-    const sessionId = state.sessionId
+    const sessionId = sessionRef.current
     if (!sessionId) return null
+
+    setState((s) => ({ ...s, status: 'completing' }))
 
     try {
       const result = await rewardApi.completeGame(sessionId, score)
+      sessionRef.current = null
       setState((s) => ({ ...s, status: 'done', result }))
       return result
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Không thể hoàn thành trò chơi'
+      sessionRef.current = null
+      const message = getErrorMessage(err)
       setState((s) => ({ ...s, status: 'idle', error: message }))
       return null
     }
-  }, [state.sessionId])
+  }, [])
 
   const reset = useCallback(() => {
+    sessionRef.current = null
     setState({ status: 'idle', sessionId: null, expiresAt: null, result: null, error: null })
   }, [])
 

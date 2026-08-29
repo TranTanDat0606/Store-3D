@@ -54,20 +54,22 @@ export class RewardService {
   }
 
   async completeGame(userId: string, data: CompleteGameInput) {
-    const session = await GameSession.findById(data.sessionId);
-    if (!session) throw new AppError('Không tìm thấy phiên chơi', 404);
-    if (String(session.user) !== userId) throw new AppError('Phiên chơi không thuộc về bạn', 403);
-    if (session.status !== GameSessionStatus.Active) {
-      throw new AppError('Phiên chơi đã kết thúc', 400);
-    }
-    if (session.expiresAt <= new Date()) {
-      session.status = GameSessionStatus.Expired;
-      await session.save();
+    // Atomic transition: only one caller can move active → completed
+    const now = new Date();
+    const session = await GameSession.findOneAndUpdate(
+      { _id: data.sessionId, user: userId, status: GameSessionStatus.Active, expiresAt: { $gt: now } },
+      { $set: { status: GameSessionStatus.Completed, score: data.score } },
+      { new: true },
+    );
+    if (!session) {
+      const existing = await GameSession.findById(data.sessionId);
+      if (!existing) throw new AppError('Không tìm thấy phiên chơi', 404);
+      if (String(existing.user) !== userId) throw new AppError('Phiên chơi không thuộc về bạn', 403);
+      if (existing.status !== GameSessionStatus.Active) {
+        throw new AppError('Phiên chơi đã kết thúc', 400);
+      }
       throw new AppError('Phiên chơi đã hết hạn', 400);
     }
-
-    session.score = data.score;
-    session.status = GameSessionStatus.Completed;
 
     let reward: { code: string; discount: number; expiresAt: Date } | null = null;
 
@@ -87,10 +89,9 @@ export class RewardService {
       });
 
       session.rewardCoupon = userCoupon._id;
+      await session.save();
       reward = { code, discount: tier.discount, expiresAt };
     }
-
-    await session.save();
 
     return { score: data.score, reward };
   }

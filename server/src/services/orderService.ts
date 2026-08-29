@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product } from '../models';
+import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product, UserCoupon } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
@@ -7,6 +7,7 @@ import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/ord
 interface CouponApplication {
   code: string;
   discount: number;
+  isAdminCoupon: boolean;
 }
 
 /**
@@ -24,22 +25,41 @@ export const ALLOWED_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 /** Validates a coupon code against the subtotal. Returns null when no coupon given. */
-async function resolveCoupon(code: string | undefined, subtotal: number): Promise<CouponApplication | null> {
+async function resolveCoupon(code: string | undefined, subtotal: number, userId?: string): Promise<CouponApplication | null> {
   if (!code) return null;
 
-  const coupon = await Coupon.findOne({ code: code.toUpperCase().trim() });
-  if (!coupon) throw new AppError('Mã giảm giá không tồn tại', 400);
-  if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
-  if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+  const normalizedCode = code.toUpperCase().trim();
 
-  let discount = 0;
-  if (coupon.type === CouponType.Percent) {
-    discount = Math.round((subtotal * coupon.discount) / 100);
-  } else {
-    discount = Math.min(coupon.discount, subtotal);
+  // Try admin Coupon first
+  const coupon = await Coupon.findOne({ code: normalizedCode });
+  if (coupon) {
+    if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+    if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+
+    let discount = 0;
+    if (coupon.type === CouponType.Percent) {
+      discount = Math.round((subtotal * coupon.discount) / 100);
+    } else {
+      discount = Math.min(coupon.discount, subtotal);
+    }
+
+    return { code: coupon.code, discount, isAdminCoupon: true };
   }
 
-  return { code: coupon.code, discount };
+  // Fallback: check per-user reward coupons (atomic redemption)
+  if (userId) {
+    const userCoupon = await UserCoupon.findOneAndUpdate(
+      { code: normalizedCode, user: userId, usedAt: null, expiresAt: { $gt: new Date() } },
+      { $set: { usedAt: new Date() } },
+      { new: true },
+    );
+    if (userCoupon) {
+      const discount = Math.round((subtotal * userCoupon.discount) / 100);
+      return { code: userCoupon.code, discount, isAdminCoupon: false };
+    }
+  }
+
+  throw new AppError('Mã giảm giá không tồn tại', 400);
 }
 
 export class OrderService {
@@ -74,7 +94,7 @@ export class OrderService {
       });
     }
 
-    const coupon = await resolveCoupon(data.couponCode, subtotal);
+    const coupon = await resolveCoupon(data.couponCode, subtotal, userId);
     const shipping = 0; // free shipping
     const total = subtotal - (coupon?.discount ?? 0) + shipping;
 
@@ -126,8 +146,8 @@ export class OrderService {
       }
     }
 
-    // Increment coupon usage
-    if (coupon) {
+    // Increment admin coupon usage (UserCoupons are already atomically marked via findOneAndUpdate)
+    if (coupon?.isAdminCoupon) {
       await Coupon.updateOne(
         { code: coupon.code },
         { $inc: { usedCount: 1 } },
@@ -276,10 +296,19 @@ export class OrderService {
 
     // Restore coupon usage
     if (order.coupon?.code) {
-      await Coupon.updateOne(
-        { code: order.coupon.code },
-        { $inc: { usedCount: -1 } },
-      );
+      if (order.coupon.code.startsWith('REWARD-')) {
+        // Restore UserCoupon: clear usedAt
+        await UserCoupon.updateOne(
+          { code: order.coupon.code, user: userId },
+          { $unset: { usedAt: '' } },
+        );
+      } else {
+        // Restore admin Coupon usage count
+        await Coupon.updateOne(
+          { code: order.coupon.code },
+          { $inc: { usedCount: -1 } },
+        );
+      }
     }
 
     const updates: Record<string, unknown> = { status: OrderStatus.Cancelled };

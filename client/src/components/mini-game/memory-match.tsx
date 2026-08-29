@@ -31,7 +31,7 @@ function shuffle<T>(array: T[]): T[] {
 }
 
 export function MemoryMatch({ onGameEnd, disabled }: MemoryMatchProps) {
-  const [cards, setCards] = useState<CardData[]>(() => initCards())
+  const [cards] = useState<CardData[]>(() => initCards())
   const [flippedIds, setFlippedIds] = useState<number[]>([])
   const [matchedPairs, setMatchedPairs] = useState<Set<number>>(new Set())
   const [score, setScore] = useState(0)

@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { couponService } from '../services/couponService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
+import type { AuthRequest } from '../middleware/auth';
 
 export const couponController = {
   list: asyncHandler(async (_req, res: Response) => {
@@ -30,8 +31,8 @@ export const couponController = {
   }),
 
   /** Public: validate a coupon against a subtotal. */
-  apply: asyncHandler(async (req, res: Response) => {
-    const result = await couponService.apply(req.body);
+  apply: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const result = await couponService.apply(req.body, req.user!._id);
     return successResponse(res, result, { message: 'Áp dụng mã giảm giá thành công' });
   }),
 

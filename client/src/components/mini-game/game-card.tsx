@@ -23,6 +23,13 @@ export const GameCard = memo(function GameCard({
       type="button"
       onClick={onClick}
       disabled={disabled || revealed}
+      aria-label={
+        revealed
+          ? isMatched
+            ? `Đã khớp: ${symbol}`
+            : `Đang mở: ${symbol}`
+          : 'Thẻ úp, nhấn để lật'
+      }
       className={cn(
         'relative aspect-square w-full cursor-pointer rounded-xl transition-transform',
         'active:scale-95 disabled:cursor-default disabled:active:scale-100',

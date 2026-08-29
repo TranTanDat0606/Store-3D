@@ -1,4 +1,4 @@
-import { Coupon, CouponType } from '../models';
+import { Coupon, CouponType, UserCoupon } from '../models';
 import { AppError } from '../utils/AppError';
 import type { CreateCouponInput, UpdateCouponInput, ApplyCouponInput } from '../validators/coupon';
 
@@ -46,23 +46,46 @@ export class CouponService {
   }
 
   /** Public: validate a coupon and compute the discount for a given subtotal. */
-  async apply(data: ApplyCouponInput) {
-    const coupon = await Coupon.findOne({ code: data.code.toUpperCase().trim() });
-    if (!coupon) throw new AppError('Mã giảm giá không tồn tại', 400);
-    if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
-    if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
-    if (coupon.minOrder > 0 && data.subtotal < coupon.minOrder) {
-      throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
+  async apply(data: ApplyCouponInput, userId?: string) {
+    const normalizedCode = data.code.toUpperCase().trim();
+
+    // Try admin Coupon first
+    const coupon = await Coupon.findOne({ code: normalizedCode });
+    if (coupon) {
+      if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+      if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+      if (coupon.minOrder > 0 && data.subtotal < coupon.minOrder) {
+        throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
+      }
+
+      let discount = 0;
+      if (coupon.type === CouponType.Percent) {
+        discount = Math.round((data.subtotal * coupon.discount) / 100);
+      } else {
+        discount = Math.min(coupon.discount, data.subtotal);
+      }
+
+      return { coupon, discount };
     }
 
-    let discount = 0;
-    if (coupon.type === CouponType.Percent) {
-      discount = Math.round((data.subtotal * coupon.discount) / 100);
-    } else {
-      discount = Math.min(coupon.discount, data.subtotal);
+    // Fallback: check per-user reward coupons (game-earned)
+    if (userId) {
+      const userCoupon = await UserCoupon.findOne({
+        code: normalizedCode,
+        user: userId,
+        usedAt: null,
+        expiresAt: { $gt: new Date() },
+      });
+      if (userCoupon) {
+        const discount = Math.round((data.subtotal * userCoupon.discount) / 100);
+        return {
+          coupon: { _id: userCoupon._id, code: userCoupon.code, discount: userCoupon.discount, type: userCoupon.type, expiredDate: userCoupon.expiresAt, quantity: 1, usedCount: 0, minOrder: 0 },
+          discount,
+        };
+      }
     }
 
-    return { coupon, discount };
+    throw new AppError('Mã giảm giá không tồn tại', 400);
   }
 
   /** List coupons available for a given subtotal. */
