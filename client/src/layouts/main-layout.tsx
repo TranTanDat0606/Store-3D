@@ -1,10 +1,12 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 
 const CartDrawer = lazy(() => import('@/components/cart/cart-drawer').then(m => ({ default: m.CartDrawer })))
+const ChatLauncher = lazy(() => import('@/components/chat/chat-launcher').then(m => ({ default: m.ChatLauncher })))
+const ChatPanel = lazy(() => import('@/components/chat/chat-panel').then(m => ({ default: m.ChatPanel })))
 
 function ScrollToTop() {
   const { pathname, search } = useLocation()
@@ -15,6 +17,8 @@ function ScrollToTop() {
 }
 
 export function MainLayout() {
+  const [chatOpen, setChatOpen] = useState(false)
+
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />
@@ -25,6 +29,8 @@ export function MainLayout() {
       <Footer />
       <Suspense fallback={null}>
         <CartDrawer />
+        <ChatLauncher isOpen={chatOpen} onToggle={() => setChatOpen(v => !v)} />
+        <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
       </Suspense>
     </div>
   )

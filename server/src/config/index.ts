@@ -47,4 +47,9 @@ export const config = {
     password: process.env.SMTP_PASSWORD || '',
   },
   supportEmail: process.env.SUPPORT_EMAIL || 'support@store3d.com',
+  ai: {
+    provider: process.env.AI_PROVIDER || 'mock',
+    model: process.env.AI_MODEL || 'gpt-3.5-turbo',
+    apiKey: process.env.AI_API_KEY || '',
+  },
 } as const;

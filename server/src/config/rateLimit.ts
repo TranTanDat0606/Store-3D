@@ -24,3 +24,15 @@ export const authLimiter = rateLimit({
     data: null,
   },
 });
+
+export const aiChatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Quá nhiều yêu cầu chat, vui lòng thử lại sau',
+    data: null,
+  },
+});
