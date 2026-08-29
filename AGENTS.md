@@ -47,6 +47,13 @@ Do NOT read other `.ai/` files (PROJECT.md, ARCHITECTURE.md, KNOWLEDGE_MAP.md) u
 - Follow VERIFICATION steps in CANONICAL_CONTEXT.md §10
 - Follow ACCEPTANCE CRITERIA in CANONICAL_CONTEXT.md §9
 - Verify no regressions in existing functionality
+- **If task involved frontend code:** Run frontend quality gate (skill: `frontend-quality-checklist`)
+  - Determine task profile from context (UI Change, Performance, Accessibility, Security, SEO, Production Release, New Project)
+  - Run only applicable checklist categories per profile
+  - Fix Critical issues before completing
+  - Fix or explicitly justify High issues before completing
+  - Report Medium/Low issues appropriately
+  - Backend-only, database-only, documentation-only, and unrelated config tasks skip the frontend quality gate
 
 ### 8. UPDATE MEMORY
 - Update `.ai/CURRENT_STATE.md` after material project changes (new features, completed work, new known issues)
