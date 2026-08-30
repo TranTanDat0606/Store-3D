@@ -2,40 +2,37 @@ import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
-function AiNeuralIcon({ className }: { className?: string }) {
+function AiChatIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>
-      {/* Central diamond / AI core */}
+      <defs>
+        <linearGradient id="ai-bubble-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="currentColor" stopOpacity={0.9} />
+          <stop offset="100%" stopColor="currentColor" stopOpacity={0.6} />
+        </linearGradient>
+      </defs>
+      {/* Chat bubble — rounded rectangle with tail */}
       <path
-        d="M12 3.5L18.5 12 12 20.5 5.5 12Z"
+        d="M4 5.5A1.5 1.5 0 015.5 4h13A1.5 1.5 0 0120 5.5v9a1.5 1.5 0 01-1.5 1.5H8l-3.5 3V17H5.5A1.5 1.5 0 014 15.5z"
+        fill="url(#ai-bubble-grad)"
+        opacity={0.15}
+      />
+      <path
+        d="M4 5.5A1.5 1.5 0 015.5 4h13A1.5 1.5 0 0120 5.5v9a1.5 1.5 0 01-1.5 1.5H8l-3.5 3V17H5.5A1.5 1.5 0 014 15.5z"
         stroke="currentColor"
-        strokeWidth={1.4}
+        strokeWidth={1.5}
         strokeLinejoin="round"
       />
-      {/* Inner diamond — smaller */}
+      {/* AI sparkle — inside bubble, top right */}
       <path
-        d="M12 7L15.8 12 12 17 8.2 12Z"
-        stroke="currentColor"
-        strokeWidth={1}
-        strokeLinejoin="round"
-        opacity={0.5}
-      />
-      {/* Center dot — AI core */}
-      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-      {/* Node — top */}
-      <circle cx="12" cy="3.5" r="1" fill="currentColor" opacity={0.8} />
-      {/* Node — right */}
-      <circle cx="18.5" cy="12" r="1" fill="currentColor" opacity={0.8} />
-      {/* Node — bottom */}
-      <circle cx="12" cy="20.5" r="1" fill="currentColor" opacity={0.8} />
-      {/* Node — left */}
-      <circle cx="5.5" cy="12" r="1" fill="currentColor" opacity={0.8} />
-      {/* Sparkle — top right accent */}
-      <path
-        d="M20.8 4.2l0.5-1.2 0.5 1.2 1.2 0.5-1.2 0.5-0.5 1.2-0.5-1.2-1.2-0.5z"
+        d="M15.5 7.5l0.7-1.4 0.7 1.4 1.4 0.7-1.4 0.7-0.7 1.4-0.7-1.4-1.4-0.7z"
         fill="currentColor"
-        opacity={0.6}
+        opacity={0.7}
       />
+      {/* AI neural dots — subtle pattern inside bubble */}
+      <circle cx="9" cy="9" r="1" fill="currentColor" opacity={0.4} />
+      <circle cx="12.5" cy="10.5" r="0.7" fill="currentColor" opacity={0.3} />
+      <circle cx="10" cy="12.5" r="0.6" fill="currentColor" opacity={0.25} />
     </svg>
   );
 }
@@ -71,7 +68,7 @@ export function ChatLauncher({ isOpen, onToggle }: ChatLauncherProps) {
             exit={{ rotate: -90, opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            <AiNeuralIcon className="size-7" />
+            <AiChatIcon className="size-7" />
           </motion.div>
         )}
       </AnimatePresence>

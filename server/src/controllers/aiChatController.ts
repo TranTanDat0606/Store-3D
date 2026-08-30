@@ -17,13 +17,6 @@ export const aiChatController = {
       throw error;
     }
 
-    const response = result.toUIMessageStreamResponse();
-
-    const body = await response.text();
-    res.status(response.status);
-    response.headers.forEach((value, key) => {
-      res.setHeader(key, value);
-    });
-    res.send(body);
+    await result.pipeUIMessageStreamToResponse(res);
   }),
 };

@@ -34,7 +34,18 @@ function createMockModel() {
 }
 
 export interface ChatServiceParams {
-  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+  messages: Array<{ role: 'user' | 'assistant'; content?: string; parts?: Array<{ type: string; text: string }> }>;
+}
+
+function extractText(msg: ChatServiceParams['messages'][number]): string {
+  if (msg.content) return msg.content;
+  if (msg.parts) {
+    return msg.parts
+      .filter((p) => p.type === 'text')
+      .map((p) => p.text)
+      .join('');
+  }
+  return '';
 }
 
 export async function createChatStream(params: ChatServiceParams) {
@@ -42,17 +53,23 @@ export async function createChatStream(params: ChatServiceParams) {
 
   const modelMessages: ModelMessage[] = messages.map((m) => ({
     role: m.role as 'user' | 'assistant',
-    content: m.content,
+    content: extractText(m),
   }));
 
-  const model = config.ai.provider === 'mock' ? createMockModel() : undefined;
+  if (config.ai.provider === 'mock') {
+    return streamText({
+      model: createMockModel(),
+      messages: modelMessages,
+      system: SYSTEM_PROMPT,
+    });
+  }
 
-  if (!model && !config.ai.apiKey) {
+  if (!config.ai.apiKey) {
     throw new Error('AI_SERVICE_UNAVAILABLE');
   }
 
   return streamText({
-    model: model as any,
+    model: config.ai.model as any,
     messages: modelMessages,
     system: SYSTEM_PROMPT,
   });
