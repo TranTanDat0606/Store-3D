@@ -2,6 +2,7 @@ import { streamText, type ModelMessage } from 'ai';
 import { MockLanguageModelV4 } from 'ai/test';
 import { config } from '../config';
 import { Product } from '../models/Product';
+import mongoose from 'mongoose';
 
 const SYSTEM_PROMPT = `Bạn là trợ lý AI của Store3D - cửa hàng mô hình 3D in.
 Bạn giúp khách hàng tìm hiểu về sản phẩm, quy trình in 3D, và thông tin cửa hàng.
@@ -9,6 +10,17 @@ Trả lời ngắn gọn, thân thiện bằng tiếng Việt.
 Không trả lời về các chủ đề không liên quan đến cửa hàng hoặc in 3D.
 Không bao giờ hỏi hoặc tiết lộ thông tin cá nhân nhạy cảm.
 Khi gợi ý sản phẩm, luôn bao gồm tên, giá, và link chi tiết.`;
+
+const QUERY_TIMEOUT_MS = 8000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Query timeout: ${label} exceeded ${ms}ms`)), ms)
+    ),
+  ]);
+}
 
 const GREETING_RESPONSES = [
   'Xin chào! Mình là trợ lý AI của Store3D. Bạn muốn tìm mô hình 3D, xem sản phẩm nổi bật, hay cần mình tư vấn theo ngân sách?',
@@ -95,6 +107,19 @@ function formatProductLine(p: Record<string, unknown>): string {
 }
 
 async function searchProductsByBudget(budget: { min?: number; max?: number; target?: number }) {
+  const readyState = mongoose.connection.readyState;
+  if (readyState !== 1) {
+    console.error(`[AIChat] MongoDB not ready (readyState=${readyState}). Attempting reconnect...`);
+    try {
+      await mongoose.connect(process.env.MONGODB_URI!, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+      });
+    } catch (reconnectErr: any) {
+      console.error('[AIChat] Reconnect failed:', reconnectErr.message);
+    }
+  }
+
   const filter: Record<string, unknown> = { status: 'active', stock: { $gt: 0 } };
 
   if (budget.target) {
@@ -111,17 +136,27 @@ async function searchProductsByBudget(budget: { min?: number; max?: number; targ
     }
   }
 
-  let products = await Product.find(filter)
-    .sort({ salePrice: 1 })
-    .limit(5)
-    .select('name slug salePrice originalPrice images')
-    .lean();
+  console.log('[AIChat] Product query filter:', JSON.stringify(filter));
+
+  let products = await withTimeout(
+    Product.find(filter)
+      .sort({ salePrice: 1 })
+      .limit(5)
+      .select('name slug salePrice originalPrice images')
+      .lean(),
+    QUERY_TIMEOUT_MS,
+    'searchProductsByBudget primary'
+  );
 
   if (products.length === 0 && budget.target) {
-    const closest = await Product.find({ status: 'active', stock: { $gt: 0 } })
-      .sort({ salePrice: 1 })
-      .select('name slug salePrice originalPrice images')
-      .lean();
+    const closest = await withTimeout(
+      Product.find({ status: 'active', stock: { $gt: 0 } })
+        .sort({ salePrice: 1 })
+        .select('name slug salePrice originalPrice images')
+        .lean(),
+      QUERY_TIMEOUT_MS,
+      'searchProductsByBudget fallback'
+    );
 
     if (closest.length > 0) {
       const sorted = closest.map((p) => ({
@@ -133,6 +168,7 @@ async function searchProductsByBudget(budget: { min?: number; max?: number; targ
     }
   }
 
+  console.log(`[AIChat] Found ${products.length} products`);
   return products;
 }
 
@@ -158,38 +194,47 @@ function createSmartMockModel(userMessage: string, contextProducts?: string) {
     doStream: async () => {
       let response: string;
 
-      if (isGreeting(userMessage)) {
-        response = GREETING_RESPONSES[Math.floor(Math.random() * GREETING_RESPONSES.length)];
-      } else if (isProductQuery(userMessage)) {
-        const budget = parseBudget(userMessage);
+      try {
+        if (isGreeting(userMessage)) {
+          response = GREETING_RESPONSES[Math.floor(Math.random() * GREETING_RESPONSES.length)];
+        } else if (isProductQuery(userMessage)) {
+          const budget = parseBudget(userMessage);
 
-        if (budget) {
-          const products = await searchProductsByBudget(budget);
-          response = buildBudgetResponse(products, budget);
-        } else if (contextProducts) {
-          response = contextProducts;
-        } else {
-          const allProducts = await Product.find({ status: 'active', stock: { $gt: 0 } })
-            .sort({ salePrice: 1 })
-            .limit(5)
-            .select('name slug salePrice originalPrice')
-            .lean();
-
-          if (allProducts.length > 0) {
-            const lines = allProducts.map(formatProductLine);
-            response = `Đây là một số sản phẩm hiện có tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn tìm sản phẩm theo ngân sách cụ thể không?`;
+          if (budget) {
+            const products = await searchProductsByBudget(budget);
+            response = buildBudgetResponse(products, budget);
+          } else if (contextProducts) {
+            response = contextProducts;
           } else {
-            response = 'Hiện tại Store3D chưa có sản phẩm. Bạn có thể quay lại sau!';
+            const allProducts = await withTimeout(
+              Product.find({ status: 'active', stock: { $gt: 0 } })
+                .sort({ salePrice: 1 })
+                .limit(5)
+                .select('name slug salePrice originalPrice')
+                .lean(),
+              QUERY_TIMEOUT_MS,
+              'allProducts fallback'
+            );
+
+            if (allProducts.length > 0) {
+              const lines = allProducts.map(formatProductLine);
+              response = `Đây là một số sản phẩm hiện có tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn tìm sản phẩm theo ngân sách cụ thể không?`;
+            } else {
+              response = 'Hiện tại Store3D chưa có sản phẩm. Bạn có thể quay lại sau!';
+            }
+          }
+        } else {
+          const budget = parseBudget(userMessage);
+          if (budget) {
+            const products = await searchProductsByBudget(budget);
+            response = buildBudgetResponse(products, budget);
+          } else {
+            response = 'Mình là trợ lý AI của Store3D. Mình có thể giúp bạn tìm mô hình 3D, tư vấn ngân sách, hoặc xem sản phẩm nổi bật. Bạn cần gì?';
           }
         }
-      } else {
-        const budget = parseBudget(userMessage);
-        if (budget) {
-          const products = await searchProductsByBudget(budget);
-          response = buildBudgetResponse(products, budget);
-        } else {
-          response = 'Mình là trợ lý AI của Store3D. Mình có thể giúp bạn tìm mô hình 3D, tư vấn ngân sách, hoặc xem sản phẩm nổi bật. Bạn cần gì?';
-        }
+      } catch (err: any) {
+        console.error('[AIChat] doStream error:', err.message, err.stack);
+        response = 'Xin lỗi, mình gặp vấn đề khi truy vấn sản phẩm. Bạn vui lòng thử lại hoặc liên hệ support@store3d.com để được hỗ trợ.';
       }
 
       const words = response.split(' ');

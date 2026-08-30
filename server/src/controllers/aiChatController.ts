@@ -14,9 +14,17 @@ export const aiChatController = {
       if (error instanceof Error && error.message === 'AI_SERVICE_UNAVAILABLE') {
         throw new AppError('Dịch vụ AI tạm thời không khả dụng', 503);
       }
+      console.error('[AIChat] createChatStream error:', error);
       throw error;
     }
 
-    await result.pipeUIMessageStreamToResponse(res);
+    try {
+      await result.pipeUIMessageStreamToResponse(res);
+    } catch (streamErr: any) {
+      console.error('[AIChat] pipeUIMessageStreamToResponse error:', streamErr.message);
+      if (!res.headersSent) {
+        throw new AppError('Dịch vụ AI tạm thời không khả dụng', 503);
+      }
+    }
   }),
 };
