@@ -1,5 +1,6 @@
 import { Coupon, CouponType, UserCoupon } from '../models';
 import { AppError } from '../utils/AppError';
+import { MAX_DISCOUNT_VND } from '../config/rewards';
 import type { CreateCouponInput, UpdateCouponInput, ApplyCouponInput } from '../validators/coupon';
 
 export class CouponService {
@@ -77,7 +78,10 @@ export class CouponService {
         expiresAt: { $gt: new Date() },
       });
       if (userCoupon) {
-        const discount = Math.round((data.subtotal * userCoupon.discount) / 100);
+        const discount = Math.min(
+          Math.round((data.subtotal * userCoupon.discount) / 100),
+          MAX_DISCOUNT_VND,
+        );
         return {
           coupon: { _id: userCoupon._id, code: userCoupon.code, discount: userCoupon.discount, type: userCoupon.type, expiredDate: userCoupon.expiresAt, quantity: 1, usedCount: 0, minOrder: 0 },
           discount,

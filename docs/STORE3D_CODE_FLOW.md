@@ -39,7 +39,7 @@ store3D/
 │   │   │   ├── product/       # product-card, gallery, purchase-panel...
 │   │   │   ├── cart/          # cart-drawer
 │   │   │   ├── home/          # hot-sale-section
-│   │   │   ├── mini-game/     # memory-match, game-card, reward-coupon-card
+│   │   │   ├── mini-game/     # frog-catcher, reward-coupon-card
 │   │   │   └── review/        # review-card, rating-summary
 │   │   ├── contexts/          # Auth, Cart, Wishlist, Theme
 │   │   ├── hooks/             # useChat, useGameSession, useReviewEligibility...
@@ -184,12 +184,8 @@ POST /api/ai-chat
     ↓
 Middleware stack (theo thứ tự):
   1. globalLimiter (300/15min)
-  2. requireAuth — kiểm tra JWT cookie
-     - Đọc token từ req.cookies.token
-     - verifyToken(token) → payload { sub, role }
-     - User.findById(payload.sub) → req.user
-  3. aiChatLimiter (30/15min)
-  4. validateRequest(chatMessageSchema) — Zod validation
+  2. guestAiChatLimiter (15/15min) — không yêu cầu đăng nhập
+  3. validateRequest(chatMessageSchema) — Zod validation
      - messages: array, 1-20 tin nhắn
      - Mỗi tin: role (user|assistant)
      - Nội dung accepts 2 format:
@@ -415,18 +411,25 @@ Xem chi tiết ở Section 4
 ### Mini Game
 
 ```
-OrderSuccessPage → startGame → POST /api/rewards/start-game
+OrderSuccessPage / OrderCompletionModal → startGame → POST /api/rewards/game/start
     ↓
 rewardService.startGame
   - Kiểm tra order completed + chưa có game session
   - Tạo GameSession (unique index user+order)
     ↓
-MemoryMatch game → completeGame → POST /api/rewards/complete-game
+FrogCatcher game (5 lanes, click insects, avoid obstacles)
+  - Insects: Mosquito(+2), Fly(+4), Dragonfly(+6), Beetle(+8)
+  - Obstacles: Rock, Fruit → -1 heart (3 hearts total)
+  - Progressive difficulty (speed + spawn rate increase)
+    ↓
+completeGame → POST /api/rewards/game/complete
     ↓
 rewardService.completeGame
   - Atomic findOneAndUpdate (ngăn duplicate)
-  - Tính score: matchPairs × 10 + remainingTime × 2
-  - Xác định reward tier (0-29: 0%, 30-69: 5%, 70-99: 10%, 100+: 15%)
+  - Xác định reward tier:
+    50+ → 5%, 60+ → 10%, 70+ → 15%,
+    80+ → 20%, 90+ → 25%, 100+ → 30%
+  - Max discount: 200,000 VND
   - Tạo UserCoupon
     ↓
 UserCoupon hiển thị → áp dụng tại CheckoutPage
@@ -461,8 +464,8 @@ UserCoupon hiển thị → áp dụng tại CheckoutPage
 
 ### API trả 429
 
-1. `server/config/rateLimit.ts` — aiChatLimiter max=30/15min
-2. Đã gửi quá 30 request trong 15 phút?
+1. `server/config/rateLimit.ts` — guestAiChatLimiter max=15/15min (AI Chat)
+2. Đã gửi quá 15 request trong 15 phút?
 
 ### API trả 400 (Validation Error)
 
@@ -491,7 +494,7 @@ UserCoupon hiển thị → áp dụng tại CheckoutPage
 
 1. `server/services/rewardService.ts` — startGame检查 order completed?
 2. GameSession unique index — đã có session chưa?
-3. `completeGame` — score có đủ điều kiện reward tier không?
+3. `completeGame` — score có đủ điều kiện reward tier không? (cần 50+ điểm)
 4. `server/models/UserCoupon.ts` — coupon có tạo thành công không?
 
 ### Coupon không áp dụng
@@ -602,10 +605,13 @@ UserCoupon hiển thị → áp dụng tại CheckoutPage
 
 | File | Lưu ý |
 |------|-------|
+| `server/config/rewards.ts` | Reward tiers, max score, max discount |
 | `server/services/rewardService.ts` | Game session, score, reward |
 | `server/models/GameSession.ts` | Session schema, TTL |
 | `server/models/UserCoupon.ts` | Reward coupon |
-| `client/components/mini-game/*.tsx` | Game UI |
+| `client/components/mini-game/frog-catcher.tsx` | Frog Catcher game |
+| `client/components/mini-game/mini-game-modal.tsx` | Game modal wrapper |
+| `client/components/mini-game/reward-coupon-card.tsx` | Reward display |
 | `client/hooks/useGameSession.ts` | Game state |
 | `client/services/rewardApi.ts` | API client |
 

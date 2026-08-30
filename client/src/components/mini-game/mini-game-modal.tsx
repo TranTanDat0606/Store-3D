@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { MemoryMatch } from './memory-match'
+import { FrogCatcher } from './frog-catcher'
 import { RewardCouponCard } from './reward-coupon-card'
 import { useGameSession } from '@/hooks/useGameSession'
 import { Button } from '@/components/ui/button'
@@ -51,10 +51,10 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gamepad2 className="size-5" />
-            Mini Game - Nhận mã giảm giá
+            Mini Game - Bắt côn trùng
           </DialogTitle>
           <DialogDescription>
-            Đánh nhanh nhớ nhanh! Tìm các cặp thẻ bài giống nhau để nhận quà.
+            Giúp ếch bắt côn trùng và tránh chướng ngại vật!
           </DialogDescription>
         </DialogHeader>
 
@@ -80,15 +80,18 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
               <div className="text-center">
                 <p className="text-lg font-semibold">Sẵn sàng chơi?</p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Tìm 3 cặp thẻ bài giống nhau trong 60 giây.
+                  Nhấn vào côn trùng để bắt. Tránh đá và quả!
                   <br />
-                  Điểm càng cao, quà càng lớn!
+                  3 trái tim. Điểm càng cao, quà càng lớn!
                 </p>
               </div>
-              <div className="space-y-1 text-center text-sm">
+              <div className="space-y-0.5 text-center text-xs text-muted-foreground">
+                <p>50+ điểm → Giảm 5%</p>
+                <p>60+ điểm → Giảm 10%</p>
+                <p>70+ điểm → Giảm 15%</p>
+                <p>80+ điểm → Giảm 20%</p>
+                <p>90+ điểm → Giảm 25%</p>
                 <p>100+ điểm → Giảm 30%</p>
-                <p>60-99 điểm → Giảm 10%</p>
-                <p>50-59 điểm → Giảm 5%</p>
               </div>
               <Button onClick={handleStart} size="lg">
                 <Gamepad2 className="mr-2 size-4" />
@@ -98,7 +101,7 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           )}
 
           {isPlaying && (
-            <MemoryMatch onGameEnd={handleGameEnd} />
+            <FrogCatcher onGameEnd={handleGameEnd} />
           )}
 
           {isDone && result && (
@@ -112,7 +115,7 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
               ) : (
                 <div className="rounded-lg bg-muted p-4 text-center">
                   <p className="text-sm">Bạn chưa đạt đủ điểm để nhận quà.</p>
-                  <p className="text-muted-foreground mt-1 text-xs">Thử lại lần sau nhé!</p>
+                  <p className="text-muted-foreground mt-1 text-xs">Cần tối thiểu 50 điểm. Thử lại lần sau nhé!</p>
                 </div>
               )}
             </div>
