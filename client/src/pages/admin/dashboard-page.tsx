@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { DollarSign, Package, ShoppingCart, Users, Clock, CheckCircle2, TrendingUp, type LucideIcon } from 'lucide-react'
+import { DollarSign, Package, ShoppingCart, Users, Clock, CheckCircle2, TrendingUp, Download, type LucideIcon } from 'lucide-react'
 import {
   Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 import { statsApi, orderApi } from '@/services'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { OrderStatusBadge } from '@/components/order/order-status-badge'
 import { formatCurrency, formatDateTime, cn, resolveImageUrl } from '@/lib'
+import { API_URL } from '@/services/apiClient'
 import type { BestSellingProduct, Order, OrdersByStatus, RevenuePeriod, RevenuePoint, StatsOverview } from '@/types'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -83,6 +85,10 @@ export default function AdminDashboardPage() {
     () => revenue.map((r) => ({ ...r, date: r.date.slice(5) })),
     [revenue]
   )
+
+  const handleExportExcel = () => {
+    window.open(`${API_URL}/admin/stats/export-excel`, '_blank')
+  }
 
   if (loading) {
     return (
@@ -189,7 +195,13 @@ export default function AdminDashboardPage() {
         <Card className="border-white/10 bg-slate-900/60 backdrop-blur-xl">
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle className="text-base text-white">Doanh thu 30 ngày</CardTitle>
-            <TrendingUp className="size-5 text-cyan-400" />
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportExcel} className="border-white/10 bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white">
+                <Download className="mr-1.5 size-3.5" />
+                Xuất Excel
+              </Button>
+              <TrendingUp className="size-5 text-cyan-400" />
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>

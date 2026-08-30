@@ -1,11 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { Heart, LayoutDashboard, Package, Settings, User } from 'lucide-react'
+import { Heart, LayoutDashboard, Package, Settings, User, Ticket } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
 
 const links = [
   { to: '/tai-khoan', label: 'Tổng quan', icon: LayoutDashboard, end: true },
   { to: '/tai-khoan/don-hang', label: 'Đơn hàng của tôi', icon: Package },
+  { to: '/tai-khoan/ma-giam-gia', label: 'Mã giảm giá', icon: Ticket },
   { to: '/tai-khoan/yeu-thich', label: 'Yêu thích', icon: Heart },
   { to: '/tai-khoan/ho-so', label: 'Hồ sơ', icon: User },
   { to: '/tai-khoan/mat-khau', label: 'Đổi mật khẩu', icon: Settings },

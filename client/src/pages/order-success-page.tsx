@@ -9,6 +9,7 @@ import { OrderStatusBadge } from '@/components/order/order-status-badge'
 import { ReviewProductAction } from '@/components/review/review-action'
 import { useReviewEligibility } from '@/hooks/useReviewEligibility'
 import { formatCurrency, resolveImageUrl } from '@/lib'
+import { toast } from 'sonner'
 import type { Order } from '@/types'
 
 const MiniGameModal = lazy(() =>
@@ -31,7 +32,13 @@ export default function OrderSuccessPage() {
     orderApi
       .getById(id)
       .then((o) => {
-        if (!cancelled) setOrder(o)
+        if (!cancelled) {
+          setOrder(o)
+          toast.success('Đặt hàng thành công!', {
+            description: `Đơn hàng #${o._id.slice(-8).toUpperCase()} đã được tiếp nhận.`,
+            duration: 4000,
+          })
+        }
       })
       .catch(() => {})
       .finally(() => {

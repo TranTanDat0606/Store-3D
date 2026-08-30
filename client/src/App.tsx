@@ -23,6 +23,7 @@ const OrderDetailPage = lazy(() => import('@/pages/account/order-detail-page'))
 const WishlistPage = lazy(() => import('@/pages/account/wishlist-page'))
 const ProfilePage = lazy(() => import('@/pages/account/profile-page'))
 const ChangePasswordPage = lazy(() => import('@/pages/account/change-password-page'))
+const CouponsPage = lazy(() => import('@/pages/account/coupons-page'))
 const ReviewFormPage = lazy(() => import('@/pages/review-form-page'))
 const ContactPage = lazy(() => import('@/pages/contact-page'))
 const NewsPage = lazy(() => import('@/pages/news-page'))
@@ -83,6 +84,7 @@ function App() {
                     <Route path="yeu-thich" element={<WishlistPage />} />
                     <Route path="ho-so" element={<ProfilePage />} />
                     <Route path="mat-khau" element={<ChangePasswordPage />} />
+                    <Route path="ma-giam-gia" element={<CouponsPage />} />
                   </Route>
                 </Route>
 

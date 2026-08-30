@@ -64,7 +64,7 @@ export default function AdminOrdersPage() {
     try {
       const updated = await orderApi.adminUpdateStatus(id, { status: newStatus })
       setOrders((prev) => prev.map((o) => (o._id === id ? updated : o)))
-      toast.success('Cập nhật trạng thái đơn hàng thành công')
+      toast.success('Cập nhật trạng thái đơn hàng thành công', { duration: 4000 })
     } catch (err) {
       toast.error(getErrorMessage(err))
     }
@@ -194,7 +194,7 @@ export default function AdminOrdersPage() {
                           try {
                             await orderApi.adminUpdateStatus(order._id, { status: order.status, paymentStatus: 'paid' })
                             setOrders((prev) => prev.map((o) => o._id === order._id ? { ...o, payment: { ...o.payment, status: 'paid' } } : o))
-                            toast.success('Đã cập nhật trạng thái thanh toán')
+                            toast.success('Đã cập nhật trạng thái thanh toán', { duration: 4000 })
                           } catch (err) {
                             toast.error(getErrorMessage(err))
                           }

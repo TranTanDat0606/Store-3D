@@ -24,32 +24,35 @@ function HeroShowcase({ products }: { products: Product[] }) {
       <div className="pointer-events-none absolute inset-0 rounded-3xl border border-white/5 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
       {/* Main product - centered */}
-      <motion.div
-        className="absolute top-[18%] left-1/2 z-30 w-52 -translate-x-1/2"
-        initial={{ opacity: 0, y: 30, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
-      >
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 shadow-2xl shadow-cyan-500/20 backdrop-blur-xl">
-          {showcase[0] && (
-            <>
-              <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/10 aspect-square">
-                <img
-                  src={resolveImageUrl(showcase[0].images?.[0] ?? '')}
-                  alt={showcase[0].name}
-                  fetchPriority="high"
-                  decoding="async"
-                  className="size-full object-contain"
-                />
-              </div>
-              <div className="p-3">
-                <p className="line-clamp-1 text-xs font-semibold text-slate-100">{showcase[0].name}</p>
-                <p className="text-sm font-bold text-cyan-300">{formatCurrency(showcase[0].salePrice)}</p>
-              </div>
-            </>
-          )}
-        </div>
-      </motion.div>
+      {showcase[0] && (
+        <motion.div
+          className="absolute top-[18%] left-1/2 z-30 w-52 -translate-x-1/2"
+          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          whileHover={{ scale: 1.05, y: -4 }}
+        >
+          <Link
+            to={`/san-pham/${showcase[0].slug}`}
+            className="block overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 shadow-2xl shadow-cyan-500/20 backdrop-blur-xl transition-shadow duration-300 hover:shadow-cyan-500/30 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            tabIndex={0}
+          >
+            <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/10 aspect-square">
+              <img
+                src={resolveImageUrl(showcase[0].images?.[0] ?? '')}
+                alt={showcase[0].name}
+                fetchPriority="high"
+                decoding="async"
+                className="size-full object-contain transition-transform duration-500 hover:scale-110"
+              />
+            </div>
+            <div className="p-3">
+              <p className="line-clamp-1 text-xs font-semibold text-slate-100">{showcase[0].name}</p>
+              <p className="text-sm font-bold text-cyan-300">{formatCurrency(showcase[0].salePrice)}</p>
+            </div>
+          </Link>
+        </motion.div>
+      )}
 
       {/* Left floating card - centered vertically */}
       {showcase[1] && (
@@ -58,17 +61,21 @@ function HeroShowcase({ products }: { products: Product[] }) {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          whileHover={{ scale: 1.05, rotate: -4 }}
+          whileHover={{ scale: 1.08, rotate: -4, y: -4 }}
         >
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-blue-500/10 backdrop-blur-md">
+          <Link
+            to={`/san-pham/${showcase[1].slug}`}
+            className="block overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-blue-500/10 backdrop-blur-md transition-shadow duration-300 hover:shadow-blue-500/20 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            tabIndex={0}
+          >
             <div className="aspect-square bg-gradient-to-br from-blue-500/20 to-purple-600/10">
-              <img src={resolveImageUrl(showcase[1].images?.[0] ?? '')} alt={showcase[1].name} decoding="async" className="size-full object-contain" />
+              <img src={resolveImageUrl(showcase[1].images?.[0] ?? '')} alt={showcase[1].name} decoding="async" className="size-full object-contain transition-transform duration-500 hover:scale-110" />
             </div>
             <div className="p-2">
               <p className="line-clamp-1 text-[10px] font-medium text-slate-200">{showcase[1].name}</p>
               <p className="text-xs font-bold text-blue-300">{formatCurrency(showcase[1].salePrice)}</p>
             </div>
-          </div>
+          </Link>
         </motion.div>
       )}
 
@@ -79,17 +86,21 @@ function HeroShowcase({ products }: { products: Product[] }) {
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.35 }}
-          whileHover={{ scale: 1.05, rotate: 3 }}
+          whileHover={{ scale: 1.08, rotate: 3, y: -4 }}
         >
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-purple-500/10 backdrop-blur-md">
+          <Link
+            to={`/san-pham/${showcase[2].slug}`}
+            className="block overflow-hidden rounded-xl border border-white/10 bg-slate-900/50 shadow-xl shadow-purple-500/10 backdrop-blur-md transition-shadow duration-300 hover:shadow-purple-500/20 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+            tabIndex={0}
+          >
             <div className="aspect-square bg-gradient-to-br from-purple-500/20 to-pink-600/10">
-              <img src={resolveImageUrl(showcase[2].images?.[0] ?? '')} alt={showcase[2].name} decoding="async" className="size-full object-contain" />
+              <img src={resolveImageUrl(showcase[2].images?.[0] ?? '')} alt={showcase[2].name} decoding="async" className="size-full object-contain transition-transform duration-500 hover:scale-110" />
             </div>
             <div className="p-2">
               <p className="line-clamp-1 text-[10px] font-medium text-slate-200">{showcase[2].name}</p>
               <p className="text-xs font-bold text-purple-300">{formatCurrency(showcase[2].salePrice)}</p>
             </div>
-          </div>
+          </Link>
         </motion.div>
       )}
 

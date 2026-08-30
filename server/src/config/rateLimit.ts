@@ -36,3 +36,15 @@ export const aiChatLimiter = rateLimit({
     data: null,
   },
 });
+
+export const guestAiChatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: 'Quá nhiều yêu cầu chat, vui lòng đăng nhập hoặc thử lại sau',
+    data: null,
+  },
+});

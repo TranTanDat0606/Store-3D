@@ -11,5 +11,6 @@ router.get('/revenue', statsController.revenueByDay);
 router.get('/revenue-period', statsController.revenuePeriod);
 router.get('/best-selling', statsController.bestSelling);
 router.get('/orders-by-status', statsController.ordersByStatus);
+router.get('/export-excel', statsController.exportExcel);
 
 export default router;
