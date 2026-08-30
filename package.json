@@ -2,6 +2,7 @@
   "name": "store3d-root",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
