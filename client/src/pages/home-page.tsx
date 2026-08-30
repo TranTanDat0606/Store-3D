@@ -331,21 +331,45 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA / Liên hệ */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 py-16 dark:from-slate-800 dark:to-slate-900">
-        <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-white/10 blur-[80px]" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-cyan-300/20 blur-[60px]" />
-        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
-          <h2 className="text-2xl font-bold text-white sm:text-3xl">
+      {/* CTA / Liên hệ — Light 3D Aurora */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/80 to-cyan-50/60 py-20 sm:py-24 dark:from-slate-900 dark:via-slate-800 dark:to-blue-950/40">
+        {/* Subtle grid — barely visible */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(0,0,0,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.15) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+
+        {/* Aurora blobs — soft atmospheric color */}
+        <div className="pointer-events-none absolute -top-20 right-[15%] h-72 w-72 rounded-full bg-cyan-300/20 blur-[100px]" />
+        <div className="pointer-events-none absolute -bottom-16 left-[10%] h-56 w-56 rounded-full bg-blue-300/15 blur-[80px]" />
+        <div className="pointer-events-none absolute top-1/3 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-indigo-200/15 blur-[90px] dark:bg-indigo-400/10" />
+
+        {/* Floating glass shapes */}
+        {/* Translucent rounded cube — top right */}
+        <div className="pointer-events-none absolute top-6 right-[10%] h-20 w-20 rotate-12 rounded-2xl border border-blue-200/40 bg-white/40 shadow-sm backdrop-blur-sm sm:h-28 sm:w-28 dark:border-white/10 dark:bg-white/5" />
+        {/* Glass sphere — bottom left */}
+        <div className="pointer-events-none absolute bottom-10 left-[12%] h-14 w-14 rounded-full border border-cyan-200/30 bg-gradient-to-br from-white/50 to-cyan-100/30 shadow-sm backdrop-blur-sm sm:h-16 sm:w-16 dark:border-white/10 dark:from-white/5 dark:to-cyan-400/5" />
+        {/* Rotated thin plane — mid left */}
+        <div className="pointer-events-none absolute top-1/2 left-[6%] h-8 w-24 -rotate-6 rounded-lg border border-indigo-200/30 bg-white/30 backdrop-blur-sm sm:h-10 sm:w-28 dark:border-white/10 dark:bg-white/5" />
+        {/* Small ring — bottom right */}
+        <div className="pointer-events-none absolute bottom-16 right-[18%] h-10 w-10 rounded-full border-2 border-blue-200/25 sm:h-12 sm:w-12 dark:border-white/10" />
+
+        {/* Content */}
+        <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6">
+          <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
             Sẵn sàng tạo mô hình của riêng bạn?
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm text-white/80">
+          <p className="mx-auto mt-3 max-w-lg text-sm text-slate-500 dark:text-white/60">
             Liên hệ với chúng tôi để được tư vấn miễn phí và báo giá chi tiết.
           </p>
           <div className="mt-6">
             <Button
               size="lg"
-              className="bg-white px-8 text-base font-semibold text-cyan-600 shadow-lg shadow-black/10 transition-all hover:bg-slate-100 hover:shadow-xl dark:bg-slate-200 dark:text-slate-800 dark:hover:bg-white"
+              className="bg-primary px-8 text-base font-semibold text-white shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/25"
               asChild
             >
               <Link to="/lien-he">
