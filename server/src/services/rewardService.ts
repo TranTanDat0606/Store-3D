@@ -99,8 +99,6 @@ export class RewardService {
   async getMyCoupons(userId: string) {
     const coupons = await UserCoupon.find({
       user: userId,
-      usedAt: null,
-      expiresAt: { $gt: new Date() },
     }).sort({ createdAt: -1 });
 
     return coupons;

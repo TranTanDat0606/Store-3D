@@ -54,6 +54,21 @@ export async function generateRevenueExcel(): Promise<Buffer> {
     OrderItem.aggregate([
       {
         $lookup: {
+          from: 'orders',
+          localField: 'order',
+          foreignField: '_id',
+          as: 'orderData',
+        },
+      },
+      { $unwind: { path: '$orderData', preserveNullAndEmptyArrays: false } },
+      {
+        $match: {
+          'orderData.payment.status': PaymentStatus.Paid,
+          'orderData.status': { $ne: OrderStatus.Cancelled },
+        },
+      },
+      {
+        $lookup: {
           from: 'products',
           localField: 'product',
           foreignField: '_id',

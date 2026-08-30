@@ -30,6 +30,22 @@ const BUDGET_PATTERNS = [
 const PRODUCT_KEYWORDS = /(?:sản\s*phẩm|mô\s*hình|model|figure|mô|hình|đồ|chơi|figure|toy|product|items?)/i;
 
 function parseBudget(text: string): { min?: number; max?: number; target?: number } | null {
+  const tuDenMatch = text.match(/từ\s*(\d[\d.,]*)\s*(k|tr(?:ệu)?|nghìn|đồng)?\s*đến\s*(\d[\d.,]*)\s*(k|tr(?:ệu)?|nghìn|đồng)?/i);
+  if (tuDenMatch) {
+    const parseVal = (numStr: string, unit: string) => {
+      let v = parseInt(numStr.replace(/[.,]/g, ''), 10);
+      if (isNaN(v)) return 0;
+      const u = unit.toLowerCase();
+      if (u === 'k' || u === 'nghìn') v *= 1000;
+      else if (u.startsWith('tr') || u === 'triệu') v *= 1000000;
+      else if (v < 1000) v *= 1000;
+      return v;
+    };
+    const min = parseVal(tuDenMatch[1], tuDenMatch[2] || '');
+    const max = parseVal(tuDenMatch[3], tuDenMatch[4] || '');
+    if (min > 0 && max > 0) return { min, max };
+  }
+
   for (const pattern of BUDGET_PATTERNS) {
     const match = text.match(pattern);
     if (match) {
@@ -47,14 +63,11 @@ function parseBudget(text: string): { min?: number; max?: number; target?: numbe
         value *= 1000;
       }
 
-      if (text.includes('dưới') || text.includes('dưới')) {
+      if (text.includes('dưới')) {
         return { max: value };
       }
-      if (text.includes('trên') || text.includes('trên')) {
+      if (text.includes('trên')) {
         return { min: value };
-      }
-      if (text.includes('từ') && text.includes('đến')) {
-        return { min: value, max: value };
       }
       return { target: value };
     }
