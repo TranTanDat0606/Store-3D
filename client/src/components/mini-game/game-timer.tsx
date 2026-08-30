@@ -4,10 +4,11 @@ import { cn } from '@/lib'
 interface GameTimerProps {
   duration: number
   onTimeUp: () => void
+  onTick?: (remaining: number) => void
   running: boolean
 }
 
-export const GameTimer = memo(function GameTimer({ duration, onTimeUp, running }: GameTimerProps) {
+export const GameTimer = memo(function GameTimer({ duration, onTimeUp, onTick, running }: GameTimerProps) {
   const [remaining, setRemaining] = useState(duration)
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export const GameTimer = memo(function GameTimer({ duration, onTimeUp, running }
       onTimeUp()
       return
     }
+    onTick?.(remaining)
     const timer = setTimeout(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -31,7 +33,7 @@ export const GameTimer = memo(function GameTimer({ duration, onTimeUp, running }
       })
     }, 1000)
     return () => clearTimeout(timer)
-  }, [remaining, running, onTimeUp])
+  }, [remaining, running, onTimeUp, onTick])
 
   const minutes = Math.floor(remaining / 60)
   const seconds = remaining % 60

@@ -41,6 +41,10 @@ export function MemoryMatch({ onGameEnd, disabled }: MemoryMatchProps) {
   const lockRef = useRef(false)
   const timeRef = useRef(GAME_DURATION)
 
+  const handleTick = useCallback((remaining: number) => {
+    timeRef.current = remaining
+  }, [])
+
   const totalPairs = useMemo(() => cards.length / 2, [cards])
 
   function initCards(): CardData[] {
@@ -117,7 +121,7 @@ export function MemoryMatch({ onGameEnd, disabled }: MemoryMatchProps) {
           <Trophy className="size-5 text-amber-500" />
           <span className="font-mono text-lg font-bold">{score}</span>
         </div>
-        <GameTimer duration={GAME_DURATION} onTimeUp={handleTimeUp} running={gameStarted && !gameOver} />
+        <GameTimer duration={GAME_DURATION} onTimeUp={handleTimeUp} onTick={handleTick} running={gameStarted && !gameOver} />
       </div>
 
       <div className="grid grid-cols-3 gap-3 w-full max-w-xs">

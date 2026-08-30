@@ -140,6 +140,13 @@ export class OrderService {
         { new: true },
       );
       if (!updated) {
+        // Restore reward coupon if one was atomically redeemed
+        if (coupon && !coupon.isAdminCoupon) {
+          await UserCoupon.updateOne(
+            { code: coupon.code, user: userId },
+            { $unset: { usedAt: '' } },
+          );
+        }
         await OrderItem.deleteMany({ order: order._id });
         await Order.findByIdAndDelete(order._id);
         throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
