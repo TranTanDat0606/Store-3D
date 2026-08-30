@@ -35,8 +35,8 @@ export class RewardService {
           expiresAt: activeSession.expiresAt,
         };
       }
-      activeSession.status = GameSessionStatus.Expired;
-      await activeSession.save();
+      // Delete expired session so the unique index {user, order} is freed
+      await GameSession.deleteOne({ _id: activeSession._id });
     }
 
     const expiresAt = new Date(Date.now() + GAME_SESSION_TIMEOUT_MS);

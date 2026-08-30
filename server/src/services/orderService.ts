@@ -35,6 +35,9 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
   if (coupon) {
     if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
     if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
+    if (coupon.minOrder > 0 && subtotal < coupon.minOrder) {
+      throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
+    }
 
     let discount = 0;
     if (coupon.type === CouponType.Percent) {
@@ -133,6 +136,8 @@ export class OrderService {
     );
 
     // Decrement stock atomically (guards against overselling under concurrency).
+    // Track decremented items so we can roll back on partial failure.
+    const decremented: { productId: string; quantity: number }[] = [];
     for (const lt of lineTotals) {
       const updated = await Product.findOneAndUpdate(
         { _id: lt.productId, stock: { $gte: lt.quantity } },
@@ -140,6 +145,17 @@ export class OrderService {
         { new: true },
       );
       if (!updated) {
+        // Roll back previously decremented stock
+        if (decremented.length > 0) {
+          await Product.bulkWrite(
+            decremented.map((d) => ({
+              updateOne: {
+                filter: { _id: d.productId },
+                update: { $inc: { stock: d.quantity } },
+              },
+            })),
+          );
+        }
         // Restore reward coupon if one was atomically redeemed
         if (coupon && !coupon.isAdminCoupon) {
           await UserCoupon.updateOne(
@@ -151,6 +167,7 @@ export class OrderService {
         await Order.findByIdAndDelete(order._id);
         throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
       }
+      decremented.push({ productId: lt.productId, quantity: lt.quantity });
     }
 
     // Increment admin coupon usage (UserCoupons are already atomically marked via findOneAndUpdate)

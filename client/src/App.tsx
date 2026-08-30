@@ -7,6 +7,7 @@ import { MainLayout } from '@/layouts/main-layout'
 import { AccountLayout } from '@/layouts/account-layout'
 import { AdminLayout } from '@/layouts/admin-layout'
 import { ProtectedRoute, GuestOnlyRoute, AdminRoute } from '@/routes/guards'
+import { ChunkErrorBoundary } from '@/routes/chunk-error-boundary'
 
 const HomePage = lazy(() => import('@/pages/home-page'))
 const ProductListPage = lazy(() => import('@/pages/product-list-page'))
@@ -54,8 +55,9 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <WishlistProvider>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
+          <ChunkErrorBoundary>
+            <Suspense fallback={<PageFallback />}>
+              <Routes>
               <Route element={<MainLayout />}>
                 <Route index element={<HomePage />} />
                 <Route path="san-pham" element={<ProductListPage />} />
@@ -102,7 +104,8 @@ function App() {
                 </Route>
               </Route>
             </Routes>
-          </Suspense>
+            </Suspense>
+          </ChunkErrorBoundary>
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>

@@ -6,4 +6,5 @@ export const REWARD_TIERS = [
 
 export const REWARD_COUPON_EXPIRY_DAYS = 14;
 export const GAME_SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-export const MAX_GAME_SCORE = 200;
+// True theoretical max: 3 pairs × 10 match + 60s × 2 timeBonus = 150
+export const MAX_GAME_SCORE = 150;
