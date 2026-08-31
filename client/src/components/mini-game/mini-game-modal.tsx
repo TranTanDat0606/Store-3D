@@ -51,10 +51,10 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gamepad2 className="size-5" />
-            Mini Game - Bắt côn trùng
+            Mini Game - Frog Robot Fighter
           </DialogTitle>
           <DialogDescription>
-            Giúp ếch bắt côn trùng và tránh chướng ngại vật!
+            Đánh bại kẻ thù và boss để nhận quà!
           </DialogDescription>
         </DialogHeader>
 
@@ -78,13 +78,24 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {!isStarting && !error && !started && !isDone && (
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="text-center">
-                <p className="text-lg font-semibold">Sẵn sàng chơi?</p>
+                <p className="text-lg font-semibold">Sẵn sàng chiến đấu?</p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Nhấn vào côn trùng để bắt. Tránh đá và quả!
+                  Di chuyển, nhảy, né tránh và bắn kẻ thù!
                   <br />
                   3 trái tim. Điểm càng cao, quà càng lớn!
                 </p>
               </div>
+
+              <div className="w-full space-y-3 rounded-lg bg-muted/50 p-3">
+                <p className="text-center text-xs font-semibold">Điều khiển</p>
+                <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                  <span>A/D hoặc ←/→</span><span className="text-right">Di chuyển</span>
+                  <span>Space</span><span className="text-right">Nhảy</span>
+                  <span>S hoặc ↓</span><span className="text-right">Rạp xuống</span>
+                  <span>F</span><span className="text-right">Bắn năng lượng</span>
+                </div>
+              </div>
+
               <div className="space-y-0.5 text-center text-xs text-muted-foreground">
                 <p>50+ điểm → Giảm 5%</p>
                 <p>60+ điểm → Giảm 10%</p>

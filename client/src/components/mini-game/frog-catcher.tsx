@@ -1,214 +1,740 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Heart, ArrowLeft, ArrowRight } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
+import { Heart } from 'lucide-react'
 import { cn } from '@/lib'
+import {
+  PlayerFrog,
+  PlayerFrogJump,
+  PlayerFrogCrouch,
+  EnemyRobot,
+  BossFrog,
+  EnergyBeam,
+  EnemyLaser,
+  AcidBlob,
+  LavaSpit,
+  EyeLaserBeam,
+  Rocket,
+  RollingRock,
+  HealingHeart,
+  Explosion,
+  HitSpark,
+  BossHealthBar,
+  WarningIndicator,
+} from './game-assets'
+import { MobileControls } from './mobile-controls'
 
-const LANE_COUNT = 5
-const INITIAL_LIVES = 3
-const SPAWN_INTERVAL_MS = 1200
-const MIN_SPAWN_INTERVAL_MS = 400
-const SPAWN_ACCELERATION = 0.97
-const BASE_SPEED = 1.2
-const MAX_SPEED = 4.0
-const SPEED_ACCELERATION = 0.003
+const ARENA_W = 400
+const ARENA_H = 500
+const GROUND_Y = ARENA_H - 50
+const PLAYER_W = 40
+const PLAYER_H = 44
+const PLAYER_SPEED = 220
+const JUMP_VELOCITY = -420
+const GRAVITY = 980
+const CROUCH_H = 28
+const SHOOT_COOLDOWN = 350
+const BEAM_SPEED = 450
+const BEAM_W = 24
+const BEAM_H = 8
 
-type ObjectType = 'mosquito' | 'fly' | 'dragonfly' | 'beetle' | 'rock' | 'fruit'
+const ENEMY_W = 34
+const ENEMY_H = 34
+const ENEMY_SPEED_MIN = 40
+const ENEMY_SPEED_MAX = 80
+const ENEMY_SHOOT_INTERVAL = 2200
+const ENEMY_LASER_W = 20
+const ENEMY_LASER_H = 6
 
-interface FallingObject {
+const ROCKET_W = 32
+const ROCKET_H = 14
+const ROCKET_SPEED_MIN = 100
+const ROCKET_SPEED_MAX = 180
+const ROCKET_SPAWN_INTERVAL = 4000
+
+const BOSS_W = 80
+const BOSS_H = 80
+const BOSS_HP = 60
+
+const PHASE2_SCORE = 80
+
+const ACID_W = 16
+const ACID_H = 16
+const ACID_SPEED = 150
+
+const LAVA_W = 18
+const LAVA_H = 18
+const LAVA_SPEED = 180
+
+const EYE_LASER_W = 60
+const EYE_LASER_H = 8
+const EYE_LASER_SPEED = 300
+
+const ROLLING_ROCK_W = 28
+const ROLLING_ROCK_H = 28
+const ROLLING_ROCK_SPEED = 160
+
+const HEAL_W = 24
+const HEAL_H = 24
+const HEAL_SPAWN_TIME = 60000
+
+let nextId = 1
+
+interface Projectile {
   id: number
-  type: ObjectType
-  lane: number
+  x: number
   y: number
+  type: 'beam' | 'enemy_laser' | 'acid' | 'lava' | 'eye_laser'
+  damage: number
+  phase?: 1 | 2
+}
+
+interface Enemy {
+  id: number
+  x: number
+  y: number
+  hp: number
+  maxHp: number
   speed: number
-  points: number
-  emoji: string
-  dangerous: boolean
-  caught?: boolean
+  lastShot: number
+  dying: boolean
+  deathTimer: number
+  variant: 'normal' | 'fast' | 'tank'
+}
+
+interface RocketObj {
+  id: number
+  x: number
+  y: number
+  speedX: number
+  speedY: number
+  warning: boolean
+  warningTimer: number
+}
+
+interface RollingRockObj {
+  id: number
+  x: number
+  y: number
+  speedX: number
+}
+
+interface HealObj {
+  id: number
+  x: number
+  y: number
+}
+
+type BossState = 'idle' | 'targeting' | 'telegraph' | 'attacking' | 'cooldown' | 'phase_transition' | 'defeated'
+
+interface BossObj {
+  hp: number
+  maxHp: number
+  phase: 1 | 2
+  state: BossState
+  stateTimer: number
+  attackType: 'eye_laser' | 'acid_tongue' | 'lava_spit' | 'rolling_rock'
+  cooldownDuration: number
+  appeared: boolean
+  y: number
+}
+
+interface Effect {
+  id: number
+  x: number
+  y: number
+  type: 'explosion' | 'spark'
+  timer: number
+}
+
+interface InputState {
+  left: boolean
+  right: boolean
+  jump: boolean
+  crouch: boolean
+  shoot: boolean
 }
 
 interface FrogCatcherProps {
   onGameEnd: (score: number) => void
 }
 
-const OBJECT_CONFIG: Record<ObjectType, { emoji: string; points: number; dangerous: boolean }> = {
-  mosquito: { emoji: '🦟', points: 2, dangerous: false },
-  fly: { emoji: '🪰', points: 4, dangerous: false },
-  dragonfly: { emoji: '🦋', points: 6, dangerous: false },
-  beetle: { emoji: '🪲', points: 8, dangerous: false },
-  rock: { emoji: '🪨', points: 0, dangerous: true },
-  fruit: { emoji: '🍎', points: 0, dangerous: true },
-}
-
-const INSECT_TYPES: ObjectType[] = ['mosquito', 'fly', 'dragonfly', 'beetle']
-const OBSTACLE_TYPES: ObjectType[] = ['rock', 'fruit']
-
-let nextId = 0
-
-function spawnObject(speed: number): FallingObject {
-  const isInsect = Math.random() < 0.65
-  const typePool = isInsect ? INSECT_TYPES : OBSTACLE_TYPES
-  const type = typePool[Math.floor(Math.random() * typePool.length)]
-  const config = OBJECT_CONFIG[type]
-
-  return {
-    id: nextId++,
-    type,
-    lane: Math.floor(Math.random() * LANE_COUNT),
-    y: -10,
-    speed: speed * (0.8 + Math.random() * 0.4),
-    points: config.points,
-    emoji: config.emoji,
-    dangerous: config.dangerous,
-  }
+function rectsOverlap(
+  ax: number, ay: number, aw: number, ah: number,
+  bx: number, by: number, bw: number, bh: number,
+): boolean {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by
 }
 
 export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
-  const [frogLane, setFrogLane] = useState(2)
-  const [objects, setObjects] = useState<FallingObject[]>([])
+  const [gameState, setGameState] = useState<'intro' | 'playing' | 'gameover' | 'victory'>('intro')
   const [score, setScore] = useState(0)
-  const [lives, setLives] = useState(INITIAL_LIVES)
-  const [gameOver, setGameOver] = useState(false)
-  const [started, setStarted] = useState(false)
-  const [flashLane, setFlashLane] = useState<number | null>(null)
-  const [combo, setCombo] = useState(0)
+  const [lives, setLives] = useState(3)
+  const [playerX, setPlayerX] = useState(60)
+  const [playerY, setPlayerY] = useState(GROUND_Y - PLAYER_H)
+  const [isJumping, setIsJumping] = useState(false)
+  const [isCrouching, setIsCrouching] = useState(false)
+  const [facingRight, setFacingRight] = useState(true)
+  const [enemies, setEnemies] = useState<Enemy[]>([])
+  const [projectiles, setProjectiles] = useState<Projectile[]>([])
+  const [rockets, setRockets] = useState<RocketObj[]>([])
+  const [rollingRocks, setRollingRocks] = useState<RollingRockObj[]>([])
+  const [heal, setHeal] = useState<HealObj | null>(null)
+  const [boss, setBoss] = useState<BossObj | null>(null)
+  const [effects, setEffects] = useState<Effect[]>([])
+  const [bossActive, setBossActive] = useState(false)
+  const [hitFlash, setHitFlash] = useState(false)
+  const [shakeScreen, setShakeScreen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  const speedRef = useRef(BASE_SPEED)
-  const spawnIntervalRef = useRef(SPAWN_INTERVAL_MS)
-  const lastSpawnRef = useRef(0)
+  const playerXRef = useRef(60)
+  const playerYRef = useRef(GROUND_Y - PLAYER_H)
+  const vyRef = useRef(0)
+  const isJumpingRef = useRef(false)
+  const isCrouchingRef = useRef(false)
+  const livesRef = useRef(3)
   const scoreRef = useRef(0)
-  const livesRef = useRef(INITIAL_LIVES)
   const gameOverRef = useRef(false)
-  const objectsRef = useRef<FallingObject[]>([])
-  const containerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<InputState>({ left: false, right: false, jump: false, crouch: false, shoot: false })
+  const lastShotRef = useRef(0)
+  const lastEnemySpawnRef = useRef(0)
+  const lastRocketSpawnRef = useRef(0)
+  const startTimeRef = useRef(0)
+  const bossRef = useRef<BossObj | null>(null)
+  const enemiesRef = useRef<Enemy[]>([])
+  const projectilesRef = useRef<Projectile[]>([])
+  const rocketsRef = useRef<RocketObj[]>([])
+  const rollingRocksRef = useRef<RollingRockObj[]>([])
+  const healRef = useRef<HealObj | null>(null)
+  const effectsRef = useRef<Effect[]>([])
+  const lastFrameRef = useRef(0)
+  const jumpPressedRef = useRef(false)
 
-  const handleClickObject = useCallback((obj: FallingObject) => {
-    if (gameOverRef.current || obj.caught) return
+  useEffect(() => {
+    const check = () => setIsMobile('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
-    if (obj.dangerous) {
-      const newLives = livesRef.current - 1
-      livesRef.current = newLives
-      setLives(newLives)
-      setFlashLane(obj.lane)
-      setTimeout(() => setFlashLane(null), 300)
+  const spawnEnemy = useCallback(() => {
+    const variants: ('normal' | 'fast' | 'tank')[] = ['normal', 'normal', 'normal', 'fast', 'tank']
+    const variant = variants[Math.floor(Math.random() * variants.length)]
+    const hpMap = { normal: 2, fast: 1, tank: 4 }
+    const speedMap = { normal: 1, fast: 1.5, tank: 0.6 }
+    const baseSpeed = ENEMY_SPEED_MIN + Math.random() * (ENEMY_SPEED_MAX - ENEMY_SPEED_MIN)
+    const e: Enemy = {
+      id: nextId++,
+      x: ARENA_W + 10,
+      y: GROUND_Y - ENEMY_H - Math.random() * 100,
+      hp: hpMap[variant],
+      maxHp: hpMap[variant],
+      speed: baseSpeed * speedMap[variant],
+      lastShot: performance.now() + 1000 + Math.random() * 1500,
+      dying: false,
+      deathTimer: 0,
+      variant,
+    }
+    enemiesRef.current = [...enemiesRef.current, e]
+    setEnemies([...enemiesRef.current])
+  }, [])
 
-      objectsRef.current = objectsRef.current.filter((o) => o.id !== obj.id)
-      setObjects([...objectsRef.current])
+  const spawnRocket = useCallback(() => {
+    const fromTop = Math.random() > 0.5
+    const r: RocketObj = {
+      id: nextId++,
+      x: Math.random() * (ARENA_W - 100) + 50,
+      y: fromTop ? -ROCKET_H : ARENA_H + ROCKET_H,
+      speedX: (Math.random() - 0.5) * 60,
+      speedY: fromTop ? ROCKET_SPEED_MIN + Math.random() * (ROCKET_SPEED_MAX - ROCKET_SPEED_MIN) : -(ROCKET_SPEED_MIN + Math.random() * (ROCKET_SPEED_MAX - ROCKET_SPEED_MIN)),
+      warning: true,
+      warningTimer: 800,
+    }
+    rocketsRef.current = [...rocketsRef.current, r]
+    setRockets([...rocketsRef.current])
+  }, [])
 
-      if (newLives <= 0) {
-        gameOverRef.current = true
-        setGameOver(true)
-        onGameEnd(scoreRef.current)
-      }
-    } else {
-      const pts = obj.points
-      scoreRef.current += pts
-      setScore(scoreRef.current)
-      setCombo((c) => c + 1)
+  const spawnRollingRock = useCallback(() => {
+    const fromRight = Math.random() > 0.5
+    const r: RollingRockObj = {
+      id: nextId++,
+      x: fromRight ? ARENA_W + ROLLING_ROCK_W : -ROLLING_ROCK_W,
+      y: GROUND_Y - ROLLING_ROCK_H - 5,
+      speedX: fromRight ? -ROLLING_ROCK_SPEED : ROLLING_ROCK_SPEED,
+    }
+    rollingRocksRef.current = [...rollingRocksRef.current, r]
+    setRollingRocks([...rollingRocksRef.current])
+  }, [])
 
-      objectsRef.current = objectsRef.current.map((o) =>
-        o.id === obj.id ? { ...o, caught: true } : o
-      )
-      setObjects([...objectsRef.current])
+  const addEffect = useCallback((x: number, y: number, type: 'explosion' | 'spark') => {
+    const e: Effect = { id: nextId++, x, y, type, timer: 400 }
+    effectsRef.current = [...effectsRef.current, e]
+    setEffects([...effectsRef.current])
+  }, [])
 
-      setTimeout(() => {
-        objectsRef.current = objectsRef.current.filter((o) => o.id !== obj.id)
-        setObjects([...objectsRef.current])
-      }, 200)
+  const damagePlayer = useCallback((amount: number) => {
+    if (gameOverRef.current) return
+    const newLives = Math.max(0, livesRef.current - amount)
+    livesRef.current = newLives
+    setLives(newLives)
+    setHitFlash(true)
+    setTimeout(() => setHitFlash(false), 200)
+    setShakeScreen(true)
+    setTimeout(() => setShakeScreen(false), 150)
+    if (newLives <= 0) {
+      gameOverRef.current = true
+      setGameState('gameover')
+      onGameEnd(scoreRef.current)
     }
   }, [onGameEnd])
 
-  const moveFrog = useCallback((direction: -1 | 1) => {
-    setFrogLane((prev) => {
-      const next = prev + direction
-      return Math.max(0, Math.min(LANE_COUNT - 1, next))
-    })
+  const shootBeam = useCallback(() => {
+    const now = performance.now()
+    if (now - lastShotRef.current < SHOOT_COOLDOWN) return
+    lastShotRef.current = now
+    const b: Projectile = {
+      id: nextId++,
+      x: playerXRef.current + PLAYER_W,
+      y: playerYRef.current + (isCrouchingRef.current ? CROUCH_H / 2 : PLAYER_H / 2) - BEAM_H / 2,
+      type: 'beam',
+      damage: 1,
+    }
+    projectilesRef.current = [...projectilesRef.current, b]
+    setProjectiles([...projectilesRef.current])
   }, [])
 
+  const bossShoot = useCallback((b: BossObj, attackType: string) => {
+    const bx = b.y > 0 ? 20 : 20
+    const bossCenterY = b.y + BOSS_H / 2
+
+    if (attackType === 'eye_laser') {
+      const p: Projectile = {
+        id: nextId++,
+        x: bx,
+        y: bossCenterY - EYE_LASER_H / 2,
+        type: 'eye_laser',
+        damage: 1,
+        phase: b.phase,
+      }
+      projectilesRef.current = [...projectilesRef.current, p]
+      setProjectiles([...projectilesRef.current])
+    } else if (attackType === 'acid_tongue') {
+      const p: Projectile = {
+        id: nextId++,
+        x: bx + 10,
+        y: bossCenterY - ACID_H / 2,
+        type: 'acid',
+        damage: 1,
+      }
+      projectilesRef.current = [...projectilesRef.current, p]
+      setProjectiles([...projectilesRef.current])
+    } else if (attackType === 'lava_spit') {
+      const p: Projectile = {
+        id: nextId++,
+        x: bx + 10,
+        y: bossCenterY - LAVA_H / 2,
+        type: 'lava',
+        damage: 1,
+      }
+      projectilesRef.current = [...projectilesRef.current, p]
+      setProjectiles([...projectilesRef.current])
+    } else if (attackType === 'rolling_rock') {
+      spawnRollingRock()
+    }
+  }, [spawnRollingRock])
+
+  const handleMobileAction = useCallback((action: string) => {
+    switch (action) {
+      case 'left':
+        inputRef.current.left = true
+        setTimeout(() => { inputRef.current.left = false }, 100)
+        break
+      case 'right':
+        inputRef.current.right = true
+        setTimeout(() => { inputRef.current.right = false }, 100)
+        break
+      case 'jump':
+        if (!isJumpingRef.current) {
+          inputRef.current.jump = true
+        }
+        break
+      case 'crouch':
+        inputRef.current.crouch = true
+        setTimeout(() => { inputRef.current.crouch = false }, 200)
+        break
+      case 'shoot':
+        shootBeam()
+        break
+    }
+  }, [shootBeam])
+
   useEffect(() => {
-    if (!started || gameOver) return
+    if (gameState !== 'playing') return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') {
-        e.preventDefault()
-        moveFrog(-1)
-      } else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') {
-        e.preventDefault()
-        moveFrog(1)
-      }
+      const key = e.key.toLowerCase()
+      if (key === 'a' || key === 'arrowleft') { e.preventDefault(); inputRef.current.left = true; setFacingRight(false) }
+      if (key === 'd' || key === 'arrowright') { e.preventDefault(); inputRef.current.right = true; setFacingRight(true) }
+      if ((key === ' ' || key === 'arrowup') && !jumpPressedRef.current) { e.preventDefault(); inputRef.current.jump = true; jumpPressedRef.current = true }
+      if (key === 's' || key === 'arrowdown') { e.preventDefault(); inputRef.current.crouch = true }
+      if (key === 'f') { e.preventDefault(); shootBeam() }
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase()
+      if (key === 'a' || key === 'arrowleft') inputRef.current.left = false
+      if (key === 'd' || key === 'arrowright') inputRef.current.right = false
+      if (key === ' ' || key === 'arrowup') { inputRef.current.jump = false; jumpPressedRef.current = false }
+      if (key === 's' || key === 'arrowdown') inputRef.current.crouch = false
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [started, gameOver, moveFrog])
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [gameState, shootBeam])
 
   useEffect(() => {
-    if (!started || gameOver) return
+    if (gameState !== 'playing') return
 
     let animFrame: number
-    let lastTime = performance.now()
+    lastFrameRef.current = performance.now()
+    startTimeRef.current = performance.now()
 
     const loop = (now: number) => {
       if (gameOverRef.current) return
 
-      const dt = Math.min((now - lastTime) / 16.67, 3)
-      lastTime = now
+      const dt = Math.min((now - lastFrameRef.current) / 1000, 0.05)
+      lastFrameRef.current = now
+      const elapsed = now - startTimeRef.current
 
-      speedRef.current = Math.min(speedRef.current + SPEED_ACCELERATION * dt, MAX_SPEED)
-      spawnIntervalRef.current = Math.max(
-        spawnIntervalRef.current * SPAWN_ACCELERATION,
-        MIN_SPAWN_INTERVAL_MS,
-      )
+      const input = inputRef.current
+      let px = playerXRef.current
+      let py = playerYRef.current
+      let vy = vyRef.current
+      const jumping = isJumpingRef.current
+      const crouching = input.crouch
 
-      if (now - lastSpawnRef.current > spawnIntervalRef.current) {
-        lastSpawnRef.current = now
-        const newObj = spawnObject(speedRef.current)
-        objectsRef.current = [...objectsRef.current, newObj]
-        setObjects([...objectsRef.current])
+      if (!jumping && input.jump) {
+        vy = JUMP_VELOCITY
+        vyRef.current = vy
+        isJumpingRef.current = true
+        setIsJumping(true)
+        input.jump = false
       }
 
-      const updated: FallingObject[] = []
-      let hitObstacle = false
+      if (input.left) {
+        px = Math.max(0, px - PLAYER_SPEED * dt)
+        setFacingRight(false)
+      }
+      if (input.right) {
+        px = Math.min(ARENA_W - PLAYER_W, px + PLAYER_SPEED * dt)
+        setFacingRight(true)
+      }
 
-      for (const obj of objectsRef.current) {
-        if (obj.caught) {
-          updated.push(obj)
-          continue
+      if (jumping) {
+        vy += GRAVITY * dt
+        py += vy * dt
+        if (py >= GROUND_Y - PLAYER_H) {
+          py = GROUND_Y - PLAYER_H
+          vy = 0
+          isJumpingRef.current = false
+          setIsJumping(false)
         }
+      }
 
-        const newY = obj.y + obj.speed * dt
-        if (newY >= 95) {
-          if (obj.dangerous && obj.lane === frogLane) {
-            hitObstacle = true
+      if (crouching && !jumping) {
+        py = GROUND_Y - CROUCH_H
+      } else if (!jumping) {
+        py = GROUND_Y - PLAYER_H
+      }
+
+      isCrouchingRef.current = crouching
+      setIsCrouching(crouching)
+      playerXRef.current = px
+      playerYRef.current = py
+      vyRef.current = vy
+      setPlayerX(px)
+      setPlayerY(py)
+
+      // Spawn enemies
+      const spawnRate = Math.max(1200 - elapsed * 0.08, 500)
+      if (now - lastEnemySpawnRef.current > spawnRate && !bossRef.current) {
+        lastEnemySpawnRef.current = now
+        spawnEnemy()
+      }
+
+      // Spawn rockets
+      const rocketRate = Math.max(ROCKET_SPAWN_INTERVAL - elapsed * 0.05, 1500)
+      if (now - lastRocketSpawnRef.current > rocketRate && !bossRef.current) {
+        lastRocketSpawnRef.current = now
+        spawnRocket()
+      }
+
+      // Spawn healing heart
+      if (elapsed > HEAL_SPAWN_TIME && !healRef.current && livesRef.current < 3) {
+        const h: HealObj = {
+          id: nextId++,
+          x: 100 + Math.random() * (ARENA_W - 200),
+          y: 50 + Math.random() * 100,
+        }
+        healRef.current = h
+        setHeal(h)
+      }
+
+      // Update enemies
+      const updatedEnemies: Enemy[] = []
+      for (const e of enemiesRef.current) {
+        if (e.dying) {
+          e.deathTimer -= dt * 1000
+          if (e.deathTimer > 0) {
+            updatedEnemies.push(e)
           }
           continue
         }
 
-        if (obj.dangerous && !obj.caught) {
-          const frogY = 85
-          if (obj.lane === frogLane && newY >= frogY - 8 && newY <= frogY + 8) {
-            hitObstacle = true
+        e.x -= e.speed * dt
+
+        if (now > e.lastShot) {
+          e.lastShot = now + ENEMY_SHOOT_INTERVAL
+          const lp: Projectile = {
+            id: nextId++,
+            x: e.x - ENEMY_LASER_W,
+            y: e.y + ENEMY_H / 2 - ENEMY_LASER_H / 2,
+            type: 'enemy_laser',
+            damage: 1,
+          }
+          projectilesRef.current = [...projectilesRef.current, lp]
+        }
+
+        if (e.x < -ENEMY_W) continue
+        updatedEnemies.push(e)
+      }
+      enemiesRef.current = updatedEnemies
+      setEnemies([...updatedEnemies])
+
+      // Update projectiles
+      const updatedProjectiles: Projectile[] = []
+      for (const p of projectilesRef.current) {
+        if (p.type === 'beam') {
+          p.x += BEAM_SPEED * dt
+          if (p.x > ARENA_W + 10) continue
+
+          for (const e of enemiesRef.current) {
+            if (e.dying) continue
+            if (rectsOverlap(p.x, p.y, BEAM_W, BEAM_H, e.x, e.y, ENEMY_W, ENEMY_H)) {
+              e.hp -= p.damage
+              addEffect(p.x, p.y, 'spark')
+              if (e.hp <= 0) {
+                e.dying = true
+                e.deathTimer = 300
+                const pts = e.variant === 'tank' ? 8 : e.variant === 'fast' ? 6 : 4
+                scoreRef.current += pts
+                setScore(scoreRef.current)
+                addEffect(e.x + ENEMY_W / 2, e.y + ENEMY_H / 2, 'explosion')
+              }
+              p.x = ARENA_W + 100
+              break
+            }
+          }
+
+          if (bossRef.current && bossRef.current.hp > 0 && bossRef.current.state !== 'phase_transition' && bossRef.current.state !== 'defeated') {
+            const b = bossRef.current
+            if (rectsOverlap(p.x, p.y, BEAM_W, BEAM_H, 20, b.y, BOSS_W, BOSS_H)) {
+              b.hp -= p.damage
+              addEffect(p.x, p.y, 'spark')
+              if (b.hp <= 0 && b.state !== 'defeated') {
+                b.state = 'defeated'
+                b.stateTimer = 2000
+                scoreRef.current += 50
+                setScore(scoreRef.current)
+                addEffect(20 + BOSS_W / 2, b.y + BOSS_H / 2, 'explosion')
+              }
+              p.x = ARENA_W + 100
+            }
+          }
+        } else {
+          p.x -= (p.type === 'eye_laser' ? EYE_LASER_SPEED : p.type === 'lava' ? LAVA_SPEED : ACID_SPEED) * dt
+          if (p.x < -60) continue
+
+          const ph = p.type === 'eye_laser' ? EYE_LASER_H : p.type === 'lava' ? LAVA_H : ACID_H
+          const pw = p.type === 'eye_laser' ? EYE_LASER_W : p.type === 'lava' ? LAVA_W : ACID_W
+          const playerH = crouching ? CROUCH_H : PLAYER_H
+
+          if (rectsOverlap(p.x, p.y, pw, ph, px, py, PLAYER_W, playerH)) {
+            damagePlayer(p.damage)
+            addEffect(px + PLAYER_W / 2, py, 'spark')
+            p.x = -100
             continue
           }
         }
 
-        updated.push({ ...obj, y: newY })
+        updatedProjectiles.push(p)
+      }
+      projectilesRef.current = updatedProjectiles
+      setProjectiles([...updatedProjectiles])
+
+      // Update rockets
+      const updatedRockets: RocketObj[] = []
+      for (const r of rocketsRef.current) {
+        if (r.warning) {
+          r.warningTimer -= dt * 1000
+          if (r.warningTimer <= 0) {
+            r.warning = false
+          }
+          updatedRockets.push(r)
+          continue
+        }
+
+        r.x += r.speedX * dt
+        r.y += r.speedY * dt
+
+        if (r.y < -ROCKET_H * 2 || r.y > ARENA_H + ROCKET_H * 2 || r.x < -ROCKET_W * 2 || r.x > ARENA_W + ROCKET_W * 2) continue
+
+        const playerH = crouching ? CROUCH_H : PLAYER_H
+        if (rectsOverlap(r.x, r.y, ROCKET_W, ROCKET_H, px, py, PLAYER_W, playerH)) {
+          damagePlayer(1)
+          addEffect(r.x + ROCKET_W / 2, r.y + ROCKET_H / 2, 'explosion')
+          continue
+        }
+
+        updatedRockets.push(r)
+      }
+      rocketsRef.current = updatedRockets
+      setRockets([...updatedRockets])
+
+      // Update rolling rocks
+      const updatedRR: RollingRockObj[] = []
+      for (const r of rollingRocksRef.current) {
+        r.x += r.speedX * dt
+        if (r.x < -ROLLING_ROCK_W * 2 || r.x > ARENA_W + ROLLING_ROCK_W * 2) continue
+
+        const playerH = crouching ? CROUCH_H : PLAYER_H
+        if (rectsOverlap(r.x, r.y, ROLLING_ROCK_H, ROLLING_ROCK_H, px, py, PLAYER_W, playerH)) {
+          damagePlayer(1.5)
+          addEffect(r.x + ROLLING_ROCK_W / 2, r.y + ROLLING_ROCK_H / 2, 'explosion')
+          continue
+        }
+
+        updatedRR.push(r)
+      }
+      rollingRocksRef.current = updatedRR
+      setRollingRocks([...updatedRR])
+
+      // Update healing heart
+      if (healRef.current) {
+        const h = healRef.current
+        const playerH = crouching ? CROUCH_H : PLAYER_H
+        if (rectsOverlap(h.x, h.y, HEAL_W, HEAL_H, px, py, PLAYER_W, playerH)) {
+          livesRef.current = Math.min(3, livesRef.current + 1)
+          setLives(livesRef.current)
+          healRef.current = null
+          setHeal(null)
+          addEffect(h.x + HEAL_W / 2, h.y + HEAL_H / 2, 'spark')
+        }
       }
 
-      objectsRef.current = updated
-      setObjects([...updated])
+      // Update boss
+      if (bossRef.current) {
+        const b = bossRef.current
 
-      if (hitObstacle) {
-        const newLives = livesRef.current - 1
-        livesRef.current = newLives
-        setLives(newLives)
-        setFlashLane(frogLane)
-        setTimeout(() => setFlashLane(null), 300)
-
-        if (newLives <= 0) {
-          gameOverRef.current = true
-          setGameOver(true)
-          onGameEnd(scoreRef.current)
-          return
+        if (!b.appeared) {
+          b.y = 30
+          b.appeared = true
         }
+
+        b.stateTimer -= dt * 1000
+
+        if (b.state === 'phase_transition') {
+          if (b.stateTimer <= 0) {
+            b.phase = 2
+            b.state = 'idle'
+            b.stateTimer = 1000
+            b.cooldownDuration = 1200
+          }
+        } else if (b.state === 'defeated') {
+          if (b.stateTimer <= 0) {
+            bossRef.current = null
+            setBoss(null)
+            setBossActive(false)
+          }
+        } else if (b.state === 'idle') {
+          if (b.stateTimer <= 0) {
+            b.state = 'targeting'
+            b.stateTimer = 500
+          }
+        } else if (b.state === 'targeting') {
+          if (b.stateTimer <= 0) {
+            const attacks = b.phase === 1
+              ? ['eye_laser', 'acid_tongue']
+              : ['lava_spit', 'eye_laser', 'rolling_rock']
+            b.attackType = attacks[Math.floor(Math.random() * attacks.length)] as typeof b.attackType
+            b.state = 'telegraph'
+            b.stateTimer = b.phase === 2 ? 400 : 600
+          }
+        } else if (b.state === 'telegraph') {
+          if (b.stateTimer <= 0) {
+            bossShoot(b, b.attackType)
+            b.state = 'attacking'
+            b.stateTimer = b.phase === 2 ? 300 : 500
+          }
+        } else if (b.state === 'attacking') {
+          if (b.stateTimer <= 0) {
+            b.state = 'cooldown'
+            b.stateTimer = b.cooldownDuration
+          }
+        } else if (b.state === 'cooldown') {
+          if (b.stateTimer <= 0) {
+            b.state = 'idle'
+            b.stateTimer = 400
+          }
+        }
+
+        // Check score for phase 2 transition
+        if (b.phase === 1 && scoreRef.current >= PHASE2_SCORE && b.state !== 'phase_transition' && b.state !== 'defeated') {
+          b.state = 'phase_transition'
+          b.stateTimer = 1500
+          b.cooldownDuration = 800
+          addEffect(20 + BOSS_W / 2, b.y + BOSS_H / 2, 'explosion')
+        }
+
+        setBoss({ ...b })
+      }
+
+      // Boss spawn logic
+      if (!bossRef.current && scoreRef.current >= 20 && enemiesRef.current.length === 0) {
+        const b: BossObj = {
+          hp: BOSS_HP,
+          maxHp: BOSS_HP,
+          phase: 1,
+          state: 'idle',
+          stateTimer: 2000,
+          attackType: 'eye_laser',
+          cooldownDuration: 2000,
+          appeared: false,
+          y: -BOSS_H,
+        }
+        bossRef.current = b
+        setBoss({ ...b })
+        setBossActive(true)
+        enemiesRef.current = []
+        setEnemies([])
+      }
+
+      // Update effects
+      const updatedEffects: Effect[] = []
+      for (const e of effectsRef.current) {
+        e.timer -= dt * 1000
+        if (e.timer > 0) updatedEffects.push(e)
+      }
+      effectsRef.current = updatedEffects
+      setEffects([...updatedEffects])
+
+      // Victory check
+      if (bossRef.current && bossRef.current.hp <= 0 && bossRef.current.state === 'defeated' && bossRef.current.stateTimer <= 500) {
+        gameOverRef.current = true
+        setGameState('victory')
+        onGameEnd(scoreRef.current)
+        return
       }
 
       animFrame = requestAnimationFrame(loop)
@@ -216,184 +742,378 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
 
     animFrame = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(animFrame)
-  }, [started, gameOver, frogLane, onGameEnd])
+  }, [gameState, spawnEnemy, spawnRocket, damagePlayer, bossShoot, addEffect, onGameEnd])
 
   const handleStart = useCallback(() => {
-    nextId = 0
-    speedRef.current = BASE_SPEED
-    spawnIntervalRef.current = SPAWN_INTERVAL_MS
-    lastSpawnRef.current = 0
+    nextId = 1
+    playerXRef.current = 60
+    playerYRef.current = GROUND_Y - PLAYER_H
+    vyRef.current = 0
+    isJumpingRef.current = false
+    isCrouchingRef.current = false
+    livesRef.current = 3
     scoreRef.current = 0
-    livesRef.current = INITIAL_LIVES
     gameOverRef.current = false
-    objectsRef.current = []
+    enemiesRef.current = []
+    projectilesRef.current = []
+    rocketsRef.current = []
+    rollingRocksRef.current = []
+    healRef.current = null
+    bossRef.current = null
+    effectsRef.current = []
+    lastEnemySpawnRef.current = 0
+    lastRocketSpawnRef.current = 0
+    lastShotRef.current = 0
+    jumpPressedRef.current = false
 
-    setFrogLane(2)
-    setObjects([])
+    setPlayerX(60)
+    setPlayerY(GROUND_Y - PLAYER_H)
+    setLives(3)
     setScore(0)
-    setLives(INITIAL_LIVES)
-    setGameOver(false)
-    setStarted(true)
-    setCombo(0)
+    setEnemies([])
+    setProjectiles([])
+    setRockets([])
+    setRollingRocks([])
+    setHeal(null)
+    setBoss(null)
+    setBossActive(false)
+    setEffects([])
+    setGameState('playing')
   }, [])
 
+  const playerH = isCrouching ? CROUCH_H : PLAYER_H
+
+  const renderPlayer = useMemo(() => {
+    const style: React.CSSProperties = {
+      position: 'absolute',
+      left: playerX,
+      top: playerY,
+      width: PLAYER_W,
+      height: playerH,
+      transform: facingRight ? 'none' : 'scaleX(-1)',
+      transition: 'top 0.05s',
+      zIndex: 20,
+    }
+
+    if (hitFlash) {
+      style.filter = 'brightness(2) saturate(0)'
+      style.opacity = 0.7
+    }
+
+    if (isJumping) {
+      return <PlayerFrogJump className="absolute" style={style} />
+    }
+    if (isCrouching) {
+      return <PlayerFrogCrouch className="absolute" style={style} />
+    }
+    return <PlayerFrog className="absolute" style={style} />
+  }, [playerX, playerY, playerH, facingRight, isJumping, isCrouching, hitFlash])
+
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="flex items-center justify-between w-full max-w-sm">
+    <div className="flex flex-col items-center gap-2">
+      {/* HUD */}
+      <div className="flex w-full items-center justify-between px-1">
         <div className="flex items-center gap-1">
-          {Array.from({ length: INITIAL_LIVES }).map((_, i) => (
-            <Heart
-              key={i}
-              className={cn(
-                'size-5 transition-all',
-                i < lives ? 'fill-red-500 text-red-500' : 'text-muted-foreground/30',
-              )}
-            />
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold">{score}</span>
-          {combo > 2 && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
-              x{combo}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {!started && !gameOver && (
-        <div className="flex flex-col items-center gap-3 py-6">
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div><span className="text-lg">🦟</span><br />+2</div>
-            <div><span className="text-lg">🪰</span><br />+4</div>
-            <div><span className="text-lg">🦋</span><br />+6</div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div><span className="text-lg">🪲</span><br />+8</div>
-            <div><span className="text-lg">🪨</span><br />-1 ❤️</div>
-            <div><span className="text-lg">🍎</span><br />-1 ❤️</div>
-          </div>
-          <p className="text-muted-foreground mt-2 text-xs">
-            Nhấn vào côn trùng để bắt. Tránh đá và quả!
-          </p>
-        </div>
-      )}
-
-      {(started || gameOver) && (
-        <div
-          ref={containerRef}
-          className={cn(
-            'relative w-full max-w-sm overflow-hidden rounded-xl border bg-gradient-to-b from-sky-100 to-emerald-100 dark:from-sky-950 dark:to-emerald-950',
-            flashLane !== null && 'animate-pulse ring-2 ring-red-500',
-          )}
-          style={{ height: 320 }}
-        >
-          {Array.from({ length: LANE_COUNT }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute top-0 bottom-0 border-r border-black/5 last:border-r-0"
-              style={{ left: `${(i / LANE_COUNT) * 100}%`, width: `${100 / LANE_COUNT}%` }}
-            />
-          ))}
-
-          {!gameOver && (
-            <button
-              type="button"
-              className="absolute bottom-2 z-20 flex items-center justify-center transition-all duration-100"
-              style={{
-                left: `${(frogLane / LANE_COUNT) * 100 + 100 / LANE_COUNT / 2}%`,
-                transform: 'translateX(-50%)',
-              }}
-              aria-label="Con ếch"
-            >
-              <span className="text-4xl drop-shadow-lg select-none">🐸</span>
-            </button>
-          )}
-
-          {objects.map((obj) => {
-            if (obj.caught) {
+          {Array.from({ length: 3 }).map((_, i) => {
+            const heartLife = lives - i
+            if (heartLife >= 1) {
+              return <Heart key={i} className="size-5 fill-red-500 text-red-500" />
+            }
+            if (heartLife >= 0.5) {
               return (
-                <div
-                  key={obj.id}
-                  className="absolute z-10 flex items-center justify-center transition-all duration-200 scale-150 opacity-0"
-                  style={{
-                    left: `${(obj.lane / LANE_COUNT) * 100 + 100 / LANE_COUNT / 2}%`,
-                    top: `${obj.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  <span className="text-2xl">{obj.emoji}</span>
-                  <span className="absolute -top-4 text-xs font-bold text-emerald-600">+{obj.points}</span>
+                <div key={i} className="relative size-5">
+                  <Heart className="absolute size-5 text-muted-foreground/30" />
+                  <div className="absolute size-5 overflow-hidden" style={{ width: '50%' }}>
+                    <Heart className="size-5 fill-red-500 text-red-500" />
+                  </div>
                 </div>
               )
             }
-
-            return (
-              <button
-                key={obj.id}
-                type="button"
-                onClick={() => handleClickObject(obj)}
-                className={cn(
-                  'absolute z-10 flex items-center justify-center transition-transform active:scale-125',
-                  obj.dangerous ? 'cursor-pointer' : 'cursor-pointer',
-                )}
-                style={{
-                  left: `${(obj.lane / LANE_COUNT) * 100 + 100 / LANE_COUNT / 2}%`,
-                  top: `${obj.y}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-                aria-label={obj.dangerous ? `Chướng ngại: ${obj.emoji}` : `Côn trùng: ${obj.emoji}`}
-              >
-                <span className={cn(
-                  'text-2xl drop-shadow-sm select-none',
-                  !obj.dangerous && 'hover:scale-125 transition-transform',
-                )}>
-                  {obj.emoji}
-                </span>
-              </button>
-            )
+            return <Heart key={i} className="size-5 text-muted-foreground/30" />
           })}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm font-bold tabular-nums">{score}</span>
+        </div>
+      </div>
 
-          {gameOver && (
-            <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <div className="text-center text-white">
-                <p className="text-2xl font-bold">Trò chơi kết thúc!</p>
-                <p className="mt-1 text-lg">Điểm: {score}</p>
-              </div>
+      {/* Boss HP */}
+      {bossActive && boss && (
+        <div className="w-full px-1">
+          <BossHealthBar hp={boss.hp} maxHp={boss.maxHp} phase={boss.phase} />
+        </div>
+      )}
+
+      {/* Arena */}
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-xl border-2',
+          'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900',
+          hitFlash && 'ring-2 ring-red-500',
+          shakeScreen && 'animate-[shake_0.15s_ease-in-out]',
+        )}
+        style={{
+          width: ARENA_W,
+          height: ARENA_H,
+          maxWidth: '100%',
+          aspectRatio: `${ARENA_W}/${ARENA_H}`,
+        }}
+      >
+        {/* Grid background */}
+        <div className="pointer-events-none absolute inset-0 opacity-10">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div key={`h${i}`} className="absolute w-full border-t border-cyan-500/30" style={{ top: `${(i + 1) * 5}%` }} />
+          ))}
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={`v${i}`} className="absolute h-full border-l border-cyan-500/30" style={{ left: `${(i + 1) * 6.67}%` }} />
+          ))}
+        </div>
+
+        {/* Ground */}
+        <div
+          className="absolute bottom-0 w-full"
+          style={{
+            height: ARENA_H - GROUND_Y,
+            background: 'linear-gradient(to bottom, #164e63, #0c4a6e)',
+            borderTop: '2px solid #22d3ee',
+            boxShadow: '0 -4px 12px rgba(34,211,238,0.3)',
+          }}
+        />
+
+        {/* Intro screen */}
+        {gameState === 'intro' && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+            <PlayerFrog className="mb-4" style={{ width: 64, height: 64 }} />
+            <h3 className="mb-2 text-lg font-bold text-white">Frog Robot Fighter</h3>
+            <p className="mb-4 max-w-[280px] text-center text-xs text-white/70">
+              Di chuyển, nhảy, né tránh và bắn kẻ thù!
+            </p>
+            <div className="mb-4 space-y-1 text-center text-[10px] text-white/50">
+              <p>A/D hoặc ←/→ = Di chuyển</p>
+              <p>Space = Nhảy | S = Rạp | F = Bắn</p>
             </div>
-          )}
-        </div>
+            <button
+              type="button"
+              onClick={handleStart}
+              className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-cyan-500/25 active:scale-95"
+            >
+              Bắt đầu
+            </button>
+          </div>
+        )}
+
+        {/* Enemies */}
+        {enemies.map((e) => (
+          <div
+            key={e.id}
+            className={cn('absolute', e.dying && 'animate-[fadeOut_0.3s]')}
+            style={{
+              left: e.x,
+              top: e.y,
+              width: ENEMY_W,
+              height: ENEMY_H,
+              opacity: e.dying ? 0.3 : 1,
+              filter: e.hp < e.maxHp ? 'brightness(1.5)' : undefined,
+              transition: 'filter 0.1s',
+            }}
+          >
+            <EnemyRobot variant={e.variant} style={{ width: '100%', height: '100%' }} />
+            {e.hp < e.maxHp && !e.dying && (
+              <div className="absolute -top-1 left-0 h-1 w-full overflow-hidden rounded-full bg-black/40">
+                <div
+                  className="h-full bg-red-500"
+                  style={{ width: `${(e.hp / e.maxHp) * 100}%` }}
+                />
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Player projectiles */}
+        {projectiles.map((p) => {
+          if (p.type === 'beam') {
+            return (
+              <EnergyBeam
+                key={p.id}
+                className="absolute"
+                style={{ left: p.x, top: p.y, width: BEAM_W, height: BEAM_H }}
+              />
+            )
+          }
+          if (p.type === 'enemy_laser') {
+            return (
+              <EnemyLaser
+                key={p.id}
+                className="absolute"
+                style={{ left: p.x, top: p.y, width: ENEMY_LASER_W, height: ENEMY_LASER_H }}
+              />
+            )
+          }
+          if (p.type === 'acid') {
+            return (
+              <AcidBlob
+                key={p.id}
+                className="absolute"
+                style={{ left: p.x, top: p.y, width: ACID_W, height: ACID_H }}
+              />
+            )
+          }
+          if (p.type === 'lava') {
+            return (
+              <LavaSpit
+                key={p.id}
+                className="absolute"
+                style={{ left: p.x, top: p.y, width: LAVA_W, height: LAVA_H }}
+              />
+            )
+          }
+          if (p.type === 'eye_laser') {
+            return (
+              <EyeLaserBeam
+                key={p.id}
+                className="absolute"
+                phase={p.phase}
+                style={{ left: p.x, top: p.y, width: EYE_LASER_W, height: EYE_LASER_H }}
+              />
+            )
+          }
+          return null
+        })}
+
+        {/* Rockets */}
+        {rockets.map((r) => (
+          <div key={r.id}>
+            {r.warning ? (
+              <WarningIndicator
+                className="absolute"
+                style={{ left: r.x, top: r.y > ARENA_H / 2 ? ARENA_H - 20 : 5, width: 16, height: 14 }}
+              />
+            ) : (
+              <Rocket
+                className="absolute"
+                style={{ left: r.x, top: r.y, width: ROCKET_W, height: ROCKET_H }}
+                direction={r.speedX > 0 ? 'right' : 'left'}
+              />
+            )}
+          </div>
+        ))}
+
+        {/* Rolling rocks */}
+        {rollingRocks.map((r) => (
+          <RollingRock
+            key={r.id}
+            className="absolute"
+            style={{ left: r.x, top: r.y, width: ROLLING_ROCK_W, height: ROLLING_ROCK_H }}
+          />
+        ))}
+
+        {/* Healing heart */}
+        {heal && (
+          <HealingHeart
+            className="absolute"
+            style={{ left: heal.x, top: heal.y, width: HEAL_W, height: HEAL_H }}
+          />
+        )}
+
+        {/* Boss */}
+        {boss && boss.appeared && boss.state !== 'defeated' && (
+          <BossFrog
+            className="absolute"
+            phase={boss.phase}
+            style={{
+              left: 20,
+              top: boss.y,
+              width: BOSS_W,
+              height: BOSS_H,
+              transition: boss.state === 'phase_transition' ? 'all 0.5s' : undefined,
+            }}
+          />
+        )}
+
+        {/* Boss death explosion */}
+        {boss && boss.state === 'defeated' && (
+          <Explosion
+            className="absolute"
+            style={{
+              left: 20 + BOSS_W / 2 - 32,
+              top: boss.y + BOSS_H / 2 - 32,
+              width: 64,
+              height: 64,
+              animation: 'pulse 0.3s infinite',
+            }}
+          />
+        )}
+
+        {/* Phase transition effect */}
+        {boss && boss.state === 'phase_transition' && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-red-500/20 backdrop-blur-[1px]">
+            <span className="animate-bounce text-lg font-black tracking-wider text-red-400 drop-shadow-lg">
+              PHASE 2
+            </span>
+          </div>
+        )}
+
+        {/* Effects */}
+        {effects.map((e) => (
+          <div
+            key={e.id}
+            className="absolute pointer-events-none"
+            style={{
+              left: e.x - (e.type === 'explosion' ? 16 : 10),
+              top: e.y - (e.type === 'explosion' ? 16 : 10),
+              width: e.type === 'explosion' ? 32 : 20,
+              height: e.type === 'explosion' ? 32 : 20,
+              opacity: e.timer / 400,
+            }}
+          >
+            {e.type === 'explosion' ? (
+              <Explosion style={{ width: '100%', height: '100%' }} />
+            ) : (
+              <HitSpark style={{ width: '100%', height: '100%' }} />
+            )}
+          </div>
+        ))}
+
+        {/* Player */}
+        {renderPlayer}
+
+        {/* Game Over overlay */}
+        {gameState === 'gameover' && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+            <p className="mb-1 text-2xl font-black tracking-wider text-red-400">GAME OVER</p>
+            <p className="mb-4 text-lg font-bold text-white">Điểm: {score}</p>
+            <button
+              type="button"
+              onClick={handleStart}
+              className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg active:scale-95"
+            >
+              Chơi lại
+            </button>
+          </div>
+        )}
+
+        {/* Victory overlay */}
+        {gameState === 'victory' && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
+            <p className="mb-1 text-2xl font-black tracking-wider text-amber-400">BOSS DEFEATED!</p>
+            <p className="mb-4 text-lg font-bold text-white">Điểm: {score}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Controls */}
+      {isMobile && gameState === 'playing' && (
+        <MobileControls onAction={handleMobileAction} />
       )}
 
-      {started && !gameOver && (
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => moveFrog(-1)}
-            className="flex size-10 items-center justify-center rounded-full border bg-white shadow-sm active:scale-95 dark:bg-slate-800"
-            aria-label="Di chuyển trái"
-          >
-            <ArrowLeft className="size-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => moveFrog(1)}
-            className="flex size-10 items-center justify-center rounded-full border bg-white shadow-sm active:scale-95 dark:bg-slate-800"
-            aria-label="Di chuyển phải"
-          >
-            <ArrowRight className="size-5" />
-          </button>
+      {/* Controls hint (desktop) */}
+      {!isMobile && gameState === 'playing' && (
+        <div className="flex gap-3 text-[10px] text-muted-foreground/60">
+          <span>A/D: Di chuyển</span>
+          <span>Space: Nhảy</span>
+          <span>S: Rạp</span>
+          <span>F: Bắn</span>
         </div>
-      )}
-
-      {!started && !gameOver && (
-        <button
-          type="button"
-          onClick={handleStart}
-          className="rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-primary/90 active:scale-95"
-        >
-          Bắt đầu chơi
-        </button>
       )}
     </div>
   )
