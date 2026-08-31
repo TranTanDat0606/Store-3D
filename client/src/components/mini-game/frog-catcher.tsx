@@ -66,7 +66,6 @@ const LAVA_SPEED = 180
 
 const EYE_LASER_W = 60
 const EYE_LASER_H = 8
-const EYE_LASER_SPEED = 300
 
 const ROLLING_ROCK_W = 28
 const ROLLING_ROCK_H = 28
@@ -75,6 +74,11 @@ const ROLLING_ROCK_SPEED = 160
 const HEAL_W = 24
 const HEAL_H = 24
 const HEAL_SPAWN_TIME = 60000
+
+const INVINCIBLE_DURATION = 400
+const ENEMY_LASER_SPEED = 250
+const BOSS_X = ARENA_W - BOSS_W - 20
+const BOSS_PROJECTILE_SPEED = 280
 
 let nextId = 1
 
@@ -182,6 +186,8 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
   const [effects, setEffects] = useState<Effect[]>([])
   const [bossActive, setBossActive] = useState(false)
   const [hitFlash, setHitFlash] = useState(false)
+  const [invincible, setInvincible] = useState(false)
+  const invincibleTimerRef = useRef(0)
   const [shakeScreen, setShakeScreen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -272,9 +278,12 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
 
   const damagePlayer = useCallback((amount: number) => {
     if (gameOverRef.current) return
+    if (invincibleTimerRef.current > 0) return
     const newLives = Math.max(0, livesRef.current - amount)
     livesRef.current = newLives
     setLives(newLives)
+    invincibleTimerRef.current = INVINCIBLE_DURATION
+    setInvincible(true)
     setHitFlash(true)
     setTimeout(() => setHitFlash(false), 200)
     setShakeScreen(true)
@@ -282,7 +291,6 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     if (newLives <= 0) {
       gameOverRef.current = true
       setGameState('gameover')
-      onGameEnd(scoreRef.current)
     }
   }, [onGameEnd])
 
@@ -302,13 +310,13 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
   }, [])
 
   const bossShoot = useCallback((b: BossObj, attackType: string) => {
-    const bx = b.y > 0 ? 20 : 20
+    const bx = BOSS_X
     const bossCenterY = b.y + BOSS_H / 2
 
     if (attackType === 'eye_laser') {
       const p: Projectile = {
         id: nextId++,
-        x: bx,
+        x: bx - EYE_LASER_W,
         y: bossCenterY - EYE_LASER_H / 2,
         type: 'eye_laser',
         damage: 1,
@@ -319,7 +327,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     } else if (attackType === 'acid_tongue') {
       const p: Projectile = {
         id: nextId++,
-        x: bx + 10,
+        x: bx - ACID_W,
         y: bossCenterY - ACID_H / 2,
         type: 'acid',
         damage: 1,
@@ -329,7 +337,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     } else if (attackType === 'lava_spit') {
       const p: Projectile = {
         id: nextId++,
-        x: bx + 10,
+        x: bx - LAVA_W,
         y: bossCenterY - LAVA_H / 2,
         type: 'lava',
         damage: 1,
@@ -345,11 +353,17 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     switch (action) {
       case 'left':
         inputRef.current.left = true
-        setTimeout(() => { inputRef.current.left = false }, 100)
+        setFacingRight(false)
         break
       case 'right':
         inputRef.current.right = true
-        setTimeout(() => { inputRef.current.right = false }, 100)
+        setFacingRight(true)
+        break
+      case 'left_up':
+        inputRef.current.left = false
+        break
+      case 'right_up':
+        inputRef.current.right = false
         break
       case 'jump':
         if (!isJumpingRef.current) {
@@ -358,7 +372,9 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
         break
       case 'crouch':
         inputRef.current.crouch = true
-        setTimeout(() => { inputRef.current.crouch = false }, 200)
+        break
+      case 'crouch_up':
+        inputRef.current.crouch = false
         break
       case 'shoot':
         shootBeam()
@@ -406,6 +422,14 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
       const dt = Math.min((now - lastFrameRef.current) / 1000, 0.05)
       lastFrameRef.current = now
       const elapsed = now - startTimeRef.current
+
+      if (invincibleTimerRef.current > 0) {
+        invincibleTimerRef.current -= dt * 1000
+        if (invincibleTimerRef.current <= 0) {
+          invincibleTimerRef.current = 0
+          setInvincible(false)
+        }
+      }
 
       const input = inputRef.current
       let px = playerXRef.current
@@ -553,11 +577,12 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
             }
           }
         } else {
-          p.x -= (p.type === 'eye_laser' ? EYE_LASER_SPEED : p.type === 'lava' ? LAVA_SPEED : ACID_SPEED) * dt
+          const speed = p.type === 'eye_laser' ? BOSS_PROJECTILE_SPEED : p.type === 'enemy_laser' ? ENEMY_LASER_SPEED : p.type === 'lava' ? LAVA_SPEED : ACID_SPEED
+          p.x -= speed * dt
           if (p.x < -60) continue
 
-          const ph = p.type === 'eye_laser' ? EYE_LASER_H : p.type === 'lava' ? LAVA_H : ACID_H
-          const pw = p.type === 'eye_laser' ? EYE_LASER_W : p.type === 'lava' ? LAVA_W : ACID_W
+          const ph = p.type === 'eye_laser' ? EYE_LASER_H : p.type === 'enemy_laser' ? ENEMY_LASER_H : p.type === 'lava' ? LAVA_H : ACID_H
+          const pw = p.type === 'eye_laser' ? EYE_LASER_W : p.type === 'enemy_laser' ? ENEMY_LASER_W : p.type === 'lava' ? LAVA_W : ACID_W
           const playerH = crouching ? CROUCH_H : PLAYER_H
 
           if (rectsOverlap(p.x, p.y, pw, ph, px, py, PLAYER_W, playerH)) {
@@ -609,7 +634,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
         if (r.x < -ROLLING_ROCK_W * 2 || r.x > ARENA_W + ROLLING_ROCK_W * 2) continue
 
         const playerH = crouching ? CROUCH_H : PLAYER_H
-        if (rectsOverlap(r.x, r.y, ROLLING_ROCK_H, ROLLING_ROCK_H, px, py, PLAYER_W, playerH)) {
+        if (rectsOverlap(r.x, r.y, ROLLING_ROCK_W, ROLLING_ROCK_H, px, py, PLAYER_W, playerH)) {
           damagePlayer(1.5)
           addEffect(r.x + ROLLING_ROCK_W / 2, r.y + ROLLING_ROCK_H / 2, 'explosion')
           continue
@@ -733,7 +758,6 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
       if (bossRef.current && bossRef.current.hp <= 0 && bossRef.current.state === 'defeated' && bossRef.current.stateTimer <= 500) {
         gameOverRef.current = true
         setGameState('victory')
-        onGameEnd(scoreRef.current)
         return
       }
 
@@ -778,6 +802,8 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     setBoss(null)
     setBossActive(false)
     setEffects([])
+    setInvincible(false)
+    invincibleTimerRef.current = 0
     setGameState('playing')
   }, [])
 
@@ -798,6 +824,8 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
     if (hitFlash) {
       style.filter = 'brightness(2) saturate(0)'
       style.opacity = 0.7
+    } else if (invincible) {
+      style.opacity = 0.4 + Math.sin(performance.now() * 0.02) * 0.3
     }
 
     if (isJumping) {
@@ -807,7 +835,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
       return <PlayerFrogCrouch className="absolute" style={style} />
     }
     return <PlayerFrog className="absolute" style={style} />
-  }, [playerX, playerY, playerH, facingRight, isJumping, isCrouching, hitFlash])
+  }, [playerX, playerY, playerH, facingRight, isJumping, isCrouching, hitFlash, invincible])
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -1018,14 +1046,18 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
         {/* Boss */}
         {boss && boss.appeared && boss.state !== 'defeated' && (
           <BossFrog
-            className="absolute"
+            className={cn(
+              'absolute',
+              boss.state === 'telegraph' && 'animate-pulse',
+            )}
             phase={boss.phase}
             style={{
-              left: 20,
+              left: BOSS_X,
               top: boss.y,
               width: BOSS_W,
               height: BOSS_H,
               transition: boss.state === 'phase_transition' ? 'all 0.5s' : undefined,
+              filter: boss.state === 'telegraph' ? 'brightness(1.5) drop-shadow(0 0 8px rgba(239,68,68,0.8))' : undefined,
             }}
           />
         )}
@@ -1035,7 +1067,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
           <Explosion
             className="absolute"
             style={{
-              left: 20 + BOSS_W / 2 - 32,
+              left: BOSS_X + BOSS_W / 2 - 32,
               top: boss.y + BOSS_H / 2 - 32,
               width: 64,
               height: 64,
@@ -1082,13 +1114,22 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
             <p className="mb-1 text-2xl font-black tracking-wider text-red-400">GAME OVER</p>
             <p className="mb-4 text-lg font-bold text-white">Điểm: {score}</p>
-            <button
-              type="button"
-              onClick={handleStart}
-              className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg active:scale-95"
-            >
-              Chơi lại
-            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleStart}
+                className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg active:scale-95"
+              >
+                Chơi lại
+              </button>
+              <button
+                type="button"
+                onClick={() => onGameEnd(scoreRef.current)}
+                className="rounded-lg border border-white/20 bg-white/10 px-6 py-2 text-sm font-bold text-white/80 hover:bg-white/20 active:scale-95"
+              >
+                Thoát
+              </button>
+            </div>
           </div>
         )}
 
@@ -1097,6 +1138,22 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
             <p className="mb-1 text-2xl font-black tracking-wider text-amber-400">BOSS DEFEATED!</p>
             <p className="mb-4 text-lg font-bold text-white">Điểm: {score}</p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleStart}
+                className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-2 text-sm font-bold text-white shadow-lg active:scale-95"
+              >
+                Chơi lại
+              </button>
+              <button
+                type="button"
+                onClick={() => onGameEnd(scoreRef.current)}
+                className="rounded-lg border border-white/20 bg-white/10 px-6 py-2 text-sm font-bold text-white/80 hover:bg-white/20 active:scale-95"
+              >
+                Nhận thưởng
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -3,18 +3,20 @@ import { cn } from '@/lib'
 import { ArrowLeft, ArrowRight, ChevronUp, ChevronDown, Crosshair } from 'lucide-react'
 
 interface MobileControlsProps {
-  onAction: (action: 'left' | 'right' | 'jump' | 'crouch' | 'shoot') => void
+  onAction: (action: 'left' | 'right' | 'left_up' | 'right_up' | 'jump' | 'crouch' | 'crouch_up' | 'shoot') => void
   className?: string
 }
 
 function TouchButton({
   children,
   onPress,
+  onRelease,
   className,
   label,
 }: {
   children: React.ReactNode
   onPress: () => void
+  onRelease?: () => void
   className?: string
   label: string
 }) {
@@ -35,8 +37,11 @@ function TouchButton({
   const handleEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    activeRef.current = false
-  }, [])
+    if (activeRef.current) {
+      activeRef.current = false
+      onRelease?.()
+    }
+  }, [onRelease])
 
   useEffect(() => {
     const cleanup = () => {
@@ -91,6 +96,7 @@ export function MobileControls({ onAction, className }: MobileControlsProps) {
         <div className="flex gap-1.5">
           <TouchButton
             onPress={() => onAction('left')}
+            onRelease={() => onAction('left_up')}
             className="size-14"
             label="Di chuyển trái"
           >
@@ -98,6 +104,7 @@ export function MobileControls({ onAction, className }: MobileControlsProps) {
           </TouchButton>
           <TouchButton
             onPress={() => onAction('crouch')}
+            onRelease={() => onAction('crouch_up')}
             className="size-14"
             label="Rạp xuống"
           >
@@ -105,6 +112,7 @@ export function MobileControls({ onAction, className }: MobileControlsProps) {
           </TouchButton>
           <TouchButton
             onPress={() => onAction('right')}
+            onRelease={() => onAction('right_up')}
             className="size-14"
             label="Di chuyển phải"
           >

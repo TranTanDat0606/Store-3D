@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { X, Bot, MessageSquare } from 'lucide-react';
+import { X, Bot, MessageSquare, Plus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useChat } from '@/hooks/useChat';
 import { ChatMessage } from './chat-message';
@@ -12,7 +12,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
-  const { messages, sendMessage, status, error } = useChat();
+  const { messages, sendMessage, status, error, clearChat } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,6 +34,10 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
     sendMessage({ role: 'user', parts: [{ type: 'text', text }] });
   };
 
+  const handleNewChat = () => {
+    clearChat();
+  };
+
   const isStreaming = status === 'streaming' || status === 'submitted';
 
   return (
@@ -42,7 +46,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
         <>
           <motion.div
             key="chat-overlay"
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm sm:hidden"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm sm:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -71,15 +75,29 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
                   <p className="text-muted-foreground text-xs">Trợ lý ảo</p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                aria-label="Đóng chat"
-                className="size-8"
-              >
-                <X className="size-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {messages.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNewChat}
+                    aria-label="Cuộc trò chuyện mới"
+                    className="size-8"
+                    title="Cuộc trò chuyện mới"
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                  aria-label="Đóng chat"
+                  className="size-8"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
             </div>
 
             {/* Messages */}

@@ -24,7 +24,7 @@ export function MainLayout() {
 
   useEffect(() => {
     if (isCartOpen && chatOpen) setChatOpen(false)
-  }, [isCartOpen])
+  }, [isCartOpen, chatOpen])
 
   return (
     <div className="flex min-h-screen flex-col">
