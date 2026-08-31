@@ -1,8 +1,22 @@
-import { streamText, type ModelMessage } from 'ai';
-import { MockLanguageModelV4 } from 'ai/test';
 import { config } from '../config';
 import { Product } from '../models/Product';
 import mongoose from 'mongoose';
+
+type ModelMessage = { role: 'user' | 'assistant'; content: string };
+
+let _streamText: ((typeof import('ai'))['streamText']) | null = null;
+let _MockLanguageModelV4: (typeof import('ai/test'))['MockLanguageModelV4'] | null = null;
+
+async function loadAiModules() {
+  if (!_streamText) {
+    const ai = await import('ai');
+    _streamText = ai.streamText;
+  }
+  if (!_MockLanguageModelV4) {
+    const aiTest = await import('ai/test');
+    _MockLanguageModelV4 = aiTest.MockLanguageModelV4;
+  }
+}
 
 const SYSTEM_PROMPT = `Bạn là trợ lý AI của Store3D - cửa hàng mô hình 3D in.
 Bạn giúp khách hàng tìm hiểu về sản phẩm, quy trình in 3D, và thông tin cửa hàng.
@@ -190,7 +204,7 @@ function buildBudgetResponse(products: Awaited<ReturnType<typeof searchProductsB
 }
 
 function createSmartMockModel(userMessage: string, contextProducts?: string) {
-  return new MockLanguageModelV4({
+  return new _MockLanguageModelV4!({
     doStream: async () => {
       let response: string;
 
@@ -275,6 +289,7 @@ function extractText(msg: ChatServiceParams['messages'][number]): string {
 }
 
 export async function createChatStream(params: ChatServiceParams) {
+  await loadAiModules();
   const { messages } = params;
 
   const modelMessages: ModelMessage[] = messages.map((m) => ({
@@ -286,7 +301,7 @@ export async function createChatStream(params: ChatServiceParams) {
   const userText = lastUserMessage ? extractText(lastUserMessage) : '';
 
   if (config.ai.provider === 'mock') {
-    return streamText({
+    return _streamText!({
       model: createSmartMockModel(userText),
       messages: modelMessages,
       system: SYSTEM_PROMPT,
@@ -297,7 +312,7 @@ export async function createChatStream(params: ChatServiceParams) {
     throw new Error('AI_SERVICE_UNAVAILABLE');
   }
 
-  return streamText({
+  return _streamText!({
     model: config.ai.model as any,
     messages: modelMessages,
     system: SYSTEM_PROMPT,

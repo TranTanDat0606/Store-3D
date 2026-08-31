@@ -12,7 +12,7 @@ export function toObjectId(id: string): Types.ObjectId {
   if (!/^[0-9a-fA-F]{24}$/.test(id)) {
     throw new AppError('ID không hợp lệ', 400);
   }
-  return new (require('mongoose').Types.ObjectId)(id);
+  return new mongoose.Types.ObjectId(id);
 }
 
 async function ensureUniqueSlug(name: string, slug: string | undefined, excludeId?: string): Promise<string> {

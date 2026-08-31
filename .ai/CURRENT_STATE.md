@@ -86,6 +86,28 @@ All 10 rules verified in `aiChatService.ts`:
 - Hidden demo credentials in `client/README.md` — potential security concern if repo is public
 - `store3d.vercel.app` custom domain points to wrong project (needs dashboard fix)
 
+## Vercel Deployment — Module Format Fix (verified 2026-08-31)
+
+### Root Cause (confirmed from Vercel runtime logs)
+`ReferenceError: exports is not defined in ES module scope` at `api/server.js:2:23`.
+
+- Root `package.json` has `"type": "module"` → Node.js treats `.js` files as ESM by default
+- `api/tsconfig.json` has `"module": "CommonJS"` → Vercel compiles `api/server.ts` to CJS (`exports` keyword)
+- CJS output loaded as ESM by Node.js → `exports is not defined` crash at line 2, before any handler executes
+
+### Fix Applied
+1. **`api/package.json`** (created): `{"type": "commonjs"}` — makes Node.js resolve nearest package boundary for `api/server.js` as CJS
+2. **`api/tsconfig.json`**: Kept `"module": "CommonJS"` intentionally — CJS ensures `require()` resolves extensionless relative imports to `../server/src/*` files correctly
+3. **`server/src/services/aiChatService.ts`**: Changed static `import from 'ai'` / `import from 'ai/test'` to dynamic `await import('ai')` / `await import('ai/test')` — the `ai` package is ESM-only and cannot be `require()`'d from CJS
+4. **`server/src/services/productService.ts`**: Replaced `require('mongoose').Types.ObjectId` with `mongoose.Types.ObjectId` (already imported at top)
+
+### Why Not ESM Output
+Changing `api/tsconfig.json` to `"module": "ES2022"` produces ESM output, but ESM requires explicit `.js` extensions in relative imports (`from '../server/src/vercel-connect'`). All server source files would need `.js` extensions added to imports. CJS approach avoids this by letting `require()` resolve extensionless paths natively.
+
+### Verified
+- Production endpoints all return correct responses (200 for data, 401 for unauthenticated `/api/auth/me`)
+- `/api/health` → 200, `/api/auth/me` → 401, `/api/products` → 200, `/api/products/featured` → 200, `/api/categories/all` → 200
+
 ## Known Technical Debt
 
 1. **No client-side tests.** Zero test files in `client/`. No vitest/jest configuration
