@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export interface IReview {
@@ -51,4 +51,4 @@ const reviewSchema = new Schema<IReview>(
 reviewSchema.index({ product: 1, createdAt: -1 });
 reviewSchema.index({ user: 1, product: 1 }, { unique: true });
 
-export const Review = models.Review || model<IReview>('Review', reviewSchema);
+export const Review: Model<IReview> = models.Review || model<IReview>('Review', reviewSchema);

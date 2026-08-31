@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export interface IOrderItem {
@@ -34,4 +34,4 @@ const orderItemSchema = new Schema<IOrderItem>(
 
 orderItemSchema.index({ order: 1 });
 
-export const OrderItem = models.OrderItem || model<IOrderItem>('OrderItem', orderItemSchema);
+export const OrderItem: Model<IOrderItem> = models.OrderItem || model<IOrderItem>('OrderItem', orderItemSchema);

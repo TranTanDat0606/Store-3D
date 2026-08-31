@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export enum GameSessionStatus {
@@ -54,5 +54,5 @@ const gameSessionSchema = new Schema<IGameSession>(
 gameSessionSchema.index({ user: 1, order: 1 }, { unique: true });
 gameSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const GameSession =
+export const GameSession: Model<IGameSession> =
   models.GameSession || model<IGameSession>('GameSession', gameSessionSchema);

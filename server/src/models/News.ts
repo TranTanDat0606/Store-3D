@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 
 export enum NewsStatus {
   Draft = 'draft',
@@ -88,4 +88,4 @@ newsSchema.index({ slug: 1 });
 newsSchema.index({ status: 1, publishedAt: -1 });
 newsSchema.index({ category: 1 });
 
-export const News = models.News || model<INews>('News', newsSchema);
+export const News: Model<INews> = models.News || model<INews>('News', newsSchema);

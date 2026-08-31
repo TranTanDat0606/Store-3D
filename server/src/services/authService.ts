@@ -16,7 +16,7 @@ export interface SafeUser {
 }
 
 /** Removes password-sensitive fields before sending the user to the client. */
-export function toSafeUser(user: mongoose.Document<IUser> & IUser): SafeUser {
+export function toSafeUser(user: mongoose.HydratedDocument<IUser>): SafeUser {
   const doc = user.toObject();
   const { password: _password, comparePassword: _comparePassword, ...safe } = doc;
   void _password;

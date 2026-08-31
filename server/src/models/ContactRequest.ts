@@ -1,4 +1,4 @@
-import { Schema, model, models, Types } from 'mongoose';
+import { Schema, model, models, Types, type Model } from 'mongoose';
 
 export enum ContactStatus {
   New = 'new',
@@ -79,5 +79,5 @@ contactRequestSchema.index({ status: 1, createdAt: -1 });
 contactRequestSchema.index({ email: 1 });
 contactRequestSchema.index({ userId: 1 });
 
-export const ContactRequest =
+export const ContactRequest: Model<IContactRequest> =
   models.ContactRequest || model<IContactRequest>('ContactRequest', contactRequestSchema);

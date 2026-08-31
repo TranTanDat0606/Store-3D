@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import slugify from '../utils/slugify';
 
 export interface ICategory {
@@ -44,4 +44,4 @@ categorySchema.pre('validate', function (next) {
   next();
 });
 
-export const Category = models.Category || model<ICategory>('Category', categorySchema);
+export const Category: Model<ICategory> = models.Category || model<ICategory>('Category', categorySchema);

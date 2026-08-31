@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 
 export enum CouponType {
   Percent = 'percent',
@@ -60,4 +60,4 @@ const couponSchema = new Schema<ICoupon>(
   { timestamps: true },
 );
 
-export const Coupon = models.Coupon || model<ICoupon>('Coupon', couponSchema);
+export const Coupon: Model<ICoupon> = models.Coupon || model<ICoupon>('Coupon', couponSchema);

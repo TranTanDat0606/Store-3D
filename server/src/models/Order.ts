@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export enum OrderStatus {
@@ -111,4 +111,4 @@ orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ 'payment.orderCode': 1 }, { sparse: true, unique: true });
 
-export const Order = models.Order || model<IOrder>('Order', orderSchema);
+export const Order: Model<IOrder> = models.Order || model<IOrder>('Order', orderSchema);

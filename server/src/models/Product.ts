@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 import slugify from '../utils/slugify';
 
@@ -129,4 +129,4 @@ productSchema.index({ name: 'text', description: 'text' });
 productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 
-export const Product = models.Product || model<IProduct>('Product', productSchema);
+export const Product: Model<IProduct> = models.Product || model<IProduct>('Product', productSchema);

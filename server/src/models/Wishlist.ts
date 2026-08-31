@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export interface IWishlist {
@@ -25,4 +25,4 @@ const wishlistSchema = new Schema<IWishlist>(
   { timestamps: true },
 );
 
-export const Wishlist = models.Wishlist || model<IWishlist>('Wishlist', wishlistSchema);
+export const Wishlist: Model<IWishlist> = models.Wishlist || model<IWishlist>('Wishlist', wishlistSchema);

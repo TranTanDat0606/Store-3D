@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export enum UserRole {
@@ -80,4 +80,4 @@ userSchema.methods.comparePassword = function (candidate: string): Promise<boole
   return bcrypt.compare(candidate, this.password);
 };
 
-export const User = models.User || model<IUser>('User', userSchema);
+export const User: Model<IUser> = models.User || model<IUser>('User', userSchema);

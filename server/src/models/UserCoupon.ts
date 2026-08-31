@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import { Schema, model, models, type Model } from 'mongoose';
 import type { Types } from 'mongoose';
 
 export enum UserCouponSource {
@@ -67,5 +67,5 @@ const userCouponSchema = new Schema<IUserCoupon>(
 userCouponSchema.index({ user: 1 });
 userCouponSchema.index({ user: 1, usedAt: 1 });
 
-export const UserCoupon =
+export const UserCoupon: Model<IUserCoupon> =
   models.UserCoupon || model<IUserCoupon>('UserCoupon', userCouponSchema);
