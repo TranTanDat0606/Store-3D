@@ -563,7 +563,7 @@ export function FrogCatcher({ onGameEnd }: FrogCatcherProps) {
 
           if (bossRef.current && bossRef.current.hp > 0 && bossRef.current.state !== 'phase_transition' && bossRef.current.state !== 'defeated') {
             const b = bossRef.current
-            if (rectsOverlap(p.x, p.y, BEAM_W, BEAM_H, 20, b.y, BOSS_W, BOSS_H)) {
+            if (rectsOverlap(p.x, p.y, BEAM_W, BEAM_H, BOSS_X, b.y, BOSS_W, BOSS_H)) {
               b.hp -= p.damage
               addEffect(p.x, p.y, 'spark')
               if (b.hp <= 0 && b.state !== 'defeated') {

@@ -1,16 +1,16 @@
 # Store3D — Current State
 
-> Last updated: 2026-08-28
+> Last updated: 2026-08-31
 
 ## Current Project Status
 
-**Stable and working.** The application is a fully functional Vietnamese e-commerce store for 3D-printed models. Both client and server are deployed (Vercel for client + API, Render for server).
+**Stable and working.** Fully functional Vietnamese e-commerce store for 3D-printed models. Client + API on Vercel, server on Render.
 
 ## Implemented Features
 
 ### Fully Implemented
 - **Product catalog:** List, search, filter by category, sort, pagination, featured products, related products
-- **Product detail:** Immersive gallery-first layout with lightbox (double-click zoom, keyboard nav), desktop sticky purchase panel, mobile fixed bottom bar, tabbed content (Mô tả / Thông số / Đánh giá), rating summary bar chart, review cards, related products. Shared purchase state via `usePurchasePanel` hook.
+- **Product detail:** Immersive gallery-first layout with lightbox (double-click zoom, keyboard nav), desktop sticky purchase panel, mobile fixed bottom bar, tabbed content (Mô tả / Thông số / Đánh giá), rating summary bar chart, review cards, related products
 - **Shopping cart:** Add/remove/update quantity, persisted to localStorage, cart drawer UI
 - **Checkout:** Shipping info form, payment method selection (cash on delivery / bank transfer), coupon application
 - **QR payment:** VietQR code generation with countdown timer, bank info display, copy-to-clipboard
@@ -25,6 +25,7 @@
 - **Admin coupons:** CRUD (percent/fixed), min order, expiry, usage tracking
 - **Admin reviews:** List, delete
 - **Admin users:** List, role update, activate/deactivate, delete (protects last admin)
+- **Admin Excel export:** 4-sheet XLSX (overview, daily revenue, monthly revenue, product sales with stock), excludes cancelled orders
 - **News/blog:** Full CRUD (admin), public listing by category, slug-based detail pages
 - **Contact form:** Submit, admin list/status/note management
 - **Dark/light theme:** Toggle with localStorage persistence, smooth CSS transitions
@@ -34,87 +35,71 @@
 - **Rate limiting:** Global (300/15min) and auth-specific (20/15min)
 - **Error handling:** Central error handler, Vietnamese error messages
 - **Database seeding:** Idempotent seed script with sample data
+- **Mini-game (frog-catcher):** 3 difficulty tiers, boss with phase 2, mobile touch controls, invincibility frames (400ms), score validation, server-side reward distribution, UserCoupon persistence
+- **AI chat:** Mock provider (ai/test MockLanguageModelV4), per-user/guest localStorage scoping, debounced streaming persistence (500ms), product recommendation cards from markdown, 20-message server limit, MAX_MESSAGES=18 client guard
 
 ### Partially Implemented
-- **Email/SMTP:** Config exists in env vars but no email sending code is implemented (contact form saves to DB only)
+- **Email/SMTP:** Config exists in env vars but no email sending code is implemented
 - **Payment webhook:** Endpoint exists but relies on external webhook configuration
 
-## Completed Major Work
+## Chat History Persistence (verified 2026-08-31)
 
-| Date | Work |
-|------|------|
-| 2026-08-07 | Initial Store3D design and project setup |
-| 2026-08-08 | Product image upload (Cloudinary), Unsplash product images |
-| 2026-08-10 | Admin UI redesign |
-| 2026-08-12 | Storefront premium redesign, UI/UX improvements |
-| 2026-08-14 | Admin categories/products page redesign, QR payment, search suggestions |
-| 2026-08-26 | News/blog backend implementation |
-| 2026-08-28 | Vercel deployment fixes, Cloudinary integration, various bug fixes |
-| 2026-08-28 | Product Detail page redesign: 10 new components, `product-detail-page.tsx` rewritten, lightbox/gallery/purchase/review architecture, commit `bf2c7ab` pushed to origin/master |
+### Guest users
+- History scoped by stable guest session ID (`store3d_guest_xxx` stored in localStorage)
+- Survives F5/page refresh
+- Different browsers get different guest IDs
 
-## Product Detail Component Architecture (2026-08-28)
+### Authenticated users
+- History scoped by user ID (`store3d_chat_{userId}`)
+- User A never sees User B's history
+- Login/logout transitions: `storageKeyRef` updates immediately, `chatId` recomputes via `useMemo`
 
-The Product Detail page (`product-detail-page.tsx`) was completely rewritten to compose dedicated child components:
+### Streaming persistence
+- Debounced save at 500ms during streaming (not every token)
+- `beforeunload` handler flushes pending saves
+- Cleanup on component unmount
+- `onFinish` does immediate final save (overwrites debounced partial)
+- `clearChat` cancels pending saves before clearing
 
-**New components created:**
-- `components/common/star-rating.tsx` — Reusable star rating display
-- `components/product/use-purchase-panel.ts` — Shared purchase state/hook (called ONCE in page)
-- `components/product/product-gallery.tsx` — Desktop gallery (vertical thumbnails + hero image)
-- `components/product/product-gallery-mobile.tsx` — Mobile gallery (swipeable carousel + dots)
-- `components/product/product-lightbox.tsx` — Full-screen lightbox with double-click zoom
-- `components/product/purchase-panel.tsx` — Desktop sticky purchase panel
-- `components/product/mobile-purchase-bar.tsx` — Mobile fixed bottom bar
-- `components/product/product-tabs.tsx` — Tab bar + content (Mô tả / Thông số / Đánh giá)
-- `components/review/rating-summary.tsx` — Rating bar chart + contextual CTA
-- `components/review/review-card.tsx` — Individual review display
+### History size
+- Client: MAX_MESSAGES = 18 (kept in localStorage)
+- Server: max 20 messages validated by Zod schema
+- Older messages trimmed from localStorage on save
 
-**Architecture rules:**
-- `usePurchasePanel` is called exactly once in `ProductDetailPage`
-- Returned state passed as props to both `PurchasePanel` and `MobilePurchaseBar`
-- Neither `PurchasePanel` nor `MobilePurchaseBar` calls the hook themselves
-- Desktop/mobile switching uses CSS visibility (`hidden lg:block` / `block lg:hidden`), not JS breakpoints
-- The "Tạm tính" (subtotal) price preview is intentionally NOT displayed
+## AI Token/Tool Optimization Rules (verified 2026-08-31)
 
-**Known bugs / fixes applied:**
-- Lightbox zoom: changed from `onClick` to `onDoubleClick` to prevent accidental zoom
-- Wishlist Heart button: added `aria-label` for accessibility
-- Mobile bottom bar: `pb-20 lg:pb-0` padding prevents content overlap
+All 10 rules verified in `aiChatService.ts`:
+1. **Greeting** → direct response, no DB query
+2. **Budget request** → parse budget, targeted product query
+3. **No matching product** → fallback to nearest-price products
+4. **General conversation** → no DB query
+5. **Product-specific** → targeted query
+6. **No guessing** → uses actual DB data
+7. **Context minimization** → only selects name/slug/salePrice/originalPrice/images
+8. **No double tool calls** → parseBudget in mutually exclusive branches
+9. **Mock mode preserved** → `config.ai.provider === 'mock'`
+10. **Security** → no secrets exposed
 
 ## Known Bugs / Issues
 
-- **No critical bugs reported.** Application is stable.
-- Hidden demo credentials in `client/README.md` (admin@store3d.com / admin123) — potential security concern if repository is public.
+- **No critical bugs.** Application is stable.
+- Hidden demo credentials in `client/README.md` — potential security concern if repo is public
+- `store3d.vercel.app` custom domain points to wrong project (needs dashboard fix)
 
 ## Known Technical Debt
 
-1. **No client-side tests.** Zero test files in `client/`. No vitest/jest configuration.
-2. **Limited server tests.** Only 3 unit tests (VietQR, payment, order status). No integration tests, no API endpoint tests.
-3. **No root README.md.** Only `client/README.md` (Vite template) and `server/README.md`.
-4. **CORS permissive in development.** Allows all origins (`*`) when `NODE_ENV !== 'production'`.
-5. **No request logging.** No morgan or similar request logger.
-6. **No API documentation.** No Swagger/OpenAPI spec.
-7. **No CI/CD pipeline.** No GitHub Actions or similar.
-8. **No environment validation beyond MONGODB_URI and JWT_SECRET.** Other env vars are used with defaults.
-9. **TypeScript strict mode not enabled** in server (`strict` not in tsconfig).
-10. **No database migrations.** Mongoose is schemaless, but index changes are not tracked.
-
-## Important Unfinished Work
-
-- **Email notifications.** SMTP config exists but no email sending is implemented. Contact form saves to DB but doesn't send emails.
-- **Payment webhook.** The `/api/payment/webhook` endpoint exists but requires external webhook configuration from a payment provider.
-- **SEO optimization.** `sitemap.xml` and `robots.txt` exist in `client/public/` but are static files, not dynamically generated.
-- **Image optimization.** Product images are uploaded as-is to Cloudinary. No automatic resizing or WebP conversion beyond Cloudinary defaults.
-- **Admin news/blog.** Backend is complete but admin UI for news management may need refinement.
+1. **No client-side tests.** Zero test files in `client/`. No vitest/jest configuration
+2. **Limited server tests.** Only 3 unit tests (15 test cases total)
+3. **No root README.md**
+4. **CORS permissive in development** (`*` when `NODE_ENV !== 'production'`)
+5. **No request logging** (no morgan)
+6. **No API documentation** (no Swagger/OpenAPI)
+7. **No CI/CD pipeline**
+8. **No environment validation** beyond MONGODB_URI and JWT_SECRET
+9. **TypeScript strict mode not enabled** in server
+10. **No database migrations** (Mongoose schemaless)
 
 ## Database Seed Data
-
-The seed script creates:
-- 2 users (admin + customer)
-- 6 categories
-- 12 products (with Unsplash images)
-- 2 coupons
-- Sample wishlist and reviews
-- 6 news articles
 
 Demo accounts:
 | Role | Email | Password |
