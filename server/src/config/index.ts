@@ -2,24 +2,36 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const requiredEnv = [
-  'MONGODB_URI',
-  'JWT_SECRET',
-] as const;
+let _envValidated = false;
 
-for (const key of requiredEnv) {
-  if (!process.env[key]) {
-    throw new Error(`Missing required environment variable: ${key}`);
+function validateRequiredEnv() {
+  if (_envValidated) return;
+  const missing: string[] = [];
+  if (!process.env.MONGODB_URI) missing.push('MONGODB_URI');
+  if (!process.env.JWT_SECRET) missing.push('JWT_SECRET');
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variable${missing.length > 1 ? 's' : ''}: ${missing.join(', ')}`);
   }
+  _envValidated = true;
+}
+
+export function getMongoUri(): string {
+  validateRequiredEnv();
+  return process.env.MONGODB_URI!;
+}
+
+export function getJwtSecret(): string {
+  validateRequiredEnv();
+  return process.env.JWT_SECRET!;
 }
 
 export const config = {
   env: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 5000,
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  mongodbUri: process.env.MONGODB_URI!,
+  get mongodbUri() { return getMongoUri(); },
   jwt: {
-    secret: process.env.JWT_SECRET!,
+    get secret() { return getJwtSecret(); },
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
   rateLimit: {

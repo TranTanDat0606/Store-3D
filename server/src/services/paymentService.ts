@@ -93,12 +93,15 @@ export class PaymentService {
     const order = await Order.findOne({ 'payment.orderCode': orderCode });
     if (!order) throw new AppError('Không tìm thấy đơn hàng với mã chuyển khoản này', 404);
 
-    const result = validateReconcile(
-      { status: order.payment.status, qrExpiresAt: order.payment.qrExpiresAt, total: order.total },
-      amount,
-      new Date(),
-    );
-    if (!result.ok) throw new AppError(result.message, result.code);
+    const reconcileInput: ReconcileOrder = {
+      status: order.payment.status,
+      qrExpiresAt: order.payment.qrExpiresAt,
+      total: order.total,
+    };
+    const result = validateReconcile(reconcileInput, amount, new Date());
+    if (!result.ok) {
+      throw new AppError(result.message, result.code);
+    }
     if (order.payment.status === PaymentStatus.Paid) return order;
 
     return Order.findByIdAndUpdate(
