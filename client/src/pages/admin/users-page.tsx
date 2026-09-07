@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search, ShieldCheck, ShieldX, Trash2, UserCheck, UserX } from 'lucide-react'
+import { Search, ShieldCheck, ShieldX, UserCheck, UserX } from 'lucide-react'
 import { userApi } from '@/services'
 import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
@@ -8,17 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Pagination } from '@/components/common/pagination'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { formatDate } from '@/lib'
 import { toast } from 'sonner'
 import type { PaginationMeta, User } from '@/types'
@@ -88,26 +77,11 @@ export default function AdminUsersPage() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      await userApi.remove(id)
-      setUsers((prev) => prev.filter((u) => u._id !== id))
-      toast.success('Xóa người dùng thành công')
-    } catch (err) {
-      toast.error(getErrorMessage(err))
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Quản lý khách hàng</h1>
         <p className="text-muted-foreground">{meta ? `${meta.total} người dùng` : ''}</p>
-        {adminCount !== undefined && (
-          <p className="text-muted-foreground mt-1 text-xs">
-            Hệ thống luôn giữ ít nhất một tài khoản admin ({adminCount} admin hiện tại).
-          </p>
-        )}
       </div>
 
       <div className="relative max-w-sm">
@@ -198,30 +172,6 @@ export default function AdminUsersPage() {
                         {user.active ? <UserX className="size-4" /> : <UserCheck className="size-4" />}
                         {user.active ? 'Khóa' : 'Mở'}
                       </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" title={isLastAdmin(user) ? 'Không thể xóa admin cuối cùng' : 'Xóa'} disabled={isLastAdmin(user)}>
-                            <Trash2 className="size-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Xóa người dùng?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Bạn có chắc muốn xóa tài khoản của "{user.fullname}"? Hành động này không thể hoàn tác.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Hủy</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-destructive text-white hover:bg-destructive/90"
-                              onClick={() => handleDelete(user._id)}
-                            >
-                              Xóa
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

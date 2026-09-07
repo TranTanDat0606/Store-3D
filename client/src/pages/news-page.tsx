@@ -126,7 +126,7 @@ export default function NewsPage() {
       {loading ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-muted h-80 animate-pulse rounded-xl" />
+            <div key={i} className="bg-muted h-80 animate-pulse rounded-xl" style={{ minHeight: 320 }} />
           ))}
         </div>
       ) : news.length === 0 ? (
@@ -140,7 +140,7 @@ export default function NewsPage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {news.map((item) => (
               <Link key={item._id} to={`/tin-tuc/${item.slug}`} className="group">
-                <Card className="overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md">
+                <Card className="flex h-full flex-col overflow-hidden py-0 transition-all hover:-translate-y-1 hover:shadow-md">
                   <div className="bg-muted relative aspect-video overflow-hidden">
                     {item.thumbnail ? (
             <img
@@ -156,7 +156,7 @@ export default function NewsPage() {
                       </div>
                     )}
                   </div>
-                  <CardContent className="p-5">
+                  <CardContent className="flex flex-1 flex-col p-5">
                     <div className="mb-2 flex items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
                         {CATEGORY_LABELS[item.category] ?? item.category}
@@ -172,7 +172,7 @@ export default function NewsPage() {
                     {item.excerpt && (
                       <p className="text-muted-foreground mt-2 line-clamp-2 text-sm">{item.excerpt}</p>
                     )}
-                    <span className="text-primary mt-3 inline-flex items-center gap-1 text-sm font-medium">
+                    <span className="text-primary mt-auto inline-flex items-center gap-1 pt-3 text-sm font-medium">
                       Đọc thêm <ArrowRight className="size-4" />
                     </span>
                   </CardContent>

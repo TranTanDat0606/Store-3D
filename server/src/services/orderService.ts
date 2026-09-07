@@ -101,6 +101,12 @@ export class OrderService {
     const shipping = 0; // free shipping
     const total = subtotal - (coupon?.discount ?? 0) + shipping;
 
+    // Payment threshold: bank-transfer requires total >= 1000 VND
+    const paymentMethod = data.paymentMethod || PaymentMethod.Cash;
+    if (paymentMethod === PaymentMethod.BankTransfer && total < 1000) {
+      throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
+    }
+
     // Note: sequential writes (no DB transaction) — MongoDB Community standalone
     // does not support multi-document transactions (needs a replica set).
     const order = await Order.create({
@@ -113,7 +119,7 @@ export class OrderService {
       total,
       coupon: coupon ? { code: coupon.code, discount: coupon.discount } : undefined,
       payment: {
-        method: data.paymentMethod || PaymentMethod.Cash,
+        method: paymentMethod,
         status: PaymentStatus.Unpaid,
       },
       status: OrderStatus.Pending,

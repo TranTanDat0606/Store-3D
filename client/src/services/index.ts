@@ -3,7 +3,8 @@ export { productApi, categoryApi } from './productApi'
 export type { ProductPayload, ProductQuery, ProductListResult } from './productApi'
 export { rewardApi } from './rewardApi'
 export type { GameStartResponse, GameCompleteResponse, GameReward } from './rewardApi'
-import type { ApiResponse, Coupon, CouponWithAvailability, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
+export { addressApi } from './addressApi'
+import type { ApiResponse, Coupon, CouponWithAvailability, EligibleCoupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
 
 export interface OrderItemInput {
   product: string
@@ -86,6 +87,9 @@ export const couponApi = {
 
   available: (subtotal: number) =>
     apiClient.get<ApiResponse<CouponWithAvailability[]>>('/coupons/available', { params: { subtotal } }).then((r) => r.data.data),
+
+  eligible: (subtotal: number) =>
+    apiClient.get<ApiResponse<EligibleCoupon[]>>('/coupons/eligible', { params: { subtotal } }).then((r) => r.data.data),
 }
 
 export const reviewApi = {
@@ -198,6 +202,9 @@ export const contactApi = {
 
   adminAddNote: (id: string, adminNote: string) =>
     apiClient.put<ApiResponse<ContactRequest>>(`/contact/admin/${id}/note`, { adminNote }).then((r) => r.data.data),
+
+  adminSendResolution: (id: string, resolutionContent: string) =>
+    apiClient.post<ApiResponse<ContactRequest>>(`/contact/admin/${id}/send-resolution`, { resolutionContent }).then((r) => r.data.data),
 
   adminCountNew: () =>
     apiClient.get<ApiResponse<{ count: number }>>('/contact/admin/new-count').then((r) => r.data.data.count),

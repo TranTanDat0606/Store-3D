@@ -1,5 +1,5 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useState, lazy, Suspense, useCallback } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { AlertTriangle } from 'lucide-react'
 import { productApi, reviewApi } from '@/services'
 import { useAuth } from '@/contexts/AuthContext'
@@ -18,6 +18,7 @@ import type { Product, Review, ReviewEligibility } from '@/types'
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams] = useSearchParams()
   const { isAuthenticated } = useAuth()
 
   const [product, setProduct] = useState<Product | null>(null)
@@ -27,6 +28,8 @@ export default function ProductDetailPage() {
   const [notFound, setNotFound] = useState(false)
   const [networkError, setNetworkError] = useState(false)
   const [reviewEligibility, setReviewEligibility] = useState<ReviewEligibility | null>(null)
+
+  const highlightReviewId = searchParams.get('review')
 
   const purchaseState = usePurchasePanel(product)
 
@@ -84,6 +87,26 @@ export default function ProductDetailPage() {
       cancelled = true
     }
   }, [slug])
+
+  const scrollToReview = useCallback(() => {
+    if (!highlightReviewId || reviews.length === 0) return
+    const timer = setTimeout(() => {
+      const el = document.getElementById(`review-${highlightReviewId}`)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'rounded-lg')
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'rounded-lg')
+        }, 2000)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [highlightReviewId, reviews])
+
+  useEffect(() => {
+    const cleanup = scrollToReview()
+    return cleanup
+  }, [scrollToReview])
 
   const category = typeof product?.category === 'object' ? product.category : null
 
@@ -180,7 +203,7 @@ export default function ProductDetailPage() {
   if (!product) return null
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-32 pt-8 sm:px-6 lg:pb-0">
+    <div className="mx-auto max-w-7xl px-4 lg:pb-6 sm:pb-2 pt-8 sm:px-6 lg:pb-0">
       <Breadcrumb
         className="mb-6"
         items={[
@@ -227,13 +250,14 @@ export default function ProductDetailPage() {
             .catch(() => {})
         }}
         onLoginClick={() => purchaseState.setLoginOpen(true)}
+        defaultTab={highlightReviewId ? 'reviews' : 'description'}
       />
 
       {/* Related products */}
       {related.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-6 text-2xl font-bold">Sản phẩm liên quan</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:mb-8 sm:mb-4">
             {related.map((p, i) => (
               <ProductCard key={p._id} product={p} index={i} />
             ))}

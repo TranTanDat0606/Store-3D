@@ -107,7 +107,7 @@ export class ReviewService {
     return apiFeatures(
       Review.find(query)
         .populate('user', 'fullname avatar')
-        .populate('product', 'name slug'),
+        .populate('product', 'name slug images'),
       query,
       { ...options, sort: '-createdAt' },
     );

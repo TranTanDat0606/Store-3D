@@ -1,9 +1,9 @@
 import { useCallback, useRef, useEffect } from 'react'
 import { cn } from '@/lib'
-import { ArrowLeft, ArrowRight, ChevronUp, ChevronDown, Crosshair } from 'lucide-react'
+import { ChevronUp, ChevronDown, Crosshair } from 'lucide-react'
 
 interface MobileControlsProps {
-  onAction: (action: 'left' | 'right' | 'left_up' | 'right_up' | 'jump' | 'crouch' | 'crouch_up' | 'shoot') => void
+  onAction: (action: 'jump' | 'crouch' | 'crouch_up' | 'shoot') => void
   className?: string
 }
 
@@ -44,9 +44,7 @@ function TouchButton({
   }, [onRelease])
 
   useEffect(() => {
-    const cleanup = () => {
-      activeRef.current = false
-    }
+    const cleanup = () => { activeRef.current = false }
     return cleanup
   }, [])
 
@@ -78,57 +76,48 @@ export function MobileControls({ onAction, className }: MobileControlsProps) {
   return (
     <div
       className={cn(
-        'pointer-events-auto flex items-end justify-between gap-2 px-3 pb-2 pt-1',
+        'pointer-events-auto flex items-end justify-between gap-3 px-4 pb-3 pt-2',
         'w-full select-none',
         className,
       )}
       onTouchStart={(e) => e.stopPropagation()}
     >
-      {/* Left side - Movement + Jump/Crouch */}
-      <div className="flex flex-col items-center gap-1.5">
+      {/* Left: Jump + Duck */}
+      <div className="flex flex-col items-center gap-2">
         <TouchButton
           onPress={() => onAction('jump')}
-          className="size-14"
+          className="size-16"
           label="Nhảy"
         >
-          <ChevronUp className="size-7" strokeWidth={3} />
+          <div className="flex flex-col items-center">
+            <ChevronUp className="size-6" strokeWidth={3} />
+            <span className="text-[8px] font-bold">JUMP</span>
+          </div>
         </TouchButton>
-        <div className="flex gap-1.5">
-          <TouchButton
-            onPress={() => onAction('left')}
-            onRelease={() => onAction('left_up')}
-            className="size-14"
-            label="Di chuyển trái"
-          >
-            <ArrowLeft className="size-7" strokeWidth={3} />
-          </TouchButton>
-          <TouchButton
-            onPress={() => onAction('crouch')}
-            onRelease={() => onAction('crouch_up')}
-            className="size-14"
-            label="Rạp xuống"
-          >
-            <ChevronDown className="size-7" strokeWidth={3} />
-          </TouchButton>
-          <TouchButton
-            onPress={() => onAction('right')}
-            onRelease={() => onAction('right_up')}
-            className="size-14"
-            label="Di chuyển phải"
-          >
-            <ArrowRight className="size-7" strokeWidth={3} />
-          </TouchButton>
-        </div>
+        <TouchButton
+          onPress={() => onAction('crouch')}
+          onRelease={() => onAction('crouch_up')}
+          className="size-16"
+          label="Ngồi"
+        >
+          <div className="flex flex-col items-center">
+            <ChevronDown className="size-6" strokeWidth={3} />
+            <span className="text-[8px] font-bold">DUCK</span>
+          </div>
+        </TouchButton>
       </div>
 
-      {/* Right side - Shoot */}
+      {/* Right: Fire */}
       <div className="flex items-center pb-2">
         <TouchButton
           onPress={() => onAction('shoot')}
           className="size-20 border-cyan-400/40 bg-cyan-500/20 text-cyan-300 active:bg-cyan-500/40"
           label="Bắn"
         >
-          <Crosshair className="size-10" strokeWidth={2.5} />
+          <div className="flex flex-col items-center">
+            <Crosshair className="size-8" strokeWidth={2.5} />
+            <span className="text-[8px] font-bold">FIRE</span>
+          </div>
         </TouchButton>
       </div>
     </div>

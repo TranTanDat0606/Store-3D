@@ -226,7 +226,7 @@ export default function AdminNewsPage() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Hủy</AlertDialogCancel>
                           <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             onClick={() => handleDelete(n._id)}
                           >
                             Xóa

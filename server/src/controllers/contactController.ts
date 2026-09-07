@@ -62,6 +62,23 @@ export const contactController = {
     return successResponse(res, contact);
   }),
 
+  adminSendResolution: asyncHandler(async (req, res: Response) => {
+    const { resolutionContent } = req.body;
+    if (!resolutionContent || !resolutionContent.trim()) {
+      return res.status(400).json({ success: false, message: 'Nội dung xử lý không được để trống' });
+    }
+    try {
+      const contact = await contactService.sendResolution(req.params.id, resolutionContent.trim());
+      if (!contact) {
+        return res.status(404).json({ success: false, message: 'Không tìm thấy yêu cầu' });
+      }
+      return successResponse(res, contact);
+    } catch (err: any) {
+      console.error('[Contact] sendResolution error:', err.message);
+      return res.status(500).json({ success: false, message: 'Không thể gửi email. Vui lòng thử lại.' });
+    }
+  }),
+
   adminCountNew: asyncHandler(async (_req, res: Response) => {
     const count = await contactService.countNew();
     return successResponse(res, { count });

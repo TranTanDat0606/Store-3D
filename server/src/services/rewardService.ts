@@ -53,6 +53,37 @@ export class RewardService {
     };
   }
 
+  /** Admin-only: start a test game without requiring an orderId. */
+  async startTestGame(userId: string) {
+    const activeSession = await GameSession.findOne({
+      user: userId,
+      order: null,
+      status: GameSessionStatus.Active,
+    });
+
+    if (activeSession) {
+      if (activeSession.expiresAt > new Date()) {
+        return {
+          sessionId: String(activeSession._id),
+          expiresAt: activeSession.expiresAt,
+        };
+      }
+      await GameSession.deleteOne({ _id: activeSession._id });
+    }
+
+    const expiresAt = new Date(Date.now() + GAME_SESSION_TIMEOUT_MS);
+    const session = await GameSession.create({
+      user: userId,
+      status: GameSessionStatus.Active,
+      expiresAt,
+    });
+
+    return {
+      sessionId: String(session._id),
+      expiresAt,
+    };
+  }
+
   async completeGame(userId: string, data: CompleteGameInput) {
     // Atomic transition: only one caller can move active → completed
     const now = new Date();

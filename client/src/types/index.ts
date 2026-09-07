@@ -13,6 +13,32 @@ export interface User {
   updatedAt: string
 }
 
+export interface Address {
+  _id: string
+  userId: string
+  label: string
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  street: string
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateAddressPayload {
+  label?: string
+  recipientName: string
+  phone: string
+  province: string
+  district: string
+  ward: string
+  street: string
+  isDefault?: boolean
+}
+
 export type ProductMaterial = 'PLA' | 'PETG' | 'ABS' | 'Resin'
 export type PrinterType = 'FDM' | 'Resin Printer'
 export type ProductStatus = 'active' | 'inactive' | 'out-of-stock'
@@ -135,6 +161,21 @@ export interface CouponWithAvailability extends Coupon {
   reason?: string
 }
 
+export interface EligibleCoupon {
+  _id: string
+  code: string
+  discount: number
+  type: CouponType
+  expiredDate: string
+  quantity: number
+  usedCount: number
+  minOrder: number
+  source: 'admin' | 'game'
+  estimatedDiscountAmount: number
+  isApplicable: boolean
+  reason?: string
+}
+
 export interface News {
   _id: string
   title: string
@@ -150,7 +191,7 @@ export interface News {
   updatedAt: string
 }
 
-export type ContactStatus = 'new' | 'in_progress' | 'resolved' | 'closed'
+export type ContactStatus = 'new' | 'in_progress' | 'resolved' | 'rejected'
 
 export interface ContactRequest {
   _id: string
@@ -162,6 +203,7 @@ export interface ContactRequest {
   message: string
   status: ContactStatus
   adminNote?: string
+  resolutionContent?: string
   resolvedAt?: string
   createdAt: string
   updatedAt: string

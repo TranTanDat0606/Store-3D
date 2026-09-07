@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, ShoppingBag, Star } from 'lucide-react'
+import { Heart, ShoppingBag, Star, Trophy } from 'lucide-react'
 import { memo, useState, lazy, Suspense } from 'react'
 import { useCart } from '@/contexts/CartContext'
 const LoginPromptDialog = lazy(() => import('@/components/auth/login-prompt-dialog').then(m => ({ default: m.LoginPromptDialog })))
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn, formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
 import { toast } from 'sonner'
+import { toastAddedToCart } from '@/lib/toast-progress'
 import type { Product } from '@/types'
 import { motion } from 'framer-motion'
 
@@ -16,12 +17,14 @@ interface ProductCardProps {
   product: Product
   index?: number
   hideAddToCart?: boolean
+  rank?: 1 | 2 | 3
 }
 
 export const ProductCard = memo(function ProductCard({
   product,
   index = 0,
   hideAddToCart = false,
+  rank,
 }: ProductCardProps) {
   const { addItem } = useCart()
   const { isWishlisted, toggleWishlist } = useWishlist()
@@ -41,7 +44,7 @@ export const ProductCard = memo(function ProductCard({
       return
     }
     addItem(product)
-    toast.success('Đã thêm vào giỏ hàng', { description: product.name })
+    toastAddedToCart(product.name)
   }
 
   const handleWishlist = async (e: React.MouseEvent) => {
@@ -109,10 +112,24 @@ export const ProductCard = memo(function ProductCard({
                 </Badge>
               </motion.span>
             )}
-            {product.featured && (
-              <Badge className="bg-primary text-primary-foreground shadow-md shadow-primary/30">
-                Nổi bật
-              </Badge>
+            {rank && (
+              <motion.span
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.12 }}
+              >
+                <Badge
+                  className={cn(
+                    'shadow-md',
+                    rank === 1 && 'bg-amber-500 text-white shadow-amber-500/30',
+                    rank === 2 && 'bg-slate-400 text-white shadow-slate-400/30',
+                    rank === 3 && 'bg-orange-600 text-white shadow-orange-600/30',
+                  )}
+                >
+                  <Trophy className="mr-1 size-3" />
+                  TOP {rank}
+                </Badge>
+              </motion.span>
             )}
           </div>
 

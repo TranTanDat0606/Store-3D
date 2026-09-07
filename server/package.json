@@ -18,6 +18,8 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^2.21.0",
+    "@types/nodemailer": "^8.0.1",
     "ai": "^7.0.84",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.10.1",
@@ -31,6 +33,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.1",
     "multer": "^2.2.0",
+    "nodemailer": "^10.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

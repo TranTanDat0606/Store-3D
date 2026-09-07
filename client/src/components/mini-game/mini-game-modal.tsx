@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { FrogCatcher } from './frog-catcher'
+import { Miu9FutureRun } from './miu9-future-run'
 import { RewardCouponCard } from './reward-coupon-card'
 import { useGameSession } from '@/hooks/useGameSession'
+import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,12 +16,14 @@ import { Loader2, Gamepad2 } from 'lucide-react'
 interface MiniGameModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  orderId: string
+  orderId?: string
 }
 
 export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProps) {
-  const { status, result, error, startGame, completeGame, reset } = useGameSession()
+  const { status, result, error, startGame, startTestGame, completeGame, reset } = useGameSession()
+  const { user } = useAuth()
   const [started, setStarted] = useState(false)
+  const isAdmin = user?.role === 'admin'
 
   useEffect(() => {
     if (!open) {
@@ -30,9 +33,14 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
   }, [open, reset])
 
   const handleStart = useCallback(async () => {
-    const res = await startGame(orderId)
-    if (res) setStarted(true)
-  }, [orderId, startGame])
+    if (isAdmin && !orderId) {
+      const res = await startTestGame()
+      if (res) setStarted(true)
+    } else if (orderId) {
+      const res = await startGame(orderId)
+      if (res) setStarted(true)
+    }
+  }, [orderId, startGame, startTestGame, isAdmin])
 
   const handleGameEnd = useCallback(
     async (score: number) => {
@@ -47,14 +55,14 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Gamepad2 className="size-5" />
-            Mini Game - Frog Robot Fighter
+            MIU-9 Future Run
           </DialogTitle>
           <DialogDescription>
-            Đánh bại kẻ thù và boss để nhận quà!
+            Bắn hạ kẻ thù, nhận điểm và quà tặng!
           </DialogDescription>
         </DialogHeader>
 
@@ -78,41 +86,28 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {!isStarting && !error && !started && !isDone && (
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="text-center">
-                <p className="text-lg font-semibold">Sẵn sàng chiến đấu?</p>
+                <p className="text-lg font-semibold">Sẵn sàng chạy?</p>
                 <p className="text-muted-foreground mt-1 text-sm">
-                  Di chuyển, nhảy, né tránh và bắn kẻ thù!
-                  <br />
-                  3 trái tim. Điểm càng cao, quà càng lớn!
+                  Bắn hạ kẻ thù để tích điểm và nhận quà!
                 </p>
               </div>
-
-              <div className="w-full space-y-3 rounded-lg bg-muted/50 p-3">
-                <p className="text-center text-xs font-semibold">Điều khiển</p>
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
-                  <span>A/D hoặc ←/→</span><span className="text-right">Di chuyển</span>
-                  <span>Space</span><span className="text-right">Nhảy</span>
-                  <span>S hoặc ↓</span><span className="text-right">Rạp xuống</span>
-                  <span>F</span><span className="text-right">Bắn năng lượng</span>
-                </div>
+              <div className="flex gap-2">
+                <Button onClick={handleStart} size="lg">
+                  <Gamepad2 className="mr-2 size-4" />
+                  {isAdmin && !orderId ? 'Chơi thử' : 'Bắt đầu chơi'}
+                </Button>
+                {isAdmin && orderId && (
+                  <Button onClick={handleStart} variant="outline" size="lg">
+                    <Gamepad2 className="mr-2 size-4" />
+                    Test Play
+                  </Button>
+                )}
               </div>
-
-              <div className="space-y-0.5 text-center text-xs text-muted-foreground">
-                <p>50+ điểm → Giảm 5%</p>
-                <p>60+ điểm → Giảm 10%</p>
-                <p>70+ điểm → Giảm 15%</p>
-                <p>80+ điểm → Giảm 20%</p>
-                <p>90+ điểm → Giảm 25%</p>
-                <p>100+ điểm → Giảm 30%</p>
-              </div>
-              <Button onClick={handleStart} size="lg">
-                <Gamepad2 className="mr-2 size-4" />
-                Bắt đầu chơi
-              </Button>
             </div>
           )}
 
           {isPlaying && (
-            <FrogCatcher onGameEnd={handleGameEnd} />
+            <Miu9FutureRun onGameEnd={handleGameEnd} />
           )}
 
           {isDone && result && (

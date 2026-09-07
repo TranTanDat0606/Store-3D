@@ -3,6 +3,19 @@ import { AppError } from '../utils/AppError';
 import { MAX_DISCOUNT_VND } from '../config/rewards';
 import type { CreateCouponInput, UpdateCouponInput, ApplyCouponInput } from '../validators/coupon';
 
+/** Compute estimated discount for a coupon against a subtotal. */
+function computeEstimatedDiscount(coupon: { type: string; discount: number }, subtotal: number): number {
+  if (coupon.type === CouponType.Percent) {
+    return Math.round((subtotal * coupon.discount) / 100);
+  }
+  return Math.min(coupon.discount, subtotal);
+}
+
+/** Cap a game coupon's discount by MAX_DISCOUNT_VND. */
+function capGameDiscount(discount: number): number {
+  return Math.min(discount, MAX_DISCOUNT_VND);
+}
+
 export class CouponService {
   async list() {
     return Coupon.find().sort({ createdAt: -1 });
@@ -90,6 +103,84 @@ export class CouponService {
     }
 
     throw new AppError('Mã giảm giá không tồn tại', 400);
+  }
+
+  /** List all eligible coupons for a user at a given subtotal (admin + game coupons). */
+  async getEligibleCoupons(subtotal: number, userId?: string) {
+    const now = new Date();
+    const results: Array<{
+      _id: string;
+      code: string;
+      discount: number;
+      type: string;
+      expiredDate: Date;
+      quantity: number;
+      usedCount: number;
+      minOrder: number;
+      source: 'admin' | 'game';
+      estimatedDiscountAmount: number;
+      isApplicable: boolean;
+      reason?: string;
+    }> = [];
+
+    // 1. Admin coupons: not expired, global usage available
+    const adminCoupons = await Coupon.find({
+      expiredDate: { $gt: now },
+      $expr: { $or: [{ $eq: ['$quantity', 0] }, { $lt: ['$usedCount', '$quantity'] }] },
+    });
+
+    for (const c of adminCoupons) {
+      const estimated = computeEstimatedDiscount(c, subtotal);
+      const isApplicable = subtotal >= (c.minOrder || 0);
+      results.push({
+        _id: String(c._id),
+        code: c.code,
+        discount: c.discount,
+        type: c.type,
+        expiredDate: c.expiredDate,
+        quantity: c.quantity,
+        usedCount: c.usedCount,
+        minOrder: c.minOrder,
+        source: 'admin',
+        estimatedDiscountAmount: estimated,
+        isApplicable,
+        reason: !isApplicable && c.minOrder > 0
+          ? `Đơn tối thiểu ${c.minOrder.toLocaleString('vi-VN')}đ`
+          : undefined,
+      });
+    }
+
+    // 2. User game coupons: belong to user, not expired, not used
+    if (userId) {
+      const userCoupons = await UserCoupon.find({
+        user: userId,
+        usedAt: null,
+        expiresAt: { $gt: now },
+      });
+
+      for (const uc of userCoupons) {
+        const rawEstimated = computeEstimatedDiscount({ type: uc.type, discount: uc.discount }, subtotal);
+        const estimated = capGameDiscount(rawEstimated);
+        results.push({
+          _id: String(uc._id),
+          code: uc.code,
+          discount: uc.discount,
+          type: uc.type,
+          expiredDate: uc.expiresAt,
+          quantity: 1,
+          usedCount: 0,
+          minOrder: 0,
+          source: 'game',
+          estimatedDiscountAmount: estimated,
+          isApplicable: true,
+        });
+      }
+    }
+
+    // Sort by estimated discount descending
+    results.sort((a, b) => b.estimatedDiscountAmount - a.estimatedDiscountAmount);
+
+    return results;
   }
 
   /** List coupons available for a given subtotal. */

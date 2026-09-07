@@ -53,15 +53,19 @@ export const config = {
   qrTtlMinutes: Number(process.env.QR_TTL_MINUTES) || 5,
   paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET || '',
   smtp: {
-    host: process.env.SMTP_HOST || '',
-    port: Number(process.env.SMTP_PORT) || 587,
-    user: process.env.SMTP_USER || '',
-    password: process.env.SMTP_PASSWORD || '',
+    host: process.env.MAIL_HOST || process.env.SMTP_HOST || '',
+    port: Number(process.env.MAIL_PORT || process.env.SMTP_PORT) || 465,
+    user: process.env.MAIL_USER || process.env.SMTP_USER || '',
+    password: process.env.MAIL_PASSWORD || process.env.SMTP_PASSWORD || '',
   },
-  supportEmail: process.env.SUPPORT_EMAIL || 'support@store3d.com',
+  mailFrom: process.env.MAIL_FROM || '',
+  supportEmail: process.env.MAIL_SUPPORT || process.env.SUPPORT_EMAIL || 'support@store3d.com',
   ai: {
     provider: process.env.AI_PROVIDER || 'mock',
     model: process.env.AI_MODEL || 'gpt-3.5-turbo',
     apiKey: process.env.AI_API_KEY || '',
+  },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
   },
 } as const;

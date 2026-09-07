@@ -55,6 +55,25 @@ const BUDGET_PATTERNS = [
 
 const PRODUCT_KEYWORDS = /(?:sản\s*phẩm|mô\s*hình|model|figure|mô|hình|đồ|chơi|figure|toy|product|items?)/i;
 
+const SORT_PATTERNS: Record<string, Record<string, 1 | -1>> = {
+  'mới nhất': { createdAt: -1 },
+  'mới': { createdAt: -1 },
+  'giá thấp': { salePrice: 1 },
+  'giá rẻ': { salePrice: 1 },
+  'rẻ nhất': { salePrice: 1 },
+  'giá cao': { salePrice: -1 },
+  'đắt nhất': { salePrice: -1 },
+};
+
+const SALES_SORT_KEYWORDS = ['bán chạy', 'bán nhiều', 'nổi bật', 'bán ít', 'ít bán'];
+
+function parseSort(text: string): Record<string, 1 | -1> | null {
+  for (const [keyword, sort] of Object.entries(SORT_PATTERNS)) {
+    if (text.includes(keyword)) return sort;
+  }
+  return null;
+}
+
 function parseBudget(text: string): { min?: number; max?: number; target?: number } | null {
   const tuDenMatch = text.match(/từ\s*(\d[\d.,]*)\s*(k|tr(?:ệu)?|nghìn|đồng)?\s*đến\s*(\d[\d.,]*)\s*(k|tr(?:ệu)?|nghìn|đồng)?/i);
   if (tuDenMatch) {
@@ -113,14 +132,19 @@ function formatPrice(price: number): string {
   return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
 }
 
-function formatProductLine(p: Record<string, unknown>): string {
+function formatProductLine(p: Record<string, unknown>, includeSalesCount = false): string {
   const name = (p.name as string) ?? 'Sản phẩm';
   const salePrice = (p.salePrice as number) ?? 0;
   const slug = (p.slug as string) ?? '';
-  return `- **${name}** — ${formatPrice(salePrice)} → [Xem chi tiết](/san-pham/${slug})`;
+  const images = p.images as string[] | undefined;
+  const imageRaw = images?.[0] ?? '';
+  const sold = (p._sold as number) ?? 0;
+  const salesPart = includeSalesCount ? ` — Đã bán ${sold}` : '';
+  const imagePart = imageRaw ? `|| ![img](${imageRaw})` : '';
+  return `- **${name}** — ${formatPrice(salePrice)}${salesPart} ${imagePart} → [Xem chi tiết](/san-pham/${slug})`;
 }
 
-async function searchProductsByBudget(budget: { min?: number; max?: number; target?: number }) {
+async function searchProductsByBudget(budget: { min?: number; max?: number; target?: number }, sort?: Record<string, 1 | -1>) {
   const readyState = mongoose.connection.readyState;
   if (readyState !== 1) {
     console.error(`[AIChat] MongoDB not ready (readyState=${readyState}). Attempting reconnect...`);
@@ -154,7 +178,7 @@ async function searchProductsByBudget(budget: { min?: number; max?: number; targ
 
   let products = await withTimeout(
     Product.find(filter)
-      .sort({ salePrice: 1 })
+      .sort(sort || { salePrice: 1 })
       .limit(5)
       .select('name slug salePrice originalPrice images')
       .lean(),
@@ -165,7 +189,7 @@ async function searchProductsByBudget(budget: { min?: number; max?: number; targ
   if (products.length === 0 && budget.target) {
     const closest = await withTimeout(
       Product.find({ status: 'active', stock: { $gt: 0 } })
-        .sort({ salePrice: 1 })
+        .sort(sort || { salePrice: 1 })
         .select('name slug salePrice originalPrice images')
         .lean(),
       QUERY_TIMEOUT_MS,
@@ -186,6 +210,86 @@ async function searchProductsByBudget(budget: { min?: number; max?: number; targ
   return products;
 }
 
+async function searchProductsSorted(sort: Record<string, 1 | -1>, label: string) {
+  const readyState = mongoose.connection.readyState;
+  if (readyState !== 1) {
+    try {
+      await mongoose.connect(process.env.MONGODB_URI!, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+      });
+    } catch {}
+  }
+
+  const products = await withTimeout(
+    Product.find({ status: 'active', stock: { $gt: 0 } })
+      .sort(sort)
+      .limit(5)
+      .select('name slug salePrice originalPrice images')
+      .lean(),
+    QUERY_TIMEOUT_MS,
+    'searchProductsSorted'
+  );
+
+  if (products.length === 0) {
+    return `Hiện tại Store3D chưa có sản phẩm nào.`;
+  }
+
+  const lines = products.map((p) => formatProductLine(p));
+  return `Đây là ${label} tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn xem chi tiết sản phẩm nào không?`;
+}
+
+async function searchProductsBySales(sortDir: 1 | -1, label: string) {
+  const readyState = mongoose.connection.readyState;
+  if (readyState !== 1) {
+    try {
+      await mongoose.connect(process.env.MONGODB_URI!, {
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+      });
+    } catch {}
+  }
+
+  const VALID_ORDER_STATUSES = ['pending', 'confirmed', 'shipping', 'completed'];
+
+  const products = await withTimeout(
+    Product.aggregate([
+      { $match: { status: 'active', stock: { $gt: 0 } } },
+      { $lookup: { from: 'orderitems', localField: '_id', foreignField: 'product', as: '_orderItems' } },
+      { $lookup: { from: 'orders', localField: '_orderItems.order', foreignField: '_id', as: '_orders' } },
+      {
+        $addFields: {
+          _validOrderItems: {
+            $filter: {
+              input: '$_orderItems',
+              as: 'item',
+              cond: {
+                $in: [
+                  { $let: { vars: { order: { $arrayElemAt: [{ $filter: { input: '$_orders', as: 'o', cond: { $eq: ['$$o._id', '$$item.order'] } } }, 0 ] } }, in: '$$order.status' } },
+                  VALID_ORDER_STATUSES,
+                ],
+              },
+            },
+          },
+        },
+      },
+      { $addFields: { _sold: { $sum: '$_validOrderItems.quantity' } } },
+      { $sort: { _sold: sortDir, createdAt: -1 } },
+      { $limit: 5 },
+      { $project: { name: 1, slug: 1, salePrice: 1, originalPrice: 1, images: 1, _sold: 1 } },
+    ]),
+    QUERY_TIMEOUT_MS,
+    'searchProductsBySales'
+  );
+
+  if (products.length === 0) {
+    return `Hiện tại Store3D chưa có sản phẩm nào.`;
+  }
+
+  const lines = products.map((p) => formatProductLine(p, true));
+  return `Đây là ${label} tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn xem chi tiết sản phẩm nào không?`;
+}
+
 function buildBudgetResponse(products: Awaited<ReturnType<typeof searchProductsByBudget>>, budget: { min?: number; max?: number; target?: number }): string {
   const budgetStr = budget.target
     ? formatPrice(budget.target)
@@ -199,7 +303,7 @@ function buildBudgetResponse(products: Awaited<ReturnType<typeof searchProductsB
     return `Hiện tại Store3D chưa có sản phẩm phù hợp với ngân sách ${budgetStr}. Bạn có thể thử ngân sách khác hoặc xem toàn bộ sản phẩm tại /san-pham`;
   }
 
-  const lines = products.map(formatProductLine);
+  const lines = products.map((p) => formatProductLine(p));
   return `Mình tìm được ${products.length} sản phẩm phù hợp với ngân sách ${budgetStr}:\n\n${lines.join('\n')}\n\nBạn có muốn xem chi tiết sản phẩm nào không?`;
 }
 
@@ -212,10 +316,18 @@ function createSmartMockModel(userMessage: string, contextProducts?: string) {
         if (isGreeting(userMessage)) {
           response = GREETING_RESPONSES[Math.floor(Math.random() * GREETING_RESPONSES.length)];
         } else if (isProductQuery(userMessage)) {
+          const sort = parseSort(userMessage);
           const budget = parseBudget(userMessage);
+          const salesKeyword = SALES_SORT_KEYWORDS.find((k) => userMessage.includes(k));
+          const isLeastSales = salesKeyword && (salesKeyword.includes('ít') || salesKeyword.includes(' ít'));
 
-          if (budget) {
-            const products = await searchProductsByBudget(budget);
+          if (salesKeyword && !budget) {
+            response = await searchProductsBySales(isLeastSales ? 1 : -1, salesKeyword);
+          } else if (sort && !budget) {
+            const sortLabel = Object.entries(SORT_PATTERNS).find(([k]) => userMessage.includes(k))?.[0] || 'sản phẩm';
+            response = await searchProductsSorted(sort, sortLabel);
+          } else if (budget) {
+            const products = await searchProductsByBudget(budget, sort || undefined);
             response = buildBudgetResponse(products, budget);
           } else if (contextProducts) {
             response = contextProducts;
@@ -231,7 +343,7 @@ function createSmartMockModel(userMessage: string, contextProducts?: string) {
             );
 
             if (allProducts.length > 0) {
-              const lines = allProducts.map(formatProductLine);
+              const lines = allProducts.map((p) => formatProductLine(p));
               response = `Đây là một số sản phẩm hiện có tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn tìm sản phẩm theo ngân sách cụ thể không?`;
             } else {
               response = 'Hiện tại Store3D chưa có sản phẩm. Bạn có thể quay lại sau!';

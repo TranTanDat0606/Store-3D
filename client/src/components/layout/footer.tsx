@@ -92,8 +92,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/san-pham?featured=true" className="hover:text-foreground transition-colors">
-                  Sản phẩm nổi bật
+                <Link to="/san-pham?sort=best-selling" className="hover:text-foreground transition-colors">
+                  Sản phẩm bán chạy
                 </Link>
               </li>
               <li>

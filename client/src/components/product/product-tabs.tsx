@@ -14,6 +14,7 @@ interface ProductTabsProps {
   hasMoreReviews: boolean
   onLoadMoreReviews: () => void
   onLoginClick: () => void
+  defaultTab?: TabId
 }
 
 type TabId = 'description' | 'specs' | 'reviews'
@@ -26,8 +27,9 @@ export function ProductTabs({
   hasMoreReviews,
   onLoadMoreReviews,
   onLoginClick,
+  defaultTab = 'description',
 }: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('description')
+  const [activeTab, setActiveTab] = useState<TabId>(defaultTab)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
 
   const tabs: { id: TabId; label: string }[] = [
@@ -140,7 +142,11 @@ export function ProductTabs({
               ) : (
                 <>
                   {reviews.map((review) => (
-                    <ReviewCard key={review._id} review={review} />
+                    <ReviewCard
+                      key={review._id}
+                      review={review}
+                      id={`review-${review._id}`}
+                    />
                   ))}
                   {hasMoreReviews && (
                     <Button variant="outline" className="w-full" onClick={onLoadMoreReviews}>

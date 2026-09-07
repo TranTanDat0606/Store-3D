@@ -2,6 +2,7 @@ import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import { Box, ChevronLeft, LayoutDashboard, MessageCircleQuestion, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { contactApi } from '@/services'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -32,6 +33,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function AdminLayout() {
   const { user } = useAuth()
+  const { theme } = useTheme()
   const { pathname } = useLocation()
   const [newSupportCount, setNewSupportCount] = useState(0)
 
@@ -48,24 +50,24 @@ export function AdminLayout() {
     (pathname.startsWith('/admin/san-pham/') ? 'Chi tiết sản phẩm' : 'Quản trị')
 
   return (
-    <div className="dark min-h-screen bg-slate-950 text-slate-100">
+    <div className={cn('min-h-screen bg-background text-foreground', theme === 'dark' && 'dark')}>
       {/* Radial glow background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-blue-600/10 blur-3xl" />
+        <div className="absolute -top-40 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
       </div>
 
       <div className="relative flex min-h-screen">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-white/10 bg-slate-900/60 backdrop-blur-xl lg:flex">
+        <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-border bg-card/50 backdrop-blur-xl lg:flex">
           <div className="flex items-center gap-3 px-5 py-5">
             <Link to="/" className="flex items-center gap-3">
-              <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-10 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20">
-                <Box className="size-5 text-white" />
+              <span className="bg-gradient-to-br from-primary to-primary/80 flex size-10 items-center justify-center rounded-xl shadow-lg shadow-primary/20">
+                <Box className="size-5 text-primary-foreground" />
               </span>
               <div>
-                <p className="font-bold leading-tight text-white">Store 3D</p>
-                <p className="text-xs text-slate-400">Quản trị</p>
+                <p className="font-bold leading-tight text-foreground">Store 3D</p>
+                <p className="text-xs text-muted-foreground">Quản trị</p>
               </div>
             </Link>
           </div>
@@ -79,15 +81,15 @@ export function AdminLayout() {
                   cn(
                     'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/10 text-cyan-300 shadow-inner'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
+                      ? 'bg-primary/10 text-primary shadow-inner'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                   )
                 }
               >
                 <link.icon className="size-4" />
                 {link.label}
                 {link.to === '/admin/ho-tro' && newSupportCount > 0 && (
-                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                  <span className="ml-auto rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground">
                     {newSupportCount}
                   </span>
                 )}
@@ -99,26 +101,26 @@ export function AdminLayout() {
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Topbar */}
-          <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+          <header className="sticky top-0 z-20 border-b border-border bg-background/70 backdrop-blur-xl">
             <div className="flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
               <div className="flex items-center gap-3">
                 <Link to="/" className="flex items-center gap-3">
-                  <span className="bg-gradient-to-br from-cyan-400 to-blue-500 flex size-9 items-center justify-center rounded-xl shadow-lg shadow-cyan-500/20 lg:hidden">
-                    <Box className="size-5 text-white" />
+                  <span className="bg-gradient-to-br from-primary to-primary/80 flex size-9 items-center justify-center rounded-xl shadow-lg shadow-primary/20 lg:hidden">
+                    <Box className="size-5 text-primary-foreground" />
                   </span>
                 </Link>
-                <h1 className="text-lg font-bold text-white sm:text-xl">{title}</h1>
+                <h1 className="text-lg font-bold text-foreground sm:text-xl">{title}</h1>
               </div>
               <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" asChild className="text-slate-300 hover:bg-white/5 hover:text-white">
+                <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:bg-accent hover:text-accent-foreground">
                   <Link to="/">
                     <ChevronLeft className="size-4" />
                     Về trang chủ
                   </Link>
                 </Button>
                 <div className="hidden text-right sm:block">
-                  <p className="text-sm font-medium text-white">{user?.fullname}</p>
-                  <p className="text-xs text-slate-400">Admin</p>
+                  <p className="text-sm font-medium text-foreground">{user?.fullname}</p>
+                  <p className="text-xs text-muted-foreground">Admin</p>
                 </div>
               </div>
             </div>
@@ -133,15 +135,15 @@ export function AdminLayout() {
                     cn(
                       'flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium',
                       isActive
-                        ? 'border-cyan-400/40 bg-gradient-to-r from-cyan-500/20 to-blue-500/10 text-cyan-300'
-                        : 'border-white/10 text-slate-400 hover:border-white/20'
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-border text-muted-foreground hover:border-border'
                     )
                   }
                 >
                   <link.icon className="size-4" />
                   {link.label}
                   {link.to === '/admin/ho-tro' && newSupportCount > 0 && (
-                    <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-xs font-bold text-white leading-none">
+                    <span className="rounded-full bg-destructive px-1.5 py-0.5 text-xs font-bold text-destructive-foreground leading-none">
                       {newSupportCount}
                     </span>
                   )}

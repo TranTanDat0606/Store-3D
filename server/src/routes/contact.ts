@@ -13,5 +13,6 @@ router.get('/admin/new-count', requireAuth, requireAdmin, contactController.admi
 router.get('/admin/:id', requireAuth, requireAdmin, contactController.adminGetById);
 router.put('/admin/:id/status', requireAuth, requireAdmin, contactController.adminUpdateStatus);
 router.put('/admin/:id/note', requireAuth, requireAdmin, contactController.adminAddNote);
+router.post('/admin/:id/send-resolution', requireAuth, requireAdmin, contactController.adminSendResolution);
 
 export default router;

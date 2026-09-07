@@ -229,7 +229,7 @@ export default function HomePage() {
                 className="border-slate-300 bg-white/60 text-slate-700 backdrop-blur-sm transition-all hover:border-slate-400 hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-white dark:hover:border-white/25 dark:hover:bg-white/10"
                 asChild
               >
-                <Link to="/san-pham?featured=true">Sản phẩm nổi bật</Link>
+                <Link to="/san-pham?sort=best-selling">Sản phẩm bán chạy</Link>
               </Button>
             </motion.div>
 
@@ -315,16 +315,15 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* Featured products */}
+      {/* Best selling products */}
       <section className="bg-white py-16 dark:bg-slate-950/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-8 flex items-end justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Sản phẩm nổi bật</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Những mô hình được yêu thích nhất</p>
+              <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">Sản phẩm bán chạy</h2>
             </div>
             <Button variant="ghost" className="text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" asChild>
-              <Link to="/san-pham?featured=true">
+              <Link to="/san-pham?sort=best-selling">
                 Xem tất cả
                 <ArrowRight className="size-4" />
               </Link>
@@ -335,7 +334,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {featured.map((product, i) => (
-                <ProductCard key={product._id} product={product} index={i} />
+                <ProductCard key={product._id} product={product} index={i} rank={i < 3 ? (i + 1) as 1 | 2 | 3 : undefined} />
               ))}
             </div>
           )}

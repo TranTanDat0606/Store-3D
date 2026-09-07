@@ -4,13 +4,14 @@ import type { Review } from '@/types'
 
 interface ReviewCardProps {
   review: Review
+  id?: string
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export function ReviewCard({ review, id }: ReviewCardProps) {
   const user = typeof review.user === 'object' ? review.user : null
 
   return (
-    <div className="border-b pb-6 last:border-0">
+    <div id={id} className="border-b pb-6 last:border-0 scroll-mt-24 transition-all duration-500">
       <div className="flex items-center gap-3">
         <div className="bg-muted flex size-10 items-center justify-center rounded-full font-semibold">
           {user ? user.fullname.charAt(0).toUpperCase() : 'K'}

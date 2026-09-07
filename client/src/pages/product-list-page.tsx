@@ -98,6 +98,7 @@ export default function ProductListPage() {
   const minPrice = searchParams.get('minPrice') ?? ''
   const maxPrice = searchParams.get('maxPrice') ?? ''
   const sort = searchParams.get('sort') ?? 'newest'
+  const bestSelling = sort === 'best-selling'
 
   const [searchInput, setSearchInput] = useState(search)
   const debouncedSearch = useDebounce(searchInput, 200)
@@ -277,7 +278,7 @@ export default function ProductListPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold sm:text-3xl">
-          {currentCategory ? currentCategory.name : featured ? 'Sản phẩm nổi bật' : 'Tất cả sản phẩm'}
+          {currentCategory ? currentCategory.name : featured || bestSelling ? 'Sản phẩm bán chạy' : 'Tất cả sản phẩm'}
         </h1>
         <p className="text-muted-foreground mt-1">
           {meta ? `${meta.total} sản phẩm` : 'Đang tải...'}
@@ -413,7 +414,7 @@ export default function ProductListPage() {
               ) : (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
                   {products.map((product, i) => (
-                    <ProductCard key={product._id} product={product} index={i} />
+                    <ProductCard key={product._id} product={product} index={i} rank={bestSelling && i < 3 ? (i + 1) as 1 | 2 | 3 : undefined} />
                   ))}
                 </div>
               )}

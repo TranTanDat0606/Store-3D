@@ -1,24 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Search, Star, Trash2 } from 'lucide-react'
+import { ExternalLink, ImageOff, Search, Star } from 'lucide-react'
 import { reviewApi } from '@/services'
-import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Pagination } from '@/components/common/pagination'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { formatDateTime, resolveImageUrl } from '@/lib'
-import { toast } from 'sonner'
 import type { PaginationMeta, Review } from '@/types'
 
 function StarRow({ rating }: { rating: number }) {
@@ -70,17 +57,6 @@ export default function AdminReviewsPage() {
     }
   }, [page, debouncedSearch])
 
-  const handleDelete = async (id: string) => {
-    try {
-      await reviewApi.adminRemove(id)
-      setReviews((prev) => prev.filter((r) => r._id !== id))
-      setMeta((prev) => (prev ? { ...prev, total: Math.max(0, prev.total - 1) } : prev))
-      toast.success('Xóa đánh giá thành công')
-    } catch (err) {
-      toast.error(getErrorMessage(err))
-    }
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -112,11 +88,19 @@ export default function AdminReviewsPage() {
         <div className="space-y-4">
           {reviews.map((review) => {
             const user = typeof review.user === 'object' ? review.user : null
-            const product = typeof review.product === 'object' ? review.product : null
+            const product = typeof review.product === 'object' ? review.product as { _id: string; name: string; slug: string; images?: string[] } : null
+            const productImage = product?.images?.[0]
             return (
               <Card key={review._id}>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex gap-4">
+                    <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
+                      {productImage ? (
+                        <img src={resolveImageUrl(productImage)} alt={product?.name ?? ''} className="size-full object-cover" />
+                      ) : (
+                        <ImageOff className="size-5 text-muted-foreground" />
+                      )}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{user?.fullname ?? 'Khách hàng'}</span>
@@ -139,31 +123,18 @@ export default function AdminReviewsPage() {
                           ))}
                         </div>
                       )}
-                    </div>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="Xóa">
-                          <Trash2 className="size-4 text-destructive" />
+                      {product && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          onClick={() => { window.location.href = `/san-pham/${product.slug}?review=${review._id}` }}
+                        >
+                          <ExternalLink className="size-3.5" />
+                          Xem chi tiết
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Xóa đánh giá?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Bạn có chắc muốn xóa đánh giá này? Điểm đánh giá của sản phẩm sẽ được tính lại.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Hủy</AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-white hover:bg-destructive/90"
-                            onClick={() => handleDelete(review._id)}
-                          >
-                            Xóa
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

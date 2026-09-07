@@ -42,4 +42,11 @@ export const couponController = {
     const coupons = await couponService.listAvailable(subtotal);
     return successResponse(res, coupons);
   }),
+
+  /** Authenticated: list eligible coupons (admin + game) for checkout. */
+  eligible: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const subtotal = Number(req.query.subtotal) || 0;
+    const coupons = await couponService.getEligibleCoupons(subtotal, req.user!._id);
+    return successResponse(res, coupons);
+  }),
 };

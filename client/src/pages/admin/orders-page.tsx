@@ -76,19 +76,19 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Tìm theo tên khách hàng hoặc mã đơn..."
-            className="border-white/10 bg-slate-900/60 pl-9 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40"
+            className="pl-9"
           />
         </div>
         <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1) }}>
-          <SelectTrigger className="w-[180px] border-white/10 bg-slate-900/60 text-slate-100">
+          <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Lọc theo trạng thái" />
           </SelectTrigger>
-          <SelectContent className="border-white/10 bg-slate-900 text-slate-100">
+          <SelectContent>
             {STATUS_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -97,80 +97,80 @@ export default function AdminOrdersPage() {
       {loading ? (
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl bg-white/5" />
+            <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : orders.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 py-12 text-center text-slate-400">
+        <div className="rounded-2xl border border-dashed border-border py-12 text-center text-muted-foreground">
           Không có đơn hàng nào
         </div>
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order._id} className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl">
+            <div key={order._id} className="overflow-hidden rounded-2xl border border-border bg-card/50">
               <button
                 className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-left"
                 onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-semibold text-white">#{order._id.slice(-8).toUpperCase()}</span>
+                  <span className="font-semibold text-foreground">#{order._id.slice(-8).toUpperCase()}</span>
                   <OrderStatusBadge status={order.status} />
                   <PaymentStatusBadge status={order.payment.status} />
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="hidden text-sm text-slate-400 sm:block">
+                  <span className="hidden text-sm text-muted-foreground sm:block">
                     {order.customer.name} · {itemCount(order)} sản phẩm · {formatDateTime(order.createdAt)}
                   </span>
-                  <span className="font-bold text-white">{formatCurrency(order.total)}</span>
-                  <ChevronDown className={cn('size-4 text-slate-400 transition-transform', expandedId === order._id && 'rotate-180')} />
+                  <span className="font-bold text-foreground">{formatCurrency(order.total)}</span>
+                  <ChevronDown className={cn('size-4 text-muted-foreground transition-transform', expandedId === order._id && 'rotate-180')} />
                 </div>
               </button>
 
               {expandedId === order._id && (
-                <div className="border-t border-white/10 p-4">
+                <div className="border-t border-border p-4">
                   <div className="mb-4 grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1 text-sm text-slate-300">
-                      <p><span className="text-slate-400">Khách hàng:</span> {order.customer.name}</p>
-                      <p><span className="text-slate-400">SĐT:</span> {order.customer.phone}</p>
-                      <p><span className="text-slate-400">Email:</span> {order.customer.email}</p>
-                      <p><span className="text-slate-400">Địa chỉ:</span> {order.customer.address}</p>
-                      {order.note && <p><span className="text-slate-400">Ghi chú:</span> {order.note}</p>}
+                    <div className="space-y-1 text-sm text-foreground">
+                      <p><span className="text-muted-foreground">Khách hàng:</span> {order.customer.name}</p>
+                      <p><span className="text-muted-foreground">SĐT:</span> {order.customer.phone}</p>
+                      <p><span className="text-muted-foreground">Email:</span> {order.customer.email}</p>
+                      <p><span className="text-muted-foreground">Địa chỉ:</span> {order.customer.address}</p>
+                      {order.note && <p><span className="text-muted-foreground">Ghi chú:</span> {order.note}</p>}
                     </div>
                     <div className="space-y-2">
                       {order.items.map((item) => (
                         <div key={item._id} className="flex items-center gap-3 text-sm">
                           {item.image && (
-                            <img src={resolveImageUrl(item.image)} alt="" className="size-10 rounded-lg border border-white/10 object-cover" />
+                            <img src={resolveImageUrl(item.image)} alt="" className="size-10 rounded-lg border border-border object-cover" />
                           )}
-                          <span className="line-clamp-1 flex-1 text-slate-300">
+                          <span className="line-clamp-1 flex-1 text-foreground">
                             {item.name} × {item.quantity}
                           </span>
-                          <span className="font-medium text-slate-100">{formatCurrency(item.price * item.quantity)}</span>
+                          <span className="font-medium text-foreground">{formatCurrency(item.price * item.quantity)}</span>
                         </div>
                       ))}
                       {order.discount > 0 && (
-                        <p className="flex justify-between text-sm text-emerald-400">
+                        <p className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
                           <span>Giảm giá</span>
                           <span>-{formatCurrency(order.discount)}</span>
                         </p>
                       )}
-                      <p className="flex justify-between border-t border-white/10 pt-2 text-base font-bold text-white">
+                      <p className="flex justify-between border-t border-border pt-2 text-base font-bold text-foreground">
                         <span>Tổng</span>
                         <span>{formatCurrency(order.total)}</span>
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
-                    <span className="text-sm text-slate-400">Cập nhật trạng thái:</span>
+                  <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+                    <span className="text-sm text-muted-foreground">Cập nhật trạng thái:</span>
                     <Select
                       value={order.status}
                       onValueChange={(v) => changeStatus(order._id, v as OrderStatus)}
                     >
-                      <SelectTrigger className="w-[180px] border-white/10 bg-slate-950/60 text-slate-100">
+                      <SelectTrigger className="w-[180px]">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="border-white/10 bg-slate-900 text-slate-100">
+                      <SelectContent>
                         {STATUS_OPTIONS.filter((o) => o.value).map((o) => {
                           const opt = o.value as OrderStatus
                           const selectable = opt === order.status || ALLOWED_NEXT[order.status].includes(opt)
@@ -182,14 +182,13 @@ export default function AdminOrdersPage() {
                         })}
                       </SelectContent>
                     </Select>
-                    <Badge variant="outline" className="border-white/10 text-slate-300">
+                    <Badge variant="outline">
                       {order.payment.method === 'cash' ? 'COD' : 'Chuyển khoản'}
                     </Badge>
                     {order.payment.status === 'unpaid' && order.status === 'completed' && (
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-white/10 text-slate-200 hover:bg-white/5 hover:text-white"
                         onClick={async () => {
                           try {
                             await orderApi.adminUpdateStatus(order._id, { status: order.status, paymentStatus: 'paid' })

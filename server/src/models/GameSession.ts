@@ -28,7 +28,7 @@ const gameSessionSchema = new Schema<IGameSession>(
     order: {
       type: Schema.Types.ObjectId,
       ref: 'Order',
-      required: [true, 'Đơn hàng là bắt buộc'],
+      default: null,
     },
     status: {
       type: String,
@@ -51,7 +51,7 @@ const gameSessionSchema = new Schema<IGameSession>(
   { timestamps: true },
 );
 
-gameSessionSchema.index({ user: 1, order: 1 }, { unique: true });
+gameSessionSchema.index({ user: 1, order: 1 }, { unique: true, partialFilterExpression: { order: { $ne: null } } });
 gameSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const GameSession: Model<IGameSession> =

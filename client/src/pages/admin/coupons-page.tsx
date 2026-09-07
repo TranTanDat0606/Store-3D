@@ -202,7 +202,7 @@ export default function AdminCouponsPage() {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Hủy</AlertDialogCancel>
                             <AlertDialogAction
-                              className="bg-destructive text-white hover:bg-destructive/90"
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               onClick={() => handleDelete(c._id)}
                             >
                               Xóa

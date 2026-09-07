@@ -3,6 +3,7 @@ import { Order, OrderStatus, PaymentMethod, PaymentStatus } from '../models';
 import { AppError } from '../utils/AppError';
 import { config } from '../config';
 import { buildVietQrQuickLink, getBankName } from './vietQrService';
+import { emailService } from './email/email.service';
 
 export function generateOrderCode(): string {
   return `ST3D-${randomBytes(3).toString('hex').toUpperCase()}`;
@@ -104,7 +105,7 @@ export class PaymentService {
     }
     if (order.payment.status === PaymentStatus.Paid) return order;
 
-    return Order.findByIdAndUpdate(
+    const updatedOrder = await Order.findByIdAndUpdate(
       order._id,
       {
         $set: {
@@ -115,6 +116,35 @@ export class PaymentService {
       },
       { new: true },
     ).populate('items');
+
+    // Send payment success email (fire-and-forget, don't block webhook response)
+    if (updatedOrder) {
+      const populatedItems = updatedOrder.items as unknown as Array<{
+        product?: { name?: string };
+        quantity: number;
+        price: number;
+      }>;
+      emailService.sendPaymentSuccess({
+        customerName: updatedOrder.customer.name,
+        customerEmail: updatedOrder.customer.email,
+        orderId: String(updatedOrder._id),
+        orderDate: new Date(updatedOrder.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+        items: populatedItems.map((item) => ({
+          name: (item.product as { name?: string })?.name ?? 'Sản phẩm',
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        subtotal: updatedOrder.subtotal,
+        discount: updatedOrder.discount,
+        shipping: updatedOrder.shipping,
+        total: updatedOrder.total,
+        paymentMethod: updatedOrder.payment.method,
+        paymentStatus: PaymentStatus.Paid,
+        orderStatus: OrderStatus.Confirmed,
+      }).catch(() => {/* email failure non-blocking */});
+    }
+
+    return updatedOrder;
   }
 }
 

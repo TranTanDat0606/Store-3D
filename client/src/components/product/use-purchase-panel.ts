@@ -4,6 +4,7 @@ import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
+import { toastAddedToCart } from '@/lib/toast-progress'
 import type { Product } from '@/types'
 
 export interface PurchasePanelState {
@@ -46,7 +47,7 @@ export function usePurchasePanel(product: Product | null): PurchasePanelState {
       return
     }
     addItem(product, quantity)
-    toast.success('Đã thêm vào giỏ hàng', { description: product.name })
+    toastAddedToCart(product.name)
   }
 
   const handleBuyNow = () => {

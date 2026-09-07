@@ -11,11 +11,9 @@ import {
   Plus,
   Search,
   SearchX,
-  Trash2,
   XCircle,
 } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
-import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -38,21 +36,15 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
-  AlertDialogTitle, AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Pagination } from '@/components/common/pagination'
 import { formatCurrency, resolveImageUrl } from '@/lib'
 import { cn } from '@/lib/utils'
-import { toast } from 'sonner'
 import type { Category, PaginationMeta, Product, ProductStatus } from '@/types'
 
 export const PRODUCT_STATUS_META: Record<ProductStatus, { label: string; className: string }> = {
-  active: { label: 'Đang bán', className: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300' },
-  inactive: { label: 'Ẩn', className: 'border-white/10 bg-white/5 text-slate-300' },
-  'out-of-stock': { label: 'Hết hàng', className: 'border-amber-400/30 bg-amber-500/10 text-amber-300' },
+  active: { label: 'Đang bán', className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  inactive: { label: 'Ẩn', className: 'border-border bg-muted text-muted-foreground' },
+  'out-of-stock': { label: 'Hết hàng', className: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
 }
 
 const PRICE_RANGES = [
@@ -79,13 +71,13 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon: Icon, accentClass }: StatCardProps) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-slate-900/60 p-4">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card/50 p-4">
       <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg', accentClass)}>
         <Icon className="size-5" />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-2xl font-bold text-white">{value.toLocaleString('vi-VN')}</p>
-        <p className="truncate text-xs text-slate-400">{label}</p>
+        <p className="truncate text-2xl font-bold text-foreground">{value.toLocaleString('vi-VN')}</p>
+        <p className="truncate text-xs text-muted-foreground">{label}</p>
       </div>
     </div>
   )
@@ -99,29 +91,29 @@ function TableSkeleton({ rows = 6 }: TableSkeletonProps) {
   return (
     <Table>
       <TableHeader>
-        <TableRow className="border-white/10">
+        <TableRow className="border-border">
           {['Sản phẩm', 'Danh mục', 'Giá', 'Tồn kho', 'Trạng thái', 'Thao tác'].map((h) => (
-            <TableHead key={h} className="text-slate-400">{h}</TableHead>
+            <TableHead key={h} className="text-muted-foreground">{h}</TableHead>
           ))}
         </TableRow>
       </TableHeader>
       <TableBody>
         {Array.from({ length: rows }).map((_, i) => (
-          <TableRow key={i} className="border-white/10">
+          <TableRow key={i} className="border-border">
             <TableCell>
               <div className="flex items-center gap-3">
-                <Skeleton className="size-14 rounded-lg bg-white/5" />
+                <Skeleton className="size-14 rounded-lg bg-muted" />
                 <div className="space-y-2">
-                  <Skeleton className="h-3.5 w-40 bg-white/5" />
-                  <Skeleton className="h-3 w-24 bg-white/5" />
+                  <Skeleton className="h-3.5 w-40 bg-muted" />
+                  <Skeleton className="h-3 w-24 bg-muted" />
                 </div>
               </div>
             </TableCell>
-            <TableCell><Skeleton className="h-4 w-20 bg-white/5" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-24 bg-white/5" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-10 bg-white/5" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-20 rounded-full bg-white/5" /></TableCell>
-            <TableCell><Skeleton className="h-8 w-24 bg-white/5" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-20 bg-muted" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-24 bg-muted" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-10 bg-muted" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-20 rounded-full bg-muted" /></TableCell>
+            <TableCell><Skeleton className="h-8 w-24 bg-muted" /></TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -143,7 +135,7 @@ export default function AdminProductsPage() {
   const [category, setCategory] = useState('')
   const [status, setStatus] = useState('')
   const [priceRange, setPriceRange] = useState('')
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [refreshKey, _setRefreshKey] = useState(0)
   const [preview, setPreview] = useState<Product | null>(null)
 
   const hasActiveFilters = Boolean(debouncedSearch.trim() || category || status || priceRange)
@@ -228,17 +220,6 @@ export default function AdminProductsPage() {
     setPage(1)
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      await productApi.remove(id)
-      toast.success('Xóa sản phẩm thành công')
-      setPage(1)
-      setRefreshKey((k) => k + 1)
-    } catch (err) {
-      toast.error(getErrorMessage(err))
-    }
-  }
-
   const firstItem = meta ? (meta.page - 1) * meta.limit + 1 : 0
   const lastItem = meta ? Math.min(meta.page * meta.limit, meta.total) : 0
 
@@ -247,15 +228,15 @@ export default function AdminProductsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span>Dashboard</span>
             <ChevronRight className="size-3" />
-            <span className="text-slate-300">Sản phẩm</span>
+            <span className="text-foreground">Sản phẩm</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Sản phẩm</h2>
-          <p className="text-sm text-slate-400">Quản lý kho hàng và trạng thái sản phẩm</p>
+          <h2 className="text-2xl font-bold text-foreground">Sản phẩm</h2>
+          <p className="text-sm text-muted-foreground">Quản lý kho hàng và trạng thái sản phẩm</p>
         </div>
-        <Button onClick={() => navigate('/admin/san-pham/new')} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500">
+        <Button onClick={() => navigate('/admin/san-pham/new')}>
           <Plus className="size-4" />
           Thêm sản phẩm
         </Button>
@@ -266,7 +247,7 @@ export default function AdminProductsPage() {
         {statsLoading ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-[76px] rounded-xl bg-white/5" />
+              <Skeleton key={i} className="h-[76px] rounded-xl bg-muted" />
             ))}
           </>
         ) : (
@@ -282,20 +263,20 @@ export default function AdminProductsPage() {
       {/* Filter toolbar */}
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
         <div className="relative flex-1">
-          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm kiếm sản phẩm theo tên hoặc mã..."
-            className="border-white/10 bg-slate-900/60 pl-9 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40"
+            className="pl-9"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="border-white/10 bg-slate-900/60 text-slate-200" size="sm">
+            <SelectTrigger size="sm">
               <SelectValue placeholder="Danh mục" />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-slate-900 text-slate-200">
+            <SelectContent>
               <SelectItem value="">Tất cả danh mục</SelectItem>
               {categories.map((c) => (
                 <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
@@ -303,10 +284,10 @@ export default function AdminProductsPage() {
             </SelectContent>
           </Select>
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="border-white/10 bg-slate-900/60 text-slate-200" size="sm">
+            <SelectTrigger size="sm">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-slate-900 text-slate-200">
+            <SelectContent>
               <SelectItem value="">Tất cả</SelectItem>
               <SelectItem value="active">Đang bán</SelectItem>
               <SelectItem value="inactive">Ẩn</SelectItem>
@@ -314,10 +295,10 @@ export default function AdminProductsPage() {
             </SelectContent>
           </Select>
           <Select value={priceRange} onValueChange={setPriceRange}>
-            <SelectTrigger className="border-white/10 bg-slate-900/60 text-slate-200" size="sm">
+            <SelectTrigger size="sm">
               <SelectValue placeholder="Khoảng giá" />
             </SelectTrigger>
-            <SelectContent className="border-white/10 bg-slate-900 text-slate-200">
+            <SelectContent>
               {PRICE_RANGES.map((r) => (
                 <SelectItem key={r.label} value={r.label}>{r.label}</SelectItem>
               ))}
@@ -328,7 +309,7 @@ export default function AdminProductsPage() {
             size="sm"
             onClick={resetFilters}
             disabled={!hasActiveFilters}
-            className="text-slate-400 hover:bg-white/5 hover:text-white"
+            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           >
             Reset
           </Button>
@@ -336,32 +317,32 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Table card */}
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/60">
+      <div className="overflow-hidden rounded-xl border border-border bg-card/50">
         {loading ? (
           <TableSkeleton />
         ) : products.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-20 text-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-              <SearchX className="size-7 text-slate-500" />
+            <div className="flex flex-col items-center gap-3 py-20 text-center">
+            <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-muted">
+              <SearchX className="size-7 text-muted-foreground" />
             </div>
             <div>
-              <p className="font-medium text-white">Không tìm thấy sản phẩm</p>
-              <p className="mt-1 text-sm text-slate-400">Thử thay đổi từ khóa hoặc bộ lọc của bạn.</p>
+              <p className="font-medium text-foreground">Không tìm thấy sản phẩm</p>
+              <p className="mt-1 text-sm text-muted-foreground">Thử thay đổi từ khóa hoặc bộ lọc của bạn.</p>
             </div>
-            <Button variant="outline" size="sm" onClick={resetFilters} className="mt-1 border-white/10 text-slate-200 hover:bg-white/5">
+            <Button variant="outline" size="sm" onClick={resetFilters} className="mt-1">
               Xóa bộ lọc
             </Button>
           </div>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow className="border-white/10">
-                <TableHead className="text-slate-400">Sản phẩm</TableHead>
-                <TableHead className="text-slate-400">Danh mục</TableHead>
-                <TableHead className="text-right text-slate-400">Giá</TableHead>
-                <TableHead className="text-center text-slate-400">Tồn kho</TableHead>
-                <TableHead className="text-slate-400">Trạng thái</TableHead>
-                <TableHead className="text-right text-slate-400">Thao tác</TableHead>
+              <TableRow className="border-border">
+                <TableHead className="text-muted-foreground">Sản phẩm</TableHead>
+                <TableHead className="text-muted-foreground">Danh mục</TableHead>
+                <TableHead className="text-right text-muted-foreground">Giá</TableHead>
+                <TableHead className="text-center text-muted-foreground">Tồn kho</TableHead>
+                <TableHead className="text-muted-foreground">Trạng thái</TableHead>
+                <TableHead className="text-right text-muted-foreground">Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -369,39 +350,39 @@ export default function AdminProductsPage() {
                 const statusMeta = PRODUCT_STATUS_META[product.status]
                 const categoryName = typeof product.category === 'object' ? product.category.name : ''
                 const stockColor =
-                  product.stock <= 0 ? 'text-rose-400' : product.stock <= 10 ? 'text-amber-300' : 'text-emerald-400'
+                  product.stock <= 0 ? 'text-destructive' : product.stock <= 10 ? 'text-amber-500' : 'text-emerald-500'
                 return (
-                  <TableRow key={product._id} className="group border-white/10 transition-colors duration-150 hover:bg-white/5">
+                  <TableRow key={product._id} className="group border-border transition-colors duration-150 hover:bg-accent/50">
                     <TableCell className="min-w-64">
                       <div className="flex items-center gap-3">
-                        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-slate-800/80">
+                        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-muted">
                           {product.images[0] ? (
                             <img src={resolveImageUrl(product.images[0])} alt={product.name} loading="lazy" className="size-full object-cover" />
                           ) : (
-                            <ImageOff className="size-5 text-slate-500" />
+                            <ImageOff className="size-5 text-muted-foreground" />
                           )}
                         </div>
                         <div className="min-w-0">
                           <Link
                             to={`/admin/san-pham/${product._id}`}
-                            className="line-clamp-1 text-sm font-medium text-white transition-colors hover:text-cyan-300"
+                            className="line-clamp-1 text-sm font-medium text-foreground transition-colors hover:text-primary"
                           >
                             {product.name}
                           </Link>
-                          <p className="mt-0.5 truncate font-mono text-xs text-slate-500">{product.slug}</p>
+                          <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">{product.slug}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="border-white/10 text-slate-300">
+                      <Badge variant="outline">
                         {categoryName || '—'}
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-right">
                       <div className="flex flex-col items-end">
-                        <span className="font-semibold text-white">{formatCurrency(product.salePrice)}</span>
+                        <span className="font-semibold text-foreground">{formatCurrency(product.salePrice)}</span>
                         {product.originalPrice > product.salePrice && (
-                          <span className="text-xs text-slate-500 line-through">{formatCurrency(product.originalPrice)}</span>
+                          <span className="text-xs text-muted-foreground line-through">{formatCurrency(product.originalPrice)}</span>
                         )}
                       </div>
                     </TableCell>
@@ -418,7 +399,7 @@ export default function AdminProductsPage() {
                           size="icon"
                           onClick={() => setPreview(product)}
                           aria-label="Xem nhanh"
-                          className="size-8 text-slate-300 hover:bg-white/5 hover:text-white"
+                          className="size-8"
                         >
                           <Eye className="size-4" />
                         </Button>
@@ -427,31 +408,10 @@ export default function AdminProductsPage() {
                           size="icon"
                           onClick={() => navigate(`/admin/san-pham/${product._id}`)}
                           aria-label="Chỉnh sửa"
-                          className="size-8 text-slate-300 hover:bg-white/5 hover:text-white"
+                          className="size-8"
                         >
                           <Pencil className="size-4" />
                         </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="Xóa" className="size-8 text-slate-300 hover:bg-white/5 hover:text-rose-400">
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="border-white/10 bg-slate-900 text-slate-100">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-white">Xóa sản phẩm?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-400">
-                                Bạn có chắc muốn xóa "{product.name}"? Hành động này không thể hoàn tác.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">Hủy</AlertDialogCancel>
-                              <AlertDialogAction className="bg-rose-500 text-white hover:bg-rose-600" onClick={() => handleDelete(product._id)}>
-                                Xóa
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -463,8 +423,8 @@ export default function AdminProductsPage() {
 
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 px-4 py-3 sm:flex-row">
-            <p className="text-sm text-slate-400">
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 sm:flex-row">
+            <p className="text-sm text-muted-foreground">
               Hiển thị {firstItem}–{lastItem} trong tổng số {meta.total} sản phẩm
             </p>
             <Pagination meta={meta} onPageChange={setPage} />
@@ -474,41 +434,41 @@ export default function AdminProductsPage() {
 
       {/* Preview dialog */}
       <Dialog open={preview !== null} onOpenChange={(open) => { if (!open) setPreview(null) }}>
-        <DialogContent className="max-w-2xl border-white/10 bg-slate-900 text-slate-100">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-white">{preview?.name}</DialogTitle>
+            <DialogTitle>{preview?.name}</DialogTitle>
           </DialogHeader>
           {preview && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <img src={resolveImageUrl(preview.images[0] ?? '')} alt={preview.name} className="aspect-square w-full rounded-xl border border-white/10 object-contain" />
-              <div className="space-y-3 text-sm text-slate-300">
+              <img src={resolveImageUrl(preview.images[0] ?? '')} alt={preview.name} className="aspect-square w-full rounded-xl border border-border object-contain" />
+              <div className="space-y-3 text-sm text-muted-foreground">
                 <p>
-                  <span className="text-slate-400">Danh mục: </span>
+                  <span className="text-muted-foreground">Danh mục: </span>
                   {typeof preview.category === 'object' ? preview.category.name : '—'}
                 </p>
                 <p>
-                  <span className="text-slate-400">Chất liệu: </span>{preview.material} · {preview.printerType}
+                  <span className="text-muted-foreground">Chất liệu: </span>{preview.material} · {preview.printerType}
                 </p>
                 <p>
-                  <span className="text-slate-400">Kích thước: </span>{preview.size || '—'}
+                  <span className="text-muted-foreground">Kích thước: </span>{preview.size || '—'}
                 </p>
                 <p>
-                  <span className="text-slate-400">Tồn kho: </span>{preview.stock}
+                  <span className="text-muted-foreground">Tồn kho: </span>{preview.stock}
                 </p>
                 <p>
-                  <span className="text-slate-400">Giá bán: </span>
-                  <span className="font-semibold text-cyan-300">{formatCurrency(preview.salePrice)}</span>
+                  <span className="text-muted-foreground">Giá bán: </span>
+                  <span className="font-semibold text-primary">{formatCurrency(preview.salePrice)}</span>
                 </p>
                 {preview.originalPrice > preview.salePrice && (
                   <p>
-                    <span className="text-slate-400">Giá gốc: </span>
+                    <span className="text-muted-foreground">Giá gốc: </span>
                     <span className="line-through">{formatCurrency(preview.originalPrice)}</span>
                   </p>
                 )}
-                <p className="text-slate-400">
-                  Đánh giá: <span className="text-amber-300">★ {preview.rating}</span> ({preview.reviewCount})
+                <p className="text-muted-foreground">
+                  Đánh giá: <span className="text-amber-500">★ {preview.rating}</span> ({preview.reviewCount})
                 </p>
-                <Button onClick={() => navigate(`/admin/san-pham/${preview._id}`)} className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-400 hover:to-blue-500">
+                <Button onClick={() => navigate(`/admin/san-pham/${preview._id}`)} className="w-full">
                   <Pencil className="size-4" />
                   Chỉnh sửa sản phẩm
                 </Button>

@@ -10,7 +10,7 @@ export interface IUserCoupon {
   code: string;
   discount: number;
   type: 'percent';
-  orderId: Types.ObjectId;
+  orderId?: Types.ObjectId | null;
   source: UserCouponSource;
   expiresAt: Date;
   usedAt?: Date;
@@ -46,7 +46,7 @@ const userCouponSchema = new Schema<IUserCoupon>(
     orderId: {
       type: Schema.Types.ObjectId,
       ref: 'Order',
-      required: [true, 'Đơn hàng gốc là bắt buộc'],
+      default: null,
     },
     source: {
       type: String,

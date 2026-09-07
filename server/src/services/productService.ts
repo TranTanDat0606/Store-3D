@@ -198,81 +198,35 @@ export class ProductService {
   async featured(params: Record<string, unknown>) {
     const { page, limit } = parsePagination(params);
     const matchStage: Record<string, unknown> = { status: ProductStatus.Active };
+    const VALID_ORDER_STATUSES = ['pending', 'confirmed', 'shipping', 'completed'];
 
     const [total, docs] = await Promise.all([
       Product.countDocuments(matchStage),
       Product.aggregate([
         { $match: matchStage },
-        {
-          $lookup: {
-            from: 'orderitems',
-            localField: '_id',
-            foreignField: 'product',
-            as: '_orderItems',
-          },
-        },
+        { $lookup: { from: 'orderitems', localField: '_id', foreignField: 'product', as: '_orderItems' } },
+        { $lookup: { from: 'orders', localField: '_orderItems.order', foreignField: '_id', as: '_orders' } },
         {
           $addFields: {
-            _sold: { $sum: '$_orderItems.quantity' },
-            _discountPercent: {
-              $cond: [
-                { $gt: ['$originalPrice', 0] },
-                {
-                  $multiply: [
-                    { $divide: [{ $subtract: ['$originalPrice', '$salePrice'] }, '$originalPrice'] },
-                    100,
+            _validOrderItems: {
+              $filter: {
+                input: '$_orderItems',
+                as: 'item',
+                cond: {
+                  $in: [
+                    { $let: { vars: { order: { $arrayElemAt: [{ $filter: { input: '$_orders', as: 'o', cond: { $eq: ['$$o._id', '$$item.order'] } } }, 0 ] } }, in: '$$order.status' } },
+                    VALID_ORDER_STATUSES,
                   ],
                 },
-                0,
-              ],
+              },
             },
           },
         },
-        {
-          $group: {
-            _id: null,
-            maxSold: { $max: '$_sold' },
-            docs: { $push: '$$ROOT' },
-          },
-        },
-        { $unwind: '$docs' },
-        {
-          $addFields: {
-            'docs._normalizedSold': {
-              $cond: [
-                { $gt: ['$maxSold', 0] },
-                { $divide: ['$docs._sold', '$maxSold'] },
-                0,
-              ],
-            },
-          },
-        },
-        {
-          $addFields: {
-            'docs._featuredScore': {
-              $add: [
-                { $multiply: [{ $divide: ['$docs._discountPercent', 100] }, 0.6] },
-                { $multiply: ['$docs._normalizedSold', 0.4] },
-              ],
-            },
-          },
-        },
-        { $sort: { 'docs._featuredScore': -1, 'docs._id': 1 } },
+        { $addFields: { _sold: { $sum: '$_validOrderItems.quantity' } } },
+        { $sort: { _sold: -1, createdAt: -1 } },
         { $skip: (page - 1) * limit },
         { $limit: limit },
-        {
-          $replaceRoot: {
-            newRoot: '$docs',
-          },
-        },
-        {
-          $lookup: {
-            from: 'categories',
-            localField: 'category',
-            foreignField: '_id',
-            as: '_category',
-          },
-        },
+        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: '_category' } },
         { $unwind: { path: '$_category', preserveNullAndEmptyArrays: true } },
         {
           $project: {

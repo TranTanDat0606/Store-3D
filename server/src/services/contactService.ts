@@ -1,5 +1,6 @@
 import { ContactRequest, ContactStatus } from '../models/ContactRequest';
 import { config } from '../config';
+import { emailService } from './email/email.service';
 
 const ALLOWED_TRANSITIONS: Record<string, ContactStatus[]> = {
   [ContactStatus.New]: [ContactStatus.InProgress, ContactStatus.Rejected],
@@ -38,6 +39,27 @@ export class ContactService {
       message: data.message,
       timestamp: new Date().toISOString(),
     });
+
+    // Send emails (fire-and-forget, don't block response)
+    const ticketId = String(contact._id).slice(-8).toUpperCase();
+    const submittedAt = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+
+    emailService.sendContactAdmin({
+      contactName: data.fullname,
+      contactEmail: data.email,
+      contactPhone: data.phone,
+      subject: data.subject || 'Liên hệ từ trang web',
+      message: data.message,
+      submittedAt,
+    }).catch(() => {/* email failure non-blocking */});
+
+    emailService.sendContactAcknowledgement({
+      customerName: data.fullname,
+      customerEmail: data.email,
+      ticketId,
+      subject: data.subject || 'Liên hệ từ trang web',
+      submittedAt,
+    }).catch(() => {/* email failure non-blocking */});
 
     return {
       success: true,
@@ -110,6 +132,29 @@ export class ContactService {
 
   async addNote(id: string, adminNote: string) {
     return ContactRequest.findByIdAndUpdate(id, { adminNote }, { new: true }).lean();
+  }
+
+  async sendResolution(id: string, resolutionContent: string) {
+    const contact = await ContactRequest.findById(id).lean();
+    if (!contact) return null;
+
+    const updated = await ContactRequest.findByIdAndUpdate(
+      id,
+      { resolutionContent },
+      { new: true }
+    ).lean();
+
+    const ticketId = String(contact._id).slice(-8).toUpperCase();
+    const { emailService } = await import('./email/email.service');
+    await emailService.sendSupportReply({
+      customerName: contact.fullname,
+      customerEmail: contact.email,
+      ticketId,
+      subject: contact.subject,
+      adminReply: resolutionContent,
+    });
+
+    return updated;
   }
 
   async countNew() {

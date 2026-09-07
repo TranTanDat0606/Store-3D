@@ -22,10 +22,6 @@ export function MainLayout() {
   const [chatOpen, setChatOpen] = useState(false)
   const { isOpen: isCartOpen } = useCart()
 
-  useEffect(() => {
-    if (isCartOpen && chatOpen) setChatOpen(false)
-  }, [isCartOpen, chatOpen])
-
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />
@@ -36,7 +32,7 @@ export function MainLayout() {
       <Footer />
       <Suspense fallback={null}>
         <CartDrawer />
-        <ChatLauncher isOpen={chatOpen} onToggle={() => setChatOpen(v => !v)} />
+        <ChatLauncher isOpen={chatOpen} onToggle={() => setChatOpen(v => !v)} cartOpen={isCartOpen} />
         <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
         <OrderCompletionModal />
       </Suspense>

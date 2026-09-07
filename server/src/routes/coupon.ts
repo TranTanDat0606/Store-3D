@@ -10,6 +10,9 @@ const router = Router();
 router.get('/available', couponController.available);
 router.post('/apply', requireAuth, validateRequest(applyCouponSchema), couponController.apply);
 
+// Authenticated: eligible coupons for checkout
+router.get('/eligible', requireAuth, couponController.eligible);
+
 // Admin CRUD
 router.get('/', requireAuth, requireAdmin, couponController.list);
 router.get('/:id', requireAuth, requireAdmin, couponController.getById);

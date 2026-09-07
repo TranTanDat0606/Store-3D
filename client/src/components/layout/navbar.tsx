@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
   Box,
   Search,
@@ -88,15 +88,17 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const { pathname, search: locationSearch } = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const isActive = (path: string, exact = false) => {
     if (exact) return pathname === path
     return pathname === path || pathname.startsWith(path + '/')
   }
 
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(searchParams.get('search') ?? '')
   const debouncedSearch = useDebounce(search, 300)
   const [searchResults, setSearchResults] = useState<Product[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
@@ -115,10 +117,23 @@ export function Navbar() {
     }
   }, [debouncedSearch])
 
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    const hasSearch = search.trim().length > 0
+    if (hasSearch) {
+      params.set('search', search.trim())
+      params.set('page', '1')
+    } else {
+      params.delete('search')
+      params.delete('page')
+    }
+    setSearchParams(params, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch])
+
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (search.trim()) {
-      navigate(`/san-pham?search=${encodeURIComponent(search.trim())}`)
       setSearchResults([])
     }
   }
@@ -129,7 +144,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full overflow-hidden border-b bg-background/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         <Button
           variant="ghost"
@@ -154,11 +169,11 @@ export function Navbar() {
           <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/', true) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Trang chủ
           </Link>
-          <Link to="/san-pham" className={`text-sm font-medium transition-colors ${isActive('/san-pham', true) && !locationSearch.includes('featured') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+          <Link to="/san-pham" className={`text-sm font-medium transition-colors ${isActive('/san-pham', true) && !locationSearch.includes('sort=best-selling') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Sản phẩm
           </Link>
-          <Link to="/san-pham?featured=true" className={`text-sm font-medium transition-colors ${isActive('/san-pham') && locationSearch.includes('featured') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
-            Nổi bật
+          <Link to="/san-pham?sort=best-selling" className={`text-sm font-medium transition-colors ${isActive('/san-pham') && locationSearch.includes('sort=best-selling') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
+            Bán chạy
           </Link>
           <Link to="/tin-tuc" className={`text-sm font-medium transition-colors ${isActive('/tin-tuc') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}>
             Tin tức
@@ -175,17 +190,15 @@ export function Navbar() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm kiếm sản phẩm..."
             className="bg-muted/50 pl-9 pr-4"
-            onBlur={() => setTimeout(() => setSearchResults([]), 200)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => { setShowSuggestions(false); setSearchResults([]) }, 200)}
           />
-          {search.trim() && (
-            <div className="absolute top-full right-0 mt-2 w-[min(26rem,90vw)] overflow-hidden rounded-xl border bg-popover shadow-lg">
+          {showSuggestions && search.trim() && (
+            <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border bg-popover shadow-lg">
               <SearchSuggestions
                 products={searchResults}
                 query={search.trim()}
-                onSelect={() => {
-                  setSearch('')
-                  setSearchResults([])
-                }}
+                onSelect={() => { setShowSuggestions(false); setSearchResults([]) }}
               />
             </div>
           )}
@@ -274,18 +287,16 @@ export function Navbar() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm sản phẩm..."
               className="bg-muted/50 pl-9"
-              onBlur={() => setTimeout(() => setSearchResults([]), 200)}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => { setShowSuggestions(false); setSearchResults([]) }, 200)}
             />
-            {search.trim() && (
-              <div className="mt-2 overflow-hidden rounded-xl border bg-popover shadow-lg">
+            {showSuggestions && search.trim() && (
+              <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border bg-popover shadow-lg">
                 <SearchSuggestions
-                products={searchResults}
-                query={search.trim()}
-                onSelect={() => {
-                  setSearch('')
-                  setSearchResults([])
-                }}
-              />
+                  products={searchResults}
+                  query={search.trim()}
+                  onSelect={() => { setShowSuggestions(false); setSearchResults([]) }}
+                />
               </div>
             )}
           </form>
@@ -293,11 +304,11 @@ export function Navbar() {
             <Link to="/" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/', true) ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Trang chủ
             </Link>
-            <Link to="/san-pham" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham', true) && !locationSearch.includes('featured') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
+            <Link to="/san-pham" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham', true) && !locationSearch.includes('sort=best-selling') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Sản phẩm
             </Link>
-            <Link to="/san-pham?featured=true" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham') && locationSearch.includes('featured') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
-              Nổi bật
+            <Link to="/san-pham?sort=best-selling" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/san-pham') && locationSearch.includes('sort=best-selling') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
+              Bán chạy
             </Link>
             <Link to="/tin-tuc" className={`rounded-md px-3 py-2 text-sm font-medium ${isActive('/tin-tuc') ? 'bg-accent text-primary' : 'hover:bg-accent'}`}>
               Tin tức

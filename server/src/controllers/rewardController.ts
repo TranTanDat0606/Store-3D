@@ -10,6 +10,11 @@ export const rewardController = {
     return successResponse(res, result, { message: 'Bắt đầu trò chơi thành công' });
   }),
 
+  startTestGame: asyncHandler(async (req: AuthRequest, res: Response) => {
+    const result = await rewardService.startTestGame(req.user!._id);
+    return successResponse(res, result, { message: 'Bắt đầu trò chơi thử thành công' });
+  }),
+
   completeGame: asyncHandler(async (req: AuthRequest, res: Response) => {
     const result = await rewardService.completeGame(req.user!._id, req.body);
     const message = result.reward

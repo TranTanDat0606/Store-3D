@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Banknote, CreditCard, CheckCircle2, ChevronDown, ChevronUp, ShoppingBag, Tag, X } from 'lucide-react'
-import { orderApi, couponApi, type CreateOrderPayload } from '@/services'
+import { Banknote, CreditCard, ShoppingBag, Info, Plus, ChevronDown, MapPin, Star, CircleCheck, Minus, Trash2 } from 'lucide-react'
+import { orderApi, couponApi, addressApi, type CreateOrderPayload } from '@/services'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { getErrorMessage } from '@/services/apiClient'
@@ -13,8 +13,17 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/common/empty-state'
+import { CouponInput } from '@/components/checkout/coupon-input'
 import { cn, formatCurrency, resolveImageUrl } from '@/lib'
-import type { Coupon, CouponWithAvailability, PaymentMethod } from '@/types'
+import type { Address, Coupon, EligibleCoupon, PaymentMethod, CreateAddressPayload } from '@/types'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -27,6 +36,7 @@ import { toast } from 'sonner'
 
 const SHIPPING_FEE = 0
 const FREE_SHIPPING_THRESHOLD = 0
+const PAYMENT_MIN_THRESHOLD = 1000
 
 const checkoutSchema = z.object({
   name: z.string().min(2, 'Vui lòng nhập họ tên'),
@@ -38,21 +48,78 @@ const checkoutSchema = z.object({
 
 type CheckoutValues = z.infer<typeof checkoutSchema>
 
+function formatAddress(addr: Address): string {
+  return `${addr.street}, ${addr.ward}, ${addr.district}, ${addr.province}`
+}
+
+function openAddressDialog(setters: {
+  setEditingAddressId: (id: string | null) => void
+  setAddressForm: (f: CreateAddressPayload) => void
+  setAddressError: (e: string) => void
+  setAddressDialogOpen: (open: boolean) => void
+}, user: { fullname?: string; phone?: string } | null) {
+  setters.setEditingAddressId(null)
+  setters.setAddressForm({
+    label: '',
+    recipientName: user?.fullname ?? '',
+    phone: user?.phone ?? '',
+    province: '',
+    district: '',
+    ward: '',
+    street: '',
+    isDefault: false,
+  })
+  setters.setAddressError('')
+  setters.setAddressDialogOpen(true)
+}
+
 export default function CheckoutPage() {
-  const { items, subtotal, clearCart } = useCart()
+  const { items, subtotal, clearCart, updateQuantity, removeItem } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const addressDropdownRef = useRef<HTMLDivElement>(null)
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
-  const [couponCode, setCouponCode] = useState('')
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [discount, setDiscount] = useState(0)
   const [applying, setApplying] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [showCoupons, setShowCoupons] = useState(false)
-  const [availableCoupons, setAvailableCoupons] = useState<CouponWithAvailability[]>([])
+  const [availableCoupons, setAvailableCoupons] = useState<EligibleCoupon[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [loadingAddresses, setLoadingAddresses] = useState(true)
+  const [addressDropdownOpen, setAddressDropdownOpen] = useState(false)
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null)
+  const [addressForm, setAddressForm] = useState<CreateAddressPayload>({
+    label: '',
+    recipientName: '',
+    phone: '',
+    province: '',
+    district: '',
+    ward: '',
+    street: '',
+    isDefault: false,
+  })
+  const [addressError, setAddressError] = useState('')
+  const [addressSubmitting, setAddressSubmitting] = useState(false)
+
+  useEffect(() => {
+    setLoadingAddresses(true)
+    addressApi.list().then((res) => {
+      setAddresses(res)
+      const defaultAddr = res.find((a) => a.isDefault)
+      if (defaultAddr) {
+        setSelectedAddressId(defaultAddr._id)
+        form.setValue('name', defaultAddr.recipientName)
+        form.setValue('phone', defaultAddr.phone)
+        form.setValue('address', formatAddress(defaultAddr))
+      }
+    }).catch(() => {/* ignore */}).finally(() => setLoadingAddresses(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const form = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -67,16 +134,40 @@ export default function CheckoutPage() {
 
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE
   const total = Math.max(0, subtotal - discount) + shipping
+  const isBankTransferEnabled = total >= PAYMENT_MIN_THRESHOLD
 
-  const applyCoupon = async () => {
-    if (!couponCode.trim()) return
+  useEffect(() => {
+    if (!isBankTransferEnabled && paymentMethod === 'bank-transfer') {
+      setPaymentMethod('cash')
+    }
+  }, [isBankTransferEnabled, paymentMethod])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (addressDropdownRef.current && !addressDropdownRef.current.contains(e.target as Node)) {
+        setAddressDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const selectAddress = (addr: Address) => {
+    setSelectedAddressId(addr._id)
+    form.setValue('name', addr.recipientName)
+    form.setValue('phone', addr.phone)
+    form.setValue('address', formatAddress(addr))
+    setAddressDropdownOpen(false)
+  }
+
+  const applyCoupon = async (code: string) => {
+    if (!code.trim()) return
     setApplying(true)
     setError('')
     try {
-      const result = await couponApi.apply(couponCode.trim(), subtotal)
+      const result = await couponApi.apply(code.trim(), subtotal)
       setAppliedCoupon(result.coupon)
       setDiscount(result.discount)
-      setCouponCode('')
       toast.success('Áp dụng mã giảm giá thành công')
     } catch (err) {
       setError(getErrorMessage(err))
@@ -90,29 +181,40 @@ export default function CheckoutPage() {
     setDiscount(0)
   }
 
-  const applyCouponWithCode = async (code: string) => {
-    if (!code.trim()) return
-    setApplying(true)
-    setError('')
+  const handleAddressSubmit = async () => {
+    setAddressError('')
+    if (!addressForm.recipientName.trim() || !addressForm.phone.trim() || !addressForm.province.trim() || !addressForm.district.trim() || !addressForm.ward.trim() || !addressForm.street.trim()) {
+      setAddressError('Vui lòng nhập đầy đủ thông tin địa chỉ')
+      return
+    }
+    setAddressSubmitting(true)
     try {
-      const result = await couponApi.apply(code.trim(), subtotal)
-      setAppliedCoupon(result.coupon)
-      setDiscount(result.discount)
-      setCouponCode('')
-      setShowCoupons(false)
-      toast.success('Áp dụng mã giảm giá thành công')
+      if (editingAddressId) {
+        await addressApi.update(editingAddressId, addressForm)
+        toast.success('Cập nhật địa chỉ thành công')
+      } else {
+        const newAddr = await addressApi.create(addressForm)
+        toast.success('Thêm địa chỉ thành công')
+        setSelectedAddressId(newAddr._id)
+        form.setValue('name', newAddr.recipientName)
+        form.setValue('phone', newAddr.phone)
+        form.setValue('address', formatAddress(newAddr))
+      }
+      setAddressDialogOpen(false)
+      const res = await addressApi.list()
+      setAddresses(res)
     } catch (err) {
-      setError(getErrorMessage(err))
+      setAddressError(getErrorMessage(err))
     } finally {
-      setApplying(false)
+      setAddressSubmitting(false)
     }
   }
 
   const fetchAvailableCoupons = useCallback(async () => {
-    if (showCoupons && subtotal > 0 && !appliedCoupon) {
+    if (subtotal > 0 && !appliedCoupon) {
       setLoadingCoupons(true)
       try {
-        const coupons = await couponApi.available(subtotal)
+        const coupons = await couponApi.eligible(subtotal)
         setAvailableCoupons(coupons)
       } catch {
         setAvailableCoupons([])
@@ -120,7 +222,7 @@ export default function CheckoutPage() {
         setLoadingCoupons(false)
       }
     }
-  }, [showCoupons, subtotal, appliedCoupon])
+  }, [subtotal, appliedCoupon])
 
   useEffect(() => {
     fetchAvailableCoupons()
@@ -234,19 +336,106 @@ export default function CheckoutPage() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Address Dropdown */}
                   <FormField
                     control={form.control}
                     name="address"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Địa chỉ nhận hàng</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Số nhà, đường, quận, thành phố" {...field} />
-                        </FormControl>
-                        <FormMessage />
+                        <div ref={addressDropdownRef} className="relative">
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                {...field}
+                                readOnly
+                                placeholder="Chọn hoặc nhập địa chỉ nhận hàng"
+                                className="cursor-pointer pr-10"
+                                autoComplete="off"
+                                onClick={() => setAddressDropdownOpen((prev) => !prev)}
+                              />
+                              <button
+                                type="button"
+                                tabIndex={-1}
+                                onClick={() => setAddressDropdownOpen((prev) => !prev)}
+                                className="text-muted-foreground hover:text-foreground absolute right-0 top-0 flex h-full items-center px-3 transition-colors"
+                              >
+                                <ChevronDown className={cn('size-4 transition-transform', addressDropdownOpen && 'rotate-180')} />
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+
+                          {addressDropdownOpen && (
+                            <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg animate-in fade-in-0 zoom-in-95">
+                              {loadingAddresses ? (
+                                <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
+                                  <span className="size-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+                                  Đang tải...
+                                </div>
+                              ) : addresses.length > 0 ? (
+                                <div className="max-h-64 overflow-y-auto">
+                                  {addresses.map((addr) => (
+                                    <button
+                                      key={addr._id}
+                                      type="button"
+                                      onClick={() => selectAddress(addr)}
+                                      className={cn(
+                                        'flex w-full items-start gap-3 border-b px-3 py-3 text-left transition-colors last:border-b-0 hover:bg-primary/5',
+                                        selectedAddressId === addr._id && 'bg-primary/5'
+                                      )}
+                                    >
+                                      <MapPin className={cn('mt-0.5 size-4 shrink-0', selectedAddressId === addr._id ? 'text-primary' : 'text-muted-foreground')} />
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                          {addr.label && (
+                                            <span className="text-xs font-medium">{addr.label}</span>
+                                          )}
+                                          {addr.isDefault && (
+                                            <span className="flex items-center gap-0.5 text-[11px] font-medium text-primary">
+                                              <Star className="size-2.5 fill-primary" />
+                                              Mặc định
+                                            </span>
+                                          )}
+                                        </div>
+                                        <p className="mt-0.5 truncate text-sm">{formatAddress(addr)}</p>
+                                      </div>
+                                      {selectedAddressId === addr._id && (
+                                        <CircleCheck className="text-primary mt-0.5 size-4 shrink-0" />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="px-3 py-4 text-center text-sm text-muted-foreground">
+                                  Chưa có địa chỉ nào
+                                </div>
+                              )}
+
+                              <div className="border-t">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAddressDropdownOpen(false)
+                                    openAddressDialog(
+                                      { setEditingAddressId, setAddressForm, setAddressError, setAddressDialogOpen },
+                                      user
+                                    )
+                                  }}
+                                  className="flex w-full items-center gap-2 px-3 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
+                                >
+                                  <Plus className="size-4" />
+                                  Thêm địa chỉ mới
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </FormItem>
                     )}
                   />
+
                   <FormField
                     control={form.control}
                     name="note"
@@ -262,6 +451,99 @@ export default function CheckoutPage() {
                   />
                 </form>
               </Form>
+
+              {/* Address Dialog */}
+              <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{editingAddressId ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</DialogTitle>
+                    <DialogDescription>
+                      {editingAddressId ? 'Cập nhật thông tin địa chỉ' : 'Nhập thông tin địa chỉ giao hàng'}
+                    </DialogDescription>
+                  </DialogHeader>
+                  {addressError && (
+                    <div className="rounded-lg border border-destructive/50 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                      {addressError}
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Nhãn (ví dụ: Nhà, Cơ quan)"
+                      value={addressForm.label}
+                      onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))}
+                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input
+                        placeholder="Tên người nhận"
+                        value={addressForm.recipientName}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, recipientName: e.target.value }))
+                        }
+                      />
+                      <Input
+                        placeholder="Số điện thoại"
+                        value={addressForm.phone}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, phone: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <Input
+                        placeholder="Tỉnh/Thành phố"
+                        value={addressForm.province}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, province: e.target.value }))
+                        }
+                      />
+                      <Input
+                        placeholder="Quận/Huyện"
+                        value={addressForm.district}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, district: e.target.value }))
+                        }
+                      />
+                      <Input
+                        placeholder="Phường/Xã"
+                        value={addressForm.ward}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, ward: e.target.value }))
+                        }
+                      />
+                    </div>
+                    <Input
+                      placeholder="Số nhà, đường..."
+                      value={addressForm.street}
+                      onChange={(e) =>
+                        setAddressForm((prev) => ({ ...prev, street: e.target.value }))
+                      }
+                    />
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={addressForm.isDefault}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))
+                        }
+                        className="rounded border-gray-300"
+                      />
+                      Đặt làm địa chỉ mặc định
+                    </label>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setAddressDialogOpen(false)}>
+                      Hủy
+                    </Button>
+                    <Button onClick={handleAddressSubmit} disabled={addressSubmitting}>
+                      {addressSubmitting
+                        ? 'Đang lưu...'
+                        : editingAddressId
+                          ? 'Cập nhật'
+                          : 'Thêm mới'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
@@ -284,20 +566,33 @@ export default function CheckoutPage() {
                   <p className="text-muted-foreground text-sm">Trả tiền mặt khi nhận sản phẩm</p>
                 </div>
               </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('bank-transfer')}
-                className={cn(
-                  'flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors',
-                  paymentMethod === 'bank-transfer' ? 'border-primary bg-primary/5' : 'hover:border-primary/40'
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => isBankTransferEnabled && setPaymentMethod('bank-transfer')}
+                  disabled={!isBankTransferEnabled}
+                  className={cn(
+                    'flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-colors',
+                    paymentMethod === 'bank-transfer' ? 'border-primary bg-primary/5' : 'hover:border-primary/40',
+                    !isBankTransferEnabled && 'cursor-not-allowed opacity-50'
+                  )}
+                >
+                  <CreditCard className="text-primary size-6" />
+                  <div className="flex-1">
+                    <p className="font-medium">Chuyển khoản ngân hàng</p>
+                    <p className="text-muted-foreground text-sm">Chuyển khoản rồi chúng tôi sẽ xác nhận</p>
+                  </div>
+                  {!isBankTransferEnabled && (
+                    <Info className="size-4 shrink-0 text-muted-foreground" />
+                  )}
+                </button>
+                {!isBankTransferEnabled && (
+                  <p className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-xs">
+                    <Info className="size-3 shrink-0" />
+                    Không khả dụng với đơn hàng dưới {formatCurrency(PAYMENT_MIN_THRESHOLD)}
+                  </p>
                 )}
-              >
-                <CreditCard className="text-primary size-6" />
-                <div>
-                  <p className="font-medium">Chuyển khoản ngân hàng</p>
-                  <p className="text-muted-foreground text-sm">Chuyển khoản rồi chúng tôi sẽ xác nhận</p>
-                </div>
-              </button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -307,151 +602,118 @@ export default function CheckoutPage() {
           <CardHeader>
             <CardTitle className="text-lg">Đơn hàng của bạn</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="max-h-72 space-y-3 overflow-y-auto">
-              {items.map((item) => (
-                <div key={item.productId} className="flex items-center gap-3">
-                  <div className="bg-muted relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-                    <img src={resolveImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" className="size-full object-cover" />
-                    <span className="bg-primary text-primary-foreground absolute -top-0 -right-0 flex size-5 items-center justify-center rounded-bl-lg text-xs font-bold">
-                      {item.quantity}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-sm font-medium">{item.name}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {formatCurrency(item.price)} × {item.quantity}
-                    </p>
-                  </div>
-                  <span className="text-sm font-medium">{formatCurrency(item.price * item.quantity)}</span>
-                </div>
-              ))}
-            </div>
+          <CardContent className="space-y-0">
 
-            {/* Coupon */}
-            <div>
-              {appliedCoupon ? (
-                <div className="bg-emerald-50 dark:bg-emerald-950/50 flex items-center justify-between rounded-lg px-3 py-2 text-sm">
-                  <span className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-                    <Tag className="size-4" />
-                    {appliedCoupon.code}
-                    <span className="text-emerald-600/70 dark:text-emerald-400/70 text-xs">
-                      (-{appliedCoupon.type === 'percent' ? `${appliedCoupon.discount}%` : formatCurrency(appliedCoupon.discount)})
-                    </span>
-                  </span>
-                  <button onClick={removeCoupon} aria-label="Xóa mã giảm giá">
-                    <X className="size-4 hover:text-destructive" />
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => setShowCoupons(!showCoupons)}
-                    className="flex w-full items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-colors hover:border-primary/40"
-                  >
-                    <span className="flex items-center gap-2 text-muted-foreground">
-                      <Tag className="size-4" />
-                      Chọn hoặc nhập mã giảm giá
-                    </span>
-                    {showCoupons ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                  </button>
-
-                  {showCoupons && (
-                    <div className="mt-2 space-y-3 rounded-lg border p-3">
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Nhập mã khuyến mãi..."
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                          className="h-9 font-mono"
-                        />
-                        <Button variant="outline" size="sm" onClick={applyCoupon} disabled={applying || !couponCode.trim()}>
-                          Áp dụng
-                        </Button>
+            {/* ── SECTION: Sản phẩm ── */}
+            <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Sản phẩm ({items.length})
+              </p>
+              <div className="max-h-80 space-y-0 overflow-y-auto">
+                {items.map((item, idx) => (
+                  <div key={item.productId}>
+                    <div className="flex gap-3 py-3">
+                      <div className="bg-muted relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border/40">
+                        <img src={resolveImageUrl(item.image)} alt={item.name} loading="lazy" decoding="async" className="size-full object-cover" />
                       </div>
-
-                      {loadingCoupons ? (
-                        <div className="text-muted-foreground flex items-center justify-center gap-2 py-4 text-sm">
-                          <span className="size-4 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-                          Đang tải...
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="line-clamp-2 text-sm font-medium">{item.name}</p>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.productId)}
+                            aria-label="Xóa sản phẩm"
+                            className="text-muted-foreground/60 hover:text-destructive mt-0.5 shrink-0 rounded-md p-1 transition-colors hover:bg-destructive/10"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
                         </div>
-                      ) : availableCoupons.length > 0 ? (
-                        <div className="space-y-2">
-                          <p className="text-muted-foreground text-xs font-medium">Mã đang khả dụng:</p>
-                          {availableCoupons.map((c) => (
-                            <div
-                              key={c._id}
-                              className={`flex items-center justify-between rounded-lg border p-3 transition-colors ${
-                                c.isApplicable ? 'hover:border-primary/40 hover:bg-primary/5' : 'opacity-60'
-                              }`}
+                        <p className="text-muted-foreground mt-0.5 text-xs">
+                          {formatCurrency(item.price)} / sản phẩm
+                        </p>
+                        <div className="mt-2 flex items-center justify-between">
+                          <div className="inline-flex items-center rounded-lg border border-border/80 bg-background">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              aria-label="Giảm số lượng"
+                              className="flex size-7 items-center justify-center rounded-l-lg transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                             >
-                              <div className="min-w-0">
-                                <p className="font-mono text-sm font-bold">{c.code}</p>
-                                <p className="text-muted-foreground text-xs">
-                                  {c.type === 'percent' ? `Giảm ${c.discount}%` : `Giảm ${formatCurrency(c.discount)}`}
-                                </p>
-                                {c.minOrder > 0 && (
-                                  <p className="text-muted-foreground text-xs">
-                                    Đơn tối thiểu {formatCurrency(c.minOrder)}
-                                  </p>
-                                )}
-                                {!c.isApplicable && c.reason && (
-                                  <p className="text-destructive text-xs">{c.reason}</p>
-                                )}
-                              </div>
-                              {c.isApplicable && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="border-orange-400 bg-orange-50 text-orange-700 hover:bg-orange-100 hover:text-orange-800 dark:border-orange-500/50 dark:bg-orange-500/10 dark:text-orange-400 dark:hover:bg-orange-500/20"
-                                  onClick={() => {
-                                    setCouponCode(c.code)
-                                    applyCouponWithCode(c.code)
-                                  }}
-                                  disabled={applying}
-                                >
-                                  <CheckCircle2 className="size-4" />
-                                  Dùng
-                                </Button>
-                              )}
-                            </div>
-                          ))}
+                              <Minus className="size-3" />
+                            </button>
+                            <span className="flex size-7 items-center justify-center border-x border-border/80 text-xs font-medium">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                              aria-label="Tăng số lượng"
+                              className="flex size-7 items-center justify-center rounded-r-lg transition-colors hover:bg-muted"
+                            >
+                              <Plus className="size-3" />
+                            </button>
+                          </div>
+                          <span className="text-sm font-semibold text-foreground">
+                            {formatCurrency(item.price * item.quantity)}
+                          </span>
                         </div>
-                      ) : subtotal > 0 ? (
-                        <p className="text-muted-foreground py-2 text-center text-sm">Không có mã giảm giá khả dụng</p>
-                      ) : null}
+                      </div>
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2 border-t pt-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tạm tính</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span className="text-muted-foreground">Giảm giá</span>
-                  <span>-{formatCurrency(discount)}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Phí vận chuyển</span>
-                <span>{shipping === 0 ? 'Miễn phí' : formatCurrency(shipping)}</span>
-              </div>
-              <div className="flex justify-between border-t pt-3 text-base font-bold">
-                <span>Tổng cộng</span>
-                <span className="text-primary">{formatCurrency(total)}</span>
+                    {idx < items.length - 1 && (
+                      <div className="border-b border-border/40" />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
+            {/* ── SECTION: Mã giảm giá ── */}
+            <div className="mt-4 rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Mã giảm giá
+              </p>
+              <CouponInput
+                coupons={availableCoupons}
+                loading={loadingCoupons}
+                appliedCoupon={appliedCoupon}
+                discount={discount}
+                applying={applying}
+                onApply={applyCoupon}
+                onRemove={removeCoupon}
+              />
+            </div>
+
+            {/* ── SECTION: Tổng kết giá ── */}
+            <div className="mt-4 border-t border-border/60 pt-4">
+              <div className="space-y-2.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tạm tính</span>
+                  <span className="font-medium">{formatCurrency(subtotal)}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                    <span>Giảm giá</span>
+                    <span className="font-medium">-{formatCurrency(discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Phí vận chuyển</span>
+                  <span className="font-medium">{shipping === 0 ? 'Miễn phí' : formatCurrency(shipping)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                <span className="text-base font-bold uppercase tracking-wide">Tổng cộng</span>
+                <span className="text-primary text-lg font-bold">{formatCurrency(total)}</span>
+              </div>
+            </div>
+
+            {/* ── CTA ── */}
             <Button
               type="submit"
               form="checkout-form"
-              className="w-full"
+              className="mt-4 w-full"
               size="lg"
               disabled={submitting}
             >

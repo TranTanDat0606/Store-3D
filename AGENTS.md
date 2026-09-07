@@ -278,6 +278,12 @@ Inspect current UI → design/reference if needed → implement → browser veri
 | `frontend-quality-checklist` | Frontend code change complete | Backend-only, config-only |
 | `requesting-code-review` | After major feature implementation | Small changes |
 | `receiving-code-review` | Got review feedback | No feedback yet |
+| `diagnosing-bugs` | Hard/ambiguous bugs, performance regressions | Simple bugs (use targeted investigation) |
+| `to-spec` | Requirements/specification ambiguity | Trivial or obvious tasks |
+| `to-tickets` | Large work decomposition with dependencies | Small/medium straightforward work |
+| `code-review-matt` | Substantial/spec-driven/high-risk review | Simple changes (use requesting-code-review) |
+| `structured-interview` | Ambiguity/domain clarification | Clear requests, obvious implementations |
+| `seam-discipline` | Test seam/design decisions | Normal implementation without seam issues |
 
 ### Conditional Workflow
 
@@ -305,6 +311,35 @@ Reproduce → isolate → root cause → fix → regression verify
 ```
 Inspect current UI → design/reference if needed → implement → browser verify
 ```
+
+### Workflow Levels
+
+**CHOOSE THE SMALLEST SUFFICIENT WORKFLOW.** Do NOT force every task through every skill. Do NOT maximize skill usage. Maximize correctness while minimizing unnecessary context and tool calls.
+
+**LEVEL 0 — DIRECT ANSWER**
+Simple questions, documentation lookup, known commands.
+No workflow. Answer directly.
+
+**LEVEL 1 — TARGETED TASK**
+Tiny/simple implementation or obvious bug.
+Use the smallest direct workflow. No planning, no brainstorming.
+
+**LEVEL 2 — STRUCTURED TASK**
+Normal bug, moderate feature, or meaningful ambiguity.
+Use ONE appropriate primary methodology:
+- Normal bug → `systematic-debugging`
+- Hard bug → `diagnosing-bugs`
+- Feature ambiguity → `brainstorming`
+- Specification need → `to-spec`
+
+**LEVEL 3 — COMPLEX TASK**
+Large feature or multi-step work.
+Possible workflow (each step must be justified):
+`brainstorming` → `to-spec` (if needed) → `writing-plans` → `to-tickets` (if justified) → `executing-plans` → verification
+
+**LEVEL 4 — HIGH-RISK / CODEBASE-HEAVY**
+Architecture changes, broad refactors, complex dependency tracing, multi-module debugging.
+Add GitNexus only when it provides meaningful value.
 
 ## Git / Commit Policy
 

@@ -44,6 +44,27 @@ export function useGameSession() {
     }
   }, [])
 
+  const startTestGame = useCallback(async () => {
+    setState({ status: 'starting', sessionId: null, expiresAt: null, result: null, error: null })
+    try {
+      const { sessionId, expiresAt } = await rewardApi.startTestGame()
+      sessionRef.current = sessionId
+      setState({
+        status: 'playing',
+        sessionId,
+        expiresAt: new Date(expiresAt),
+        result: null,
+        error: null,
+      })
+      return { sessionId, expiresAt }
+    } catch (err) {
+      sessionRef.current = null
+      const message = getErrorMessage(err)
+      setState((s) => ({ ...s, status: 'idle', error: message }))
+      return null
+    }
+  }, [])
+
   const completeGame = useCallback(async (score: number) => {
     const sessionId = sessionRef.current
     if (!sessionId) return null
@@ -68,5 +89,5 @@ export function useGameSession() {
     setState({ status: 'idle', sessionId: null, expiresAt: null, result: null, error: null })
   }, [])
 
-  return { ...state, startGame, completeGame, reset }
+  return { ...state, startGame, startTestGame, completeGame, reset }
 }

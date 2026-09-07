@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Bot, MessageSquare, Plus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useChat } from '@/hooks/useChat';
@@ -14,6 +15,7 @@ interface ChatPanelProps {
 export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
   const { messages, sendMessage, status, error, clearChat } = useChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -112,6 +114,30 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
                     <p className="text-muted-foreground mt-1 text-xs">
                       Hỏi tôi bất cứ điều gì về sản phẩm và dịch vụ của Store3D.
                     </p>
+                  </div>
+                  <div className="mt-2 flex w-full flex-wrap justify-center gap-2 px-2">
+                    {[
+                      { label: 'Giá thấp nhất', query: 'Giá thấp' },
+                      { label: 'Giá cao nhất', query: 'Giá cao' },
+                      { label: 'Bán chạy nhất', query: 'Sản phẩm bán chạy nhất' },
+                      { label: 'Bán ít nhất', query: 'Sản phẩm bán ít nhất' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.label}
+                        onClick={() => handleSend(opt.query)}
+                        disabled={isStreaming}
+                        className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => { onClose(); navigate('/lien-he'); }}
+                      disabled={isStreaming}
+                      className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                    >
+                      Hỗ trợ / Liên hệ
+                    </button>
                   </div>
                 </div>
               )}

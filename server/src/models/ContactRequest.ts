@@ -16,6 +16,7 @@ export interface IContactRequest {
   message: string;
   status: ContactStatus;
   adminNote?: string;
+  resolutionContent?: string;
   resolvedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -64,6 +65,11 @@ const contactRequestSchema = new Schema<IContactRequest>(
       default: ContactStatus.New,
     },
     adminNote: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    resolutionContent: {
       type: String,
       trim: true,
       default: '',

@@ -21,6 +21,9 @@ export const rewardApi = {
   startGame: (orderId: string) =>
     apiClient.post<ApiResponse<GameStartResponse>>('/rewards/game/start', { orderId }).then((r) => r.data.data),
 
+  startTestGame: () =>
+    apiClient.post<ApiResponse<GameStartResponse>>('/rewards/game/test-start').then((r) => r.data.data),
+
   completeGame: (sessionId: string, score: number) =>
     apiClient.post<ApiResponse<GameCompleteResponse>>('/rewards/game/complete', { sessionId, score }).then((r) => r.data.data),
 

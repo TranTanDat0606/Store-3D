@@ -9,7 +9,7 @@ const LoginPromptDialog = lazy(() => import('@/components/auth/login-prompt-dial
 import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
 import { formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
-import { toast } from 'sonner'
+import { toastAddedToCart } from '@/lib/toast-progress'
 
 interface HotSaleSectionProps {
   products: Product[]
@@ -96,7 +96,7 @@ function SpotlightDeal({ product }: { product: Product }) {
       return
     }
     addItem(product)
-    toast.success('Đã thêm vào giỏ hàng', { description: product.name })
+    toastAddedToCart(product.name)
   }
 
   return (
@@ -196,7 +196,7 @@ function DealRow({ index, product }: { index: number; product: Product }) {
       return
     }
     addItem(product)
-    toast.success('Đã thêm vào giỏ hàng', { description: product.name })
+    toastAddedToCart(product.name)
   }
 
   return (
