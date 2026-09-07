@@ -141,7 +141,7 @@ export class PaymentService {
         paymentMethod: updatedOrder.payment.method,
         paymentStatus: PaymentStatus.Paid,
         orderStatus: OrderStatus.Confirmed,
-      }).catch(() => {/* email failure non-blocking */});
+      }).catch((err) => { console.error('[Payment] sendPaymentSuccess fire-and-forget failed:', (err as Error).message); });
     }
 
     return updatedOrder;

@@ -7,6 +7,8 @@ export enum ContactStatus {
   Rejected = 'rejected',
 }
 
+export type EmailStatus = 'not_sent' | 'sent' | 'failed' | 'not_configured';
+
 export interface IContactRequest {
   userId?: Types.ObjectId;
   fullname: string;
@@ -18,6 +20,9 @@ export interface IContactRequest {
   adminNote?: string;
   resolutionContent?: string;
   resolvedAt?: Date;
+  sentAt?: Date;
+  emailStatus: EmailStatus;
+  emailError?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,6 +81,19 @@ const contactRequestSchema = new Schema<IContactRequest>(
     },
     resolvedAt: {
       type: Date,
+    },
+    sentAt: {
+      type: Date,
+    },
+    emailStatus: {
+      type: String,
+      enum: ['not_sent', 'sent', 'failed', 'not_configured'],
+      default: 'not_sent',
+    },
+    emailError: {
+      type: String,
+      trim: true,
+      default: '',
     },
   },
   { timestamps: true },

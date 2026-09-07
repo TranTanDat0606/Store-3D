@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
 import { ContactStatus } from '../models/ContactRequest';
 import { AuthRequest } from '../middleware/auth';
+import { verifySmtp } from '../services/email/email.config';
 
 export const contactController = {
   submit: asyncHandler(async (req: AuthRequest, res: Response) => {
@@ -68,11 +69,18 @@ export const contactController = {
       return res.status(400).json({ success: false, message: 'Nội dung xử lý không được để trống' });
     }
     try {
-      const contact = await contactService.sendResolution(req.params.id, resolutionContent.trim());
-      if (!contact) {
+      const result = await contactService.sendResolution(req.params.id, resolutionContent.trim());
+      if (!result) {
         return res.status(404).json({ success: false, message: 'Không tìm thấy yêu cầu' });
       }
-      return successResponse(res, contact);
+      const { updated, emailStatus, emailError, sentAt } = result;
+      return successResponse(res, updated, {
+        meta: {
+          emailStatus,
+          emailError: emailStatus === 'failed' ? emailError : undefined,
+          sentAt: sentAt ? sentAt.toISOString() : undefined,
+        },
+      });
     } catch (err: any) {
       console.error('[Contact] sendResolution error:', err.message);
       return res.status(500).json({ success: false, message: 'Không thể gửi email. Vui lòng thử lại.' });
@@ -82,5 +90,10 @@ export const contactController = {
   adminCountNew: asyncHandler(async (_req, res: Response) => {
     const count = await contactService.countNew();
     return successResponse(res, { count });
+  }),
+
+  adminSmtpTest: asyncHandler(async (_req, res: Response) => {
+    const result = await verifySmtp();
+    return successResponse(res, result);
   }),
 };

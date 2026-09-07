@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Search, Filter, Eye, MessageSquare, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Ban, Send, MailCheck, MailX } from 'lucide-react'
+import { Search, Filter, Eye, MessageSquare, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Ban, Send, MailCheck, MailX, Wifi } from 'lucide-react'
 import { contactApi } from '@/services'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,7 +58,10 @@ export default function AdminSupportPage() {
   const [resolutionContent, setResolutionContent] = useState('')
   const [saving, setSaving] = useState(false)
   const [sendingResolution, setSendingResolution] = useState(false)
-  const [resolutionStatus, setResolutionStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [resolutionStatus, setResolutionStatus] = useState<'idle' | 'success' | 'error' | 'not_configured'>('idle')
+  const [resolutionErrorMsg, setResolutionErrorMsg] = useState('')
+  const [smtpStatus, setSmtpStatus] = useState<{ status: string; message: string } | null>(null)
+  const [smtpChecking, setSmtpChecking] = useState(false)
 
   const fetchContacts = useCallback(async (page = 1) => {
     setLoading(true)
@@ -122,12 +125,23 @@ export default function AdminSupportPage() {
     if (!resolutionContent.trim()) return
     setSendingResolution(true)
     setResolutionStatus('idle')
+    setResolutionErrorMsg('')
     try {
-      const updated = await contactApi.adminSendResolution(id, resolutionContent)
-      setSelected(updated)
-      setResolutionStatus('success')
+      const result = await contactApi.adminSendResolution(id, resolutionContent)
+      setSelected(result.data)
+      const emailStatus = result.meta?.emailStatus
+      if (emailStatus === 'sent') {
+        setResolutionStatus('success')
+      } else if (emailStatus === 'not_configured') {
+        setResolutionStatus('not_configured')
+        setResolutionErrorMsg('SMTP chưa được cấu hình. Vui lòng thiết lập MAIL_HOST, MAIL_USER, MAIL_PASSWORD trong .env')
+      } else {
+        setResolutionStatus('error')
+        setResolutionErrorMsg(result.meta?.emailError || 'Gửi email thất bại. Vui lòng thử lại.')
+      }
     } catch {
       setResolutionStatus('error')
+      setResolutionErrorMsg('Không thể gửi email. Vui lòng thử lại.')
     } finally {
       setSendingResolution(false)
     }
@@ -136,6 +150,22 @@ export default function AdminSupportPage() {
   const handleSearch = () => {
     fetchContacts(1)
   }
+
+  const checkSmtp = async () => {
+    setSmtpChecking(true)
+    try {
+      const result = await contactApi.adminSmtpTest()
+      setSmtpStatus(result)
+    } catch {
+      setSmtpStatus({ status: 'connection_failed', message: 'Không thể kiểm tra SMTP' })
+    } finally {
+      setSmtpChecking(false)
+    }
+  }
+
+  useEffect(() => {
+    checkSmtp()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -174,6 +204,23 @@ export default function AdminSupportPage() {
           </div>
         </CardContent>
       </Card>
+
+      {smtpStatus && smtpStatus.status !== 'connection_ok' && (
+        <Card className={smtpStatus.status === 'not_configured' ? 'border-amber-500/30' : 'border-red-500/30'}>
+          <CardContent className="flex items-center gap-3 py-3">
+            <Wifi className="size-4 text-amber-400" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {smtpStatus.status === 'not_configured' ? 'SMTP chưa được cấu hình' : 'SMTP connection issue'}
+              </p>
+              <p className="text-xs text-muted-foreground">{smtpStatus.message}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={checkSmtp} disabled={smtpChecking}>
+              {smtpChecking ? 'Đang kiểm tra...' : 'Kiểm tra lại'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="p-0">
@@ -355,7 +402,9 @@ export default function AdminSupportPage() {
                           value={adminNote}
                           onChange={(e) => setAdminNote(e.target.value)}
                           placeholder="Ghi chú nội bộ (không hiển thị cho khách hàng)..."
-                          rows={4}
+                          rows={6}
+                          className="resize-none"
+                          style={{ minHeight: '120px' }}
                         />
                       </div>
                       <Button
@@ -371,7 +420,9 @@ export default function AdminSupportPage() {
                           value={resolutionContent}
                           onChange={(e) => { setResolutionContent(e.target.value); setResolutionStatus('idle') }}
                           placeholder="Nhập nội dung xử lý để gửi cho khách hàng..."
-                          rows={4}
+                          rows={8}
+                          className="resize-none"
+                          style={{ minHeight: '200px' }}
                         />
                         <Button
                           size="sm"
@@ -397,10 +448,16 @@ export default function AdminSupportPage() {
                             Đã gửi email cho khách hàng
                           </p>
                         )}
+                        {resolutionStatus === 'not_configured' && (
+                          <p className="mt-2 flex items-center gap-1 text-xs text-amber-400">
+                            <MailX className="size-3" />
+                            {resolutionErrorMsg || 'Email chưa được cấu hình. Nội dung xử lý đã được lưu.'}
+                          </p>
+                        )}
                         {resolutionStatus === 'error' && (
                           <p className="mt-2 flex items-center gap-1 text-xs text-red-400">
                             <MailX className="size-3" />
-                            Không thể gửi email. Vui lòng thử lại.
+                            {resolutionErrorMsg || 'Không thể gửi email. Vui lòng thử lại.'}
                           </p>
                         )}
                       </div>

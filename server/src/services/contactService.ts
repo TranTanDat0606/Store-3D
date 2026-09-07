@@ -51,7 +51,7 @@ export class ContactService {
       subject: data.subject || 'Liên hệ từ trang web',
       message: data.message,
       submittedAt,
-    }).catch(() => {/* email failure non-blocking */});
+    }).catch((err) => { console.error('[Contact] sendContactAdmin fire-and-forget failed:', (err as Error).message); });
 
     emailService.sendContactAcknowledgement({
       customerName: data.fullname,
@@ -59,7 +59,8 @@ export class ContactService {
       ticketId,
       subject: data.subject || 'Liên hệ từ trang web',
       submittedAt,
-    }).catch(() => {/* email failure non-blocking */});
+      message: data.message,
+    }).catch((err) => { console.error('[Contact] sendContactAcknowledgement fire-and-forget failed:', (err as Error).message); });
 
     return {
       success: true,
@@ -135,26 +136,53 @@ export class ContactService {
   }
 
   async sendResolution(id: string, resolutionContent: string) {
-    const contact = await ContactRequest.findById(id).lean();
+    const contact = await ContactRequest.findById(id);
     if (!contact) return null;
+
+    // Save resolution content first (always, even if email fails)
+    const setFields: Record<string, unknown> = { resolutionContent };
+    if (contact.status === ContactStatus.New) {
+      setFields.status = ContactStatus.InProgress;
+    }
+
+    // Attempt SMTP email delivery (AWAITED, not fire-and-forget)
+    let emailStatus: 'sent' | 'failed' | 'not_configured' = 'not_configured';
+    let emailError = '';
+    let sentAt: Date | undefined;
+
+    try {
+      const { emailService } = await import('./email/email.service');
+      const result = await emailService.sendSupportReply({
+        customerName: contact.fullname,
+        customerEmail: contact.email,
+        ticketId: String(contact._id).slice(-8).toUpperCase(),
+        subject: contact.subject,
+        adminReply: resolutionContent,
+        originalMessage: contact.message,
+      });
+
+      emailStatus = result.status;
+      emailError = result.error || '';
+      if (result.success && result.messageId) {
+        sentAt = new Date();
+      }
+    } catch (err) {
+      emailStatus = 'failed';
+      emailError = (err as Error).message || 'Unknown email error';
+      console.error('[Contact] sendResolution email threw:', emailError);
+    }
+
+    setFields.emailStatus = emailStatus;
+    setFields.emailError = emailError;
+    if (sentAt) setFields.sentAt = sentAt;
 
     const updated = await ContactRequest.findByIdAndUpdate(
       id,
-      { resolutionContent },
+      { $set: setFields },
       { new: true }
     ).lean();
 
-    const ticketId = String(contact._id).slice(-8).toUpperCase();
-    const { emailService } = await import('./email/email.service');
-    await emailService.sendSupportReply({
-      customerName: contact.fullname,
-      customerEmail: contact.email,
-      ticketId,
-      subject: contact.subject,
-      adminReply: resolutionContent,
-    });
-
-    return updated;
+    return { updated, emailStatus, emailError, sentAt };
   }
 
   async countNew() {

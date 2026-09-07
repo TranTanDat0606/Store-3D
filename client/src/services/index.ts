@@ -204,10 +204,16 @@ export const contactApi = {
     apiClient.put<ApiResponse<ContactRequest>>(`/contact/admin/${id}/note`, { adminNote }).then((r) => r.data.data),
 
   adminSendResolution: (id: string, resolutionContent: string) =>
-    apiClient.post<ApiResponse<ContactRequest>>(`/contact/admin/${id}/send-resolution`, { resolutionContent }).then((r) => r.data.data),
+    apiClient.post<ApiResponse<ContactRequest>>(`/contact/admin/${id}/send-resolution`, { resolutionContent }).then((r) => ({
+      data: r.data.data,
+      meta: r.data.meta as { emailStatus?: string; emailError?: string; sentAt?: string } | undefined,
+    })),
 
   adminCountNew: () =>
     apiClient.get<ApiResponse<{ count: number }>>('/contact/admin/new-count').then((r) => r.data.data.count),
+
+  adminSmtpTest: () =>
+    apiClient.get<ApiResponse<{ status: string; message: string }>>('/contact/admin/smtp-test').then((r) => r.data.data),
 }
 
 export const newsApi = {

@@ -6,26 +6,36 @@ import { supportReplyTemplate } from './templates/support-reply';
 import { contactAdminTemplate } from './templates/contact-admin';
 import { contactAcknowledgementTemplate } from './templates/contact-acknowledgement';
 
-async function sendMail(to: string, subject: string, html: string): Promise<boolean> {
+export interface EmailSendResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+  status: 'sent' | 'failed' | 'not_configured';
+}
+
+async function sendMail(to: string, subject: string, html: string): Promise<EmailSendResult> {
   if (!isEmailEnabled()) {
-    console.log(`[Email] Disabled — skipping send to ${to}: ${subject}`);
-    return false;
+    console.log(`[Email] NOT_CONFIGURED — skipping send to ${to}: ${subject}`);
+    return { success: false, error: 'SMTP chưa được cấu hình', status: 'not_configured' };
   }
   const transporter = getTransporter();
-  if (!transporter) return false;
+  if (!transporter) {
+    return { success: false, error: 'Không thể tạo SMTP transporter', status: 'not_configured' };
+  }
 
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: config.smtp.user,
       to,
       subject,
       html,
     });
-    console.log(`[Email] Sent to ${to}: ${subject}`);
-    return true;
+    console.log(`[Email] EMAIL_SENT to=${to} subject="${subject}" messageId=${info.messageId} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)}`);
+    return { success: true, messageId: info.messageId, status: 'sent' };
   } catch (err) {
-    console.error(`[Email] Failed to send to ${to}: ${subject}`, (err as Error).message);
-    return false;
+    const safeError = (err as Error).message || 'Unknown error';
+    console.error(`[Email] EMAIL_SEND_FAILED to=${to} subject="${subject}" error="${safeError}"`);
+    return { success: false, error: safeError, status: 'failed' };
   }
 }
 
@@ -59,6 +69,7 @@ export interface SupportReplyEmailData {
   ticketId: string;
   subject: string;
   adminReply: string;
+  originalMessage?: string;
 }
 
 export interface ContactAdminEmailData {
@@ -76,30 +87,31 @@ export interface ContactAcknowledgementEmailData {
   ticketId: string;
   subject: string;
   submittedAt: string;
+  message?: string;
 }
 
 export const emailService = {
-  async sendPaymentSuccess(data: PaymentSuccessEmailData): Promise<boolean> {
+  async sendPaymentSuccess(data: PaymentSuccessEmailData): Promise<EmailSendResult> {
     const { subject, html } = paymentSuccessTemplate(data);
     return sendMail(data.customerEmail, subject, html);
   },
 
-  async sendSupportReceived(data: SupportReceivedEmailData): Promise<boolean> {
+  async sendSupportReceived(data: SupportReceivedEmailData): Promise<EmailSendResult> {
     const { subject, html } = supportReceivedTemplate(data);
     return sendMail(data.customerEmail, subject, html);
   },
 
-  async sendSupportReply(data: SupportReplyEmailData): Promise<boolean> {
+  async sendSupportReply(data: SupportReplyEmailData): Promise<EmailSendResult> {
     const { subject, html } = supportReplyTemplate(data);
     return sendMail(data.customerEmail, subject, html);
   },
 
-  async sendContactAdmin(data: ContactAdminEmailData): Promise<boolean> {
+  async sendContactAdmin(data: ContactAdminEmailData): Promise<EmailSendResult> {
     const { subject, html } = contactAdminTemplate(data);
     return sendMail(config.supportEmail, subject, html);
   },
 
-  async sendContactAcknowledgement(data: ContactAcknowledgementEmailData): Promise<boolean> {
+  async sendContactAcknowledgement(data: ContactAcknowledgementEmailData): Promise<EmailSendResult> {
     const { subject, html } = contactAcknowledgementTemplate(data);
     return sendMail(data.customerEmail, subject, html);
   },

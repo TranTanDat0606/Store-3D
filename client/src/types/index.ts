@@ -205,6 +205,9 @@ export interface ContactRequest {
   adminNote?: string
   resolutionContent?: string
   resolvedAt?: string
+  sentAt?: string
+  emailStatus?: 'not_sent' | 'sent' | 'failed' | 'not_configured'
+  emailError?: string
   createdAt: string
   updatedAt: string
 }
