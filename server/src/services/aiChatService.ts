@@ -9,12 +9,24 @@ let _MockLanguageModelV4: (typeof import('ai/test'))['MockLanguageModelV4'] | nu
 
 async function loadAiModules() {
   if (!_streamText) {
+    console.log('[AI-SVC-DIAG] importing ai module...');
     const ai = await import('ai');
     _streamText = ai.streamText;
+    console.log('[AI-SVC-DIAG] ai module loaded, streamText available');
   }
   if (!_MockLanguageModelV4) {
-    const aiTest = await import('ai/test');
-    _MockLanguageModelV4 = aiTest.MockLanguageModelV4;
+    console.log('[AI-SVC-DIAG] importing ai/test module...');
+    try {
+      const aiTest = await import('ai/test');
+      _MockLanguageModelV4 = aiTest.MockLanguageModelV4;
+      console.log('[AI-SVC-DIAG] ai/test loaded, MockLanguageModelV4 available');
+    } catch (e: any) {
+      console.error('[AI-SVC-DIAG] FAILED to import ai/test:', {
+        name: e?.name,
+        message: e?.message,
+      });
+      throw e;
+    }
   }
 }
 
@@ -321,6 +333,8 @@ function createSmartMockModel(userMessage: string, contextProducts?: string) {
           const salesKeyword = SALES_SORT_KEYWORDS.find((k) => userMessage.includes(k));
           const isLeastSales = salesKeyword && (salesKeyword.includes('ít') || salesKeyword.includes(' ít'));
 
+          console.log(`[AI-SVC-DIAG] doStream: productQuery — sort=${JSON.stringify(sort)}, budget=${JSON.stringify(budget)}, sales=${salesKeyword || 'none'}`);
+
           if (salesKeyword && !budget) {
             response = await searchProductsBySales(isLeastSales ? 1 : -1, salesKeyword);
           } else if (sort && !budget) {
@@ -359,7 +373,11 @@ function createSmartMockModel(userMessage: string, contextProducts?: string) {
           }
         }
       } catch (err: any) {
-        console.error('[AIChat] doStream error:', err.message, err.stack);
+        console.error('[AI-SVC-DIAG] doStream error:', {
+          name: err?.name,
+          message: err?.message,
+          stack: err?.stack?.split('\n').slice(0, 5).join('\n'),
+        });
         response = 'Xin lỗi, mình gặp vấn đề khi truy vấn sản phẩm. Bạn vui lòng thử lại hoặc liên hệ support@store3d.com để được hỗ trợ.';
       }
 
@@ -412,7 +430,13 @@ export async function createChatStream(params: ChatServiceParams) {
   const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
   const userText = lastUserMessage ? extractText(lastUserMessage) : '';
 
-  if (config.ai.provider === 'mock') {
+  const provider = config.ai.provider;
+  const hasApiKey = !!config.ai.apiKey;
+
+  console.log(`[AI-SVC-DIAG] createChatStream — provider=${provider}, hasApiKey=${hasApiKey}, msgs=${modelMessages.length}, mongoReady=${mongoose.connection.readyState}`);
+
+  if (provider === 'mock') {
+    console.log('[AI-SVC-DIAG] using mock provider');
     return _streamText!({
       model: createSmartMockModel(userText),
       messages: modelMessages,
@@ -421,9 +445,11 @@ export async function createChatStream(params: ChatServiceParams) {
   }
 
   if (!config.ai.apiKey) {
+    console.error('[AI-SVC-DIAG] AI_SERVICE_UNAVAILABLE — provider not mock, no apiKey');
     throw new Error('AI_SERVICE_UNAVAILABLE');
   }
 
+  console.log(`[AI-SVC-DIAG] using real provider model=${config.ai.model}`);
   return _streamText!({
     model: config.ai.model as any,
     messages: modelMessages,
