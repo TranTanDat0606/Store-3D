@@ -39,8 +39,8 @@ router.get('/config', requireAuth, requireAdmin, async (_req, res) => {
 
   let aiSdkVersion = 'unknown';
   try {
-    const ai = await import('ai');
-    aiSdkVersion = (ai as any).version || 'loaded-but-unknown';
+    const pkg = require('ai/package.json');
+    aiSdkVersion = pkg.version || 'cannot-resolve';
   } catch {
     aiSdkVersion = 'cannot-resolve';
   }
