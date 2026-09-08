@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "ai": "^7.0.84",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
