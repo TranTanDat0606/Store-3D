@@ -376,38 +376,45 @@ export interface ChatServiceResult {
   pipeUIMessageStreamToResponse: (res: { setHeader: (name: string, value: string) => void; write: (chunk: string) => void; end: () => void; status: (code: number) => { end: () => void } }) => Promise<void>;
 }
 
-function eventToSSELine(event: StreamEvent): string | null {
+function eventToSSELines(event: StreamEvent): string[] {
   switch (event.type) {
     case 'stream-start':
-      return `data: ${JSON.stringify({ type: 'start' })}\n`;
+      return [`data: ${JSON.stringify({ type: 'start' })}\n\n`];
     case 'text-start':
-      return `data: ${JSON.stringify({ type: 'start-step' })}\ndata: ${JSON.stringify({ type: 'text-start', id: event.id })}\n`;
+      return [
+        `data: ${JSON.stringify({ type: 'start-step' })}\n\n`,
+        `data: ${JSON.stringify({ type: 'text-start', id: event.id })}\n\n`,
+      ];
     case 'text-delta':
-      return `data: ${JSON.stringify({ type: 'text-delta', id: event.id, delta: event.delta })}\n`;
+      return [`data: ${JSON.stringify({ type: 'text-delta', id: event.id, delta: event.delta })}\n\n`];
     case 'text-end':
-      return `data: ${JSON.stringify({ type: 'text-end', id: event.id })}\ndata: ${JSON.stringify({ type: 'finish-step' })}\n`;
+      return [
+        `data: ${JSON.stringify({ type: 'text-end', id: event.id })}\n\n`,
+        `data: ${JSON.stringify({ type: 'finish-step' })}\n\n`,
+      ];
     case 'finish':
-      return `data: ${JSON.stringify({ type: 'finish', finishReason: event.finishReason.unified })}\n`;
+      return [`data: ${JSON.stringify({ type: 'finish', finishReason: event.finishReason.unified })}\n\n`];
     default:
-      return null;
+      return [];
   }
 }
 
 function pipeStreamToResponse(res: { setHeader: (name: string, value: string) => void; write: (chunk: string) => void; end: () => void; status: (code: number) => { end: () => void } }, stream: ReadableStream<StreamEvent>): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.setHeader('X-Vercel-AI-Data-Stream', 'v1');
+      res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('X-Vercel-AI-UI-Message-Stream', 'v1');
+      res.setHeader('X-Accel-Buffering', 'no');
 
       const reader = stream.getReader();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const line = eventToSSELine(value);
-        if (line) res.write(line);
+        const lines = eventToSSELines(value);
+        for (const line of lines) res.write(line);
       }
-      res.write('data: [DONE]\n');
+      res.write('data: [DONE]\n\n');
       res.end();
       resolve();
     } catch (err) {
