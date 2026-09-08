@@ -6,6 +6,7 @@ export const globalLimiter = rateLimit({
   max: config.rateLimit.max,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   message: {
     success: false,
     message: 'Quá nhiều yêu cầu, vui lòng thử lại sau',
@@ -42,6 +43,7 @@ export const guestAiChatLimiter = rateLimit({
   max: 15,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   message: {
     success: false,
     message: 'Quá nhiều yêu cầu chat, vui lòng đăng nhập hoặc thử lại sau',
