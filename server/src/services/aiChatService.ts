@@ -7,17 +7,20 @@ type ModelMessage = { role: 'user' | 'assistant'; content: string };
 let _streamText: ((typeof import('ai'))['streamText']) | null = null;
 let _MockLanguageModelV4: (typeof import('ai/test'))['MockLanguageModelV4'] | null = null;
 
+// eslint-disable-next-line no-eval
+const _dynamicImport = new Function('specifier', 'return import(specifier)');
+
 async function loadAiModules() {
   if (!_streamText) {
     console.log('[AI-SVC-DIAG] importing ai module...');
-    const ai = await import('ai');
+    const ai = await _dynamicImport('ai');
     _streamText = ai.streamText;
     console.log('[AI-SVC-DIAG] ai module loaded, streamText available');
   }
   if (!_MockLanguageModelV4) {
     console.log('[AI-SVC-DIAG] importing ai/test module...');
     try {
-      const aiTest = await import('ai/test');
+      const aiTest = await _dynamicImport('ai/test');
       _MockLanguageModelV4 = aiTest.MockLanguageModelV4;
       console.log('[AI-SVC-DIAG] ai/test loaded, MockLanguageModelV4 available');
     } catch (e: any) {
