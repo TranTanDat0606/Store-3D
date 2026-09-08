@@ -55,7 +55,7 @@ const SALES_SORT_KEYWORDS = ['bán chạy', 'bán nhiều', 'nổi bật', 'bán
 
 function parseSort(text: string): Record<string, 1 | -1> | null {
   for (const [keyword, sort] of Object.entries(SORT_PATTERNS)) {
-    if (text.includes(keyword)) return sort;
+    if (text.toLowerCase().includes(keyword.toLowerCase())) return sort;
   }
   return null;
 }
@@ -321,7 +321,7 @@ function generateMockResponse(userMessage: string, contextProducts?: string): Pr
             Product.find({ status: 'active', stock: { $gt: 0 } })
               .sort({ salePrice: 1 })
               .limit(5)
-              .select('name slug salePrice originalPrice')
+              .select('name slug salePrice originalPrice images')
               .lean(),
             QUERY_TIMEOUT_MS,
             'allProducts fallback'
