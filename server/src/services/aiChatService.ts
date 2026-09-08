@@ -4,41 +4,12 @@ import mongoose from 'mongoose';
 
 type ModelMessage = { role: 'user' | 'assistant'; content: string };
 
-let _streamText: ((typeof import('ai'))['streamText']) | null = null;
-let _MockLanguageModelV4: (typeof import('ai/test'))['MockLanguageModelV4'] | null = null;
-
-// eslint-disable-next-line no-eval
-const _dynamicImport = new Function('specifier', 'return import(specifier)');
-
-async function loadAiModules() {
-  if (!_streamText) {
-    console.log('[AI-SVC-DIAG] importing ai module...');
-    const ai = await _dynamicImport('ai');
-    _streamText = ai.streamText;
-    console.log('[AI-SVC-DIAG] ai module loaded, streamText available');
-  }
-  if (!_MockLanguageModelV4) {
-    console.log('[AI-SVC-DIAG] importing ai/test module...');
-    try {
-      const aiTest = await _dynamicImport('ai/test');
-      _MockLanguageModelV4 = aiTest.MockLanguageModelV4;
-      console.log('[AI-SVC-DIAG] ai/test loaded, MockLanguageModelV4 available');
-    } catch (e: any) {
-      console.error('[AI-SVC-DIAG] FAILED to import ai/test:', {
-        name: e?.name,
-        message: e?.message,
-      });
-      throw e;
-    }
-  }
-}
-
-const SYSTEM_PROMPT = `Bạn là trợ lý AI của Store3D - cửa hàng mô hình 3D in.
-Bạn giúp khách hàng tìm hiểu về sản phẩm, quy trình in 3D, và thông tin cửa hàng.
-Trả lời ngắn gọn, thân thiện bằng tiếng Việt.
-Không trả lời về các chủ đề không liên quan đến cửa hàng hoặc in 3D.
-Không bao giờ hỏi hoặc tiết lộ thông tin cá nhân nhạy cảm.
-Khi gợi ý sản phẩm, luôn bao gồm tên, giá, và link chi tiết.`;
+type StreamEvent =
+  | { type: 'stream-start'; warnings: unknown[] }
+  | { type: 'text-start'; id: string }
+  | { type: 'text-delta'; id: string; delta: string }
+  | { type: 'text-end'; id: string }
+  | { type: 'finish'; usage: unknown; finishReason: { unified: string; raw: string } };
 
 const QUERY_TIMEOUT_MS = 8000;
 
@@ -65,7 +36,7 @@ const BUDGET_PATTERNS = [
   /(\d[\d.,]*)\s*(k|tr(?:iệu)?|nghìn|đồng)\s*(?:không|không?|có|còn|được)/i,
   /(?:tìm|kiếm|mua|có|find)\s*(?:.*?)(\d[\d.,]*)\s*(k|tr(?:iệu)?|nghìn|đồng)?/i,
   /(\d[\d.,]*)\s*(?:₫|đ)/i,
-  /(?:giá|price|budget|ngân\s*sách)\s*(?:.*?)(\d[\d.,]*)\s*(k|tr(?:ệu)?|nghìn|đồng)?/i,
+  /(?:giá|price|budget|ngân\s*sách)\s*(?:.*?)(\d[\d.,]*)\s*(k|tr(?:iệu)?|nghìn|đồng)?/i,
 ];
 
 const PRODUCT_KEYWORDS = /(?:sản\s*phẩm|mô\s*hình|model|figure|mô|hình|đồ|chơi|figure|toy|product|items?)/i;
@@ -322,87 +293,126 @@ function buildBudgetResponse(products: Awaited<ReturnType<typeof searchProductsB
   return `Mình tìm được ${products.length} sản phẩm phù hợp với ngân sách ${budgetStr}:\n\n${lines.join('\n')}\n\nBạn có muốn xem chi tiết sản phẩm nào không?`;
 }
 
-function createSmartMockModel(userMessage: string, contextProducts?: string) {
-  return new _MockLanguageModelV4!({
-    doStream: async () => {
-      let response: string;
+function generateMockResponse(userMessage: string, contextProducts?: string): Promise<string> {
+  return (async () => {
+    try {
+      if (isGreeting(userMessage)) {
+        return GREETING_RESPONSES[Math.floor(Math.random() * GREETING_RESPONSES.length)];
+      } else if (isProductQuery(userMessage)) {
+        const sort = parseSort(userMessage);
+        const budget = parseBudget(userMessage);
+        const salesKeyword = SALES_SORT_KEYWORDS.find((k) => userMessage.includes(k));
+        const isLeastSales = salesKeyword && (salesKeyword.includes('ít') || salesKeyword.includes(' ít'));
 
-      try {
-        if (isGreeting(userMessage)) {
-          response = GREETING_RESPONSES[Math.floor(Math.random() * GREETING_RESPONSES.length)];
-        } else if (isProductQuery(userMessage)) {
-          const sort = parseSort(userMessage);
-          const budget = parseBudget(userMessage);
-          const salesKeyword = SALES_SORT_KEYWORDS.find((k) => userMessage.includes(k));
-          const isLeastSales = salesKeyword && (salesKeyword.includes('ít') || salesKeyword.includes(' ít'));
+        console.log(`[AI-SVC-DIAG] productQuery — sort=${JSON.stringify(sort)}, budget=${JSON.stringify(budget)}, sales=${salesKeyword || 'none'}`);
 
-          console.log(`[AI-SVC-DIAG] doStream: productQuery — sort=${JSON.stringify(sort)}, budget=${JSON.stringify(budget)}, sales=${salesKeyword || 'none'}`);
-
-          if (salesKeyword && !budget) {
-            response = await searchProductsBySales(isLeastSales ? 1 : -1, salesKeyword);
-          } else if (sort && !budget) {
-            const sortLabel = Object.entries(SORT_PATTERNS).find(([k]) => userMessage.includes(k))?.[0] || 'sản phẩm';
-            response = await searchProductsSorted(sort, sortLabel);
-          } else if (budget) {
-            const products = await searchProductsByBudget(budget, sort || undefined);
-            response = buildBudgetResponse(products, budget);
-          } else if (contextProducts) {
-            response = contextProducts;
-          } else {
-            const allProducts = await withTimeout(
-              Product.find({ status: 'active', stock: { $gt: 0 } })
-                .sort({ salePrice: 1 })
-                .limit(5)
-                .select('name slug salePrice originalPrice')
-                .lean(),
-              QUERY_TIMEOUT_MS,
-              'allProducts fallback'
-            );
-
-            if (allProducts.length > 0) {
-              const lines = allProducts.map((p) => formatProductLine(p));
-              response = `Đây là một số sản phẩm hiện có tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn tìm sản phẩm theo ngân sách cụ thể không?`;
-            } else {
-              response = 'Hiện tại Store3D chưa có sản phẩm. Bạn có thể quay lại sau!';
-            }
-          }
+        if (salesKeyword && !budget) {
+          return await searchProductsBySales(isLeastSales ? 1 : -1, salesKeyword);
+        } else if (sort && !budget) {
+          const sortLabel = Object.entries(SORT_PATTERNS).find(([k]) => userMessage.includes(k))?.[0] || 'sản phẩm';
+          return await searchProductsSorted(sort, sortLabel);
+        } else if (budget) {
+          const products = await searchProductsByBudget(budget, sort || undefined);
+          return buildBudgetResponse(products, budget);
+        } else if (contextProducts) {
+          return contextProducts;
         } else {
-          const budget = parseBudget(userMessage);
-          if (budget) {
-            const products = await searchProductsByBudget(budget);
-            response = buildBudgetResponse(products, budget);
+          const allProducts = await withTimeout(
+            Product.find({ status: 'active', stock: { $gt: 0 } })
+              .sort({ salePrice: 1 })
+              .limit(5)
+              .select('name slug salePrice originalPrice')
+              .lean(),
+            QUERY_TIMEOUT_MS,
+            'allProducts fallback'
+          );
+
+          if (allProducts.length > 0) {
+            const lines = allProducts.map((p) => formatProductLine(p));
+            return `Đây là một số sản phẩm hiện có tại Store3D:\n\n${lines.join('\n')}\n\nBạn có muốn tìm sản phẩm theo ngân sách cụ thể không?`;
           } else {
-            response = 'Mình là trợ lý AI của Store3D. Mình có thể giúp bạn tìm mô hình 3D, tư vấn ngân sách, hoặc xem sản phẩm nổi bật. Bạn cần gì?';
+            return 'Hiện tại Store3D chưa có sản phẩm. Bạn có thể quay lại sau!';
           }
         }
-      } catch (err: any) {
-        console.error('[AI-SVC-DIAG] doStream error:', {
-          name: err?.name,
-          message: err?.message,
-          stack: err?.stack?.split('\n').slice(0, 5).join('\n'),
-        });
-        response = 'Xin lỗi, mình gặp vấn đề khi truy vấn sản phẩm. Bạn vui lòng thử lại hoặc liên hệ support@store3d.com để được hỗ trợ.';
+      } else {
+        const budget = parseBudget(userMessage);
+        if (budget) {
+          const products = await searchProductsByBudget(budget);
+          return buildBudgetResponse(products, budget);
+        } else {
+          return 'Mình là trợ lý AI của Store3D. Mình có thể giúp bạn tìm mô hình 3D, tư vấn ngân sách, hoặc xem sản phẩm nổi bật. Bạn cần gì?';
+        }
       }
+    } catch (err: any) {
+      console.error('[AI-SVC-DIAG] generateMockResponse error:', {
+        name: err?.name,
+        message: err?.message,
+        stack: err?.stack?.split('\n').slice(0, 5).join('\n'),
+      });
+      return 'Xin lỗi, mình gặp vấn đề khi truy vấn sản phẩm. Bạn vui lòng thử lại hoặc liên hệ support@store3d.com để được hỗ trợ.';
+    }
+  })();
+}
 
-      const words = response.split(' ');
-
-      return {
-        stream: new ReadableStream({
-          async start(controller) {
-            controller.enqueue({ type: 'stream-start', warnings: [] });
-            controller.enqueue({ type: 'text-start', id: 'mock-text' });
-            for (let i = 0; i < words.length; i++) {
-              const delta = (i === 0 ? '' : ' ') + words[i];
-              controller.enqueue({ type: 'text-delta', id: 'mock-text', delta });
-              await new Promise((r) => setTimeout(r, 20));
-            }
-            controller.enqueue({ type: 'text-end', id: 'mock-text' });
-            controller.enqueue({ type: 'finish', usage: { inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 }, outputTokens: { total: 0 } } as any, finishReason: { unified: 'stop', raw: 'stop' } });
-            controller.close();
-          },
-        }),
-      };
+function createMockEventStream(response: string): ReadableStream<StreamEvent> {
+  const words = response.split(' ');
+  return new ReadableStream({
+    async start(controller) {
+      controller.enqueue({ type: 'stream-start', warnings: [] });
+      controller.enqueue({ type: 'text-start', id: 'mock-text' });
+      for (let i = 0; i < words.length; i++) {
+        const delta = (i === 0 ? '' : ' ') + words[i];
+        controller.enqueue({ type: 'text-delta', id: 'mock-text', delta });
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      controller.enqueue({ type: 'text-end', id: 'mock-text' });
+      controller.enqueue({ type: 'finish', usage: { inputTokens: { total: 0, noCache: 0, cacheRead: 0, cacheWrite: 0 }, outputTokens: { total: 0 } }, finishReason: { unified: 'stop', raw: 'stop' } });
+      controller.close();
     },
+  });
+}
+
+export interface ChatServiceResult {
+  pipeUIMessageStreamToResponse: (res: { setHeader: (name: string, value: string) => void; write: (chunk: string) => void; end: () => void; status: (code: number) => { end: () => void } }) => Promise<void>;
+}
+
+function eventToSSELine(event: StreamEvent): string | null {
+  switch (event.type) {
+    case 'stream-start':
+      return `data: ${JSON.stringify({ type: 'start' })}\n`;
+    case 'text-start':
+      return `data: ${JSON.stringify({ type: 'start-step' })}\ndata: ${JSON.stringify({ type: 'text-start', id: event.id })}\n`;
+    case 'text-delta':
+      return `data: ${JSON.stringify({ type: 'text-delta', id: event.id, delta: event.delta })}\n`;
+    case 'text-end':
+      return `data: ${JSON.stringify({ type: 'text-end', id: event.id })}\ndata: ${JSON.stringify({ type: 'finish-step' })}\n`;
+    case 'finish':
+      return `data: ${JSON.stringify({ type: 'finish', finishReason: event.finishReason.unified })}\n`;
+    default:
+      return null;
+  }
+}
+
+function pipeStreamToResponse(res: { setHeader: (name: string, value: string) => void; write: (chunk: string) => void; end: () => void; status: (code: number) => { end: () => void } }, stream: ReadableStream<StreamEvent>): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.setHeader('X-Vercel-AI-Data-Stream', 'v1');
+      res.setHeader('Cache-Control', 'no-cache');
+
+      const reader = stream.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const line = eventToSSELine(value);
+        if (line) res.write(line);
+      }
+      res.write('data: [DONE]\n');
+      res.end();
+      resolve();
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
@@ -421,8 +431,7 @@ function extractText(msg: ChatServiceParams['messages'][number]): string {
   return '';
 }
 
-export async function createChatStream(params: ChatServiceParams) {
-  await loadAiModules();
+export async function createChatStream(params: ChatServiceParams): Promise<ChatServiceResult> {
   const { messages } = params;
 
   const modelMessages: ModelMessage[] = messages.map((m) => ({
@@ -439,12 +448,12 @@ export async function createChatStream(params: ChatServiceParams) {
   console.log(`[AI-SVC-DIAG] createChatStream — provider=${provider}, hasApiKey=${hasApiKey}, msgs=${modelMessages.length}, mongoReady=${mongoose.connection.readyState}`);
 
   if (provider === 'mock') {
-    console.log('[AI-SVC-DIAG] using mock provider');
-    return _streamText!({
-      model: createSmartMockModel(userText),
-      messages: modelMessages,
-      system: SYSTEM_PROMPT,
-    });
+    console.log('[AI-SVC-DIAG] using mock provider (self-contained, no ai SDK)');
+    const response = await generateMockResponse(userText);
+    const stream = createMockEventStream(response);
+    return {
+      pipeUIMessageStreamToResponse: (res) => pipeStreamToResponse(res, stream),
+    };
   }
 
   if (!config.ai.apiKey) {
@@ -452,10 +461,6 @@ export async function createChatStream(params: ChatServiceParams) {
     throw new Error('AI_SERVICE_UNAVAILABLE');
   }
 
-  console.log(`[AI-SVC-DIAG] using real provider model=${config.ai.model}`);
-  return _streamText!({
-    model: config.ai.model as any,
-    messages: modelMessages,
-    system: SYSTEM_PROMPT,
-  });
+  console.log(`[AI-SVC-DIAG] using real provider model=${config.ai.model} — NOT IMPLEMENTED for Vercel (mock-only mode)`);
+  throw new Error('AI_SERVICE_UNAVAILABLE');
 }

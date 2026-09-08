@@ -5,8 +5,6 @@ import mongoose from 'mongoose';
 
 const router = Router();
 
-const _dynamicImport = new Function('specifier', 'return import(specifier)');
-
 router.get('/config', requireAuth, requireAdmin, async (_req, res) => {
   const envFlags = {
     NODE_ENV: config.env,
@@ -22,33 +20,22 @@ router.get('/config', requireAuth, requireAdmin, async (_req, res) => {
     BANK_CONFIGURED: !!config.bank.bin,
   };
 
-  let aiModuleStatus = 'unknown';
-  let aiTestModuleStatus = 'unknown';
-  let mockAvailable = false;
-  try {
-    const ai = await _dynamicImport('ai');
-    aiModuleStatus = 'loaded';
-    mockAvailable = typeof (ai as any).streamText === 'function';
-  } catch (e: any) {
-    aiModuleStatus = `FAILED: ${e?.message}`;
-  }
-  try {
-    await _dynamicImport('ai/test');
-    aiTestModuleStatus = 'loaded';
-  } catch (e: any) {
-    aiTestModuleStatus = `FAILED: ${e?.message}`;
-  }
+  let aiModuleStatus = 'not-loaded (mock-only mode, ai SDK not imported at runtime)';
+  let aiTestModuleStatus = 'not-loaded (mock-only mode, ai/test SDK not imported at runtime)';
+  let mockAvailable = config.ai.provider === 'mock';
 
   let aiSdkVersion = 'unknown';
   try {
-    const aiPkg = await _dynamicImport('ai/package.json');
-    aiSdkVersion = aiPkg.version || 'cannot-resolve';
+    const fs = await import('fs');
+    const path = await import('path');
+    const pkgPath = path.default.join(process.cwd(), 'node_modules', 'ai', 'package.json');
+    const pkg = JSON.parse(fs.default.readFileSync(pkgPath, 'utf-8'));
+    aiSdkVersion = pkg.version || 'cannot-resolve';
   } catch {
     try {
-      // Fallback: try reading package.json directly from filesystem
       const fs = await import('fs');
       const path = await import('path');
-      const pkgPath = path.default.join(process.cwd(), 'node_modules', 'ai', 'package.json');
+      const pkgPath = path.default.join(process.cwd(), 'server', 'node_modules', 'ai', 'package.json');
       const pkg = JSON.parse(fs.default.readFileSync(pkgPath, 'utf-8'));
       aiSdkVersion = pkg.version || 'cannot-resolve';
     } catch {
