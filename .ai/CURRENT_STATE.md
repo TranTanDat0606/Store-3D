@@ -1,6 +1,6 @@
 # Store3D — Current State
 
-> Last updated: 2026-09-03
+> Last updated: 2026-09-09
 
 ## Current Project Status
 
@@ -37,6 +37,12 @@
 - **Database seeding:** Idempotent seed script with sample data
 - **Mini-game (MIU-9 Future Run):** Canvas-based endless runner (1280×720, DPR-aware). Kill-only scoring (no distance points). 3-heart lives system with 2s invincibility frames on damage. Player: Pink cyber cat with arm cannon. Enemies: ground robot (+2 pts), bird robot (+4 pts, flies at jump height, fires red laser every 3s), mouse sword robot (+2 pts, charge/dash with "!" warning at 60% screen width). Controls: W/Space=Jump, S=Duck, F=Straight Laser, A/D disabled. Three game phases: idle→running→gameover. Keyboard input via window keydown/keyup with phase guard. Mobile touch controls (Jump/Duck/Fire). Cyberpunk start screen with enemy previews and kill-only scoring guide. HUD with score + hearts display. Game over overlay with score/best. Gemini integration: server endpoint generates game assets (background, road, player, bird-robot, mouse-robot) via @google/genai + Imagen 3. Client-side asset caching with 24h TTL. Canvas-drawn fallbacks when images unavailable. Admin test mode: admins can start unlimited test games without order requirement via /api/rewards/game/test-start. User play limit: 1 play per completed order (enforced server-side via GameSession unique index).
 - **AI chat:** Mock provider (ai/test MockLanguageModelV4), per-user/guest localStorage scoping, debounced streaming persistence (500ms), product recommendation cards from markdown, 20-message server limit, MAX_MESSAGES=18 client guard
+- **Product Gallery:** Dedup to show 2 unique Unsplash images per product (thumbnail + main image switching)
+- **Checkout address (User):** User.address (profile string) used as default shipping address via synthetic entry; inline edit via profile API; __user_address__ sentinel never sent as addressId
+- **Checkout address (Admin):** Address model entries with structured province/district/ward/street; existing behavior preserved
+- **Profile email:** Editable email input with Zod validation; backend uniqueness check (409 on duplicate); persists after reload
+- **Favorites:** Fixed price/button overlap — pb-12 padding when hideAddToCart prop is true
+- **Order creation:** Backend validates address ownership when addressId provided; User.address string used directly when no addressId
 
 ### Partially Implemented
 - **Email/SMTP:** Config exists in env vars but no email sending code is implemented
@@ -86,6 +92,7 @@ All 10 rules verified in `aiChatService.ts`:
 - Hidden demo credentials in `client/README.md` — potential security concern if repo is public
 - `store3d.vercel.app` custom domain points to wrong project (needs dashboard fix)
 - News page card heights now equalized via flex layout fix
+- Address Book page removed — address management consolidated into Checkout inline edit
 
 ## Vercel Deployment — Module Format Fix (verified 2026-08-31)
 
