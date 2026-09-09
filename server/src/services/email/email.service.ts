@@ -25,7 +25,7 @@ async function sendMail(to: string, subject: string, html: string): Promise<Emai
 
   try {
     const info = await transporter.sendMail({
-      from: config.smtp.user,
+      from: config.mailFrom || config.smtp.user,
       to,
       subject,
       html,
@@ -43,6 +43,7 @@ export interface PaymentSuccessEmailData {
   customerName: string;
   customerEmail: string;
   orderId: string;
+  orderCode: string;
   orderDate: string;
   items: Array<{ name: string; quantity: number; price: number }>;
   subtotal: number;
@@ -52,6 +53,7 @@ export interface PaymentSuccessEmailData {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: string;
+  address: string;
 }
 
 export interface SupportReceivedEmailData {
@@ -68,8 +70,11 @@ export interface SupportReplyEmailData {
   customerEmail: string;
   ticketId: string;
   subject: string;
+  status: string;
+  submittedAt: string;
   adminReply: string;
   originalMessage?: string;
+  contactEmail: string;
 }
 
 export interface ContactAdminEmailData {

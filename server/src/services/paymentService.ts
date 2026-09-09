@@ -105,8 +105,8 @@ export class PaymentService {
     }
     if (order.payment.status === PaymentStatus.Paid) return order;
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      order._id,
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: order._id, 'payment.status': { $ne: PaymentStatus.Paid } },
       {
         $set: {
           'payment.status': PaymentStatus.Paid,
@@ -128,6 +128,7 @@ export class PaymentService {
         customerName: updatedOrder.customer.name,
         customerEmail: updatedOrder.customer.email,
         orderId: String(updatedOrder._id),
+        orderCode: updatedOrder.payment.orderCode || String(updatedOrder._id).slice(-8).toUpperCase(),
         orderDate: new Date(updatedOrder.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
         items: populatedItems.map((item) => ({
           name: (item.product as { name?: string })?.name ?? 'Sản phẩm',
@@ -141,6 +142,7 @@ export class PaymentService {
         paymentMethod: updatedOrder.payment.method,
         paymentStatus: PaymentStatus.Paid,
         orderStatus: OrderStatus.Confirmed,
+        address: updatedOrder.customer.address,
       }).catch((err) => { console.error('[Payment] sendPaymentSuccess fire-and-forget failed:', (err as Error).message); });
     }
 

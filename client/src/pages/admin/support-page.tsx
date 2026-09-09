@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { Search, Filter, Eye, MessageSquare, Clock, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Ban, Send, MailCheck, MailX, Wifi } from 'lucide-react'
 import { contactApi } from '@/services'
 import { Button } from '@/components/ui/button'
@@ -62,6 +62,7 @@ export default function AdminSupportPage() {
   const [resolutionErrorMsg, setResolutionErrorMsg] = useState('')
   const [smtpStatus, setSmtpStatus] = useState<{ status: string; message: string } | null>(null)
   const [smtpChecking, setSmtpChecking] = useState(false)
+  const detailRef = useRef<HTMLDivElement>(null)
 
   const fetchContacts = useCallback(async (page = 1) => {
     setLoading(true)
@@ -166,6 +167,12 @@ export default function AdminSupportPage() {
   useEffect(() => {
     checkSmtp()
   }, [])
+
+  useEffect(() => {
+    if (selected && detailRef.current) {
+      detailRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [selected])
 
   return (
     <div className="space-y-6">
@@ -297,6 +304,7 @@ export default function AdminSupportPage() {
       </Card>
 
       {(selected || detailLoading) && (
+        <div ref={detailRef}>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -468,6 +476,7 @@ export default function AdminSupportPage() {
             )}
           </CardContent>
         </Card>
+        </div>
       )}
     </div>
   )

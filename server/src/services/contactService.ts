@@ -152,13 +152,17 @@ export class ContactService {
 
     try {
       const { emailService } = await import('./email/email.service');
+      const submittedAt = new Date(contact.createdAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
       const result = await emailService.sendSupportReply({
         customerName: contact.fullname,
         customerEmail: contact.email,
         ticketId: String(contact._id).slice(-8).toUpperCase(),
         subject: contact.subject,
+        status: contact.status,
+        submittedAt,
         adminReply: resolutionContent,
         originalMessage: contact.message,
+        contactEmail: config.supportEmail,
       });
 
       emailStatus = result.status;
