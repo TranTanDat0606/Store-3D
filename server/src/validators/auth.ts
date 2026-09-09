@@ -19,6 +19,7 @@ export const loginSchema = z.object({
 
 export const updateProfileSchema = z.object({
   fullname: z.string().trim().min(2, 'Họ và tên tối thiểu 2 ký tự').max(100).optional(),
+  email: emailSchema.optional(),
   phone: z.string().regex(phoneRegex, 'Số điện thoại không hợp lệ').optional().or(z.literal('')),
   address: z.string().trim().max(500).optional().or(z.literal('')),
   avatar: z.string().optional(),

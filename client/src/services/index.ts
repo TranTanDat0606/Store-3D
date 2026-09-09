@@ -4,6 +4,7 @@ export type { ProductPayload, ProductQuery, ProductListResult } from './productA
 export { rewardApi } from './rewardApi'
 export type { GameStartResponse, GameCompleteResponse, GameReward } from './rewardApi'
 export { addressApi } from './addressApi'
+export { authApi } from './authApi'
 import type { ApiResponse, Coupon, CouponWithAvailability, EligibleCoupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
 
 export interface OrderItemInput {
@@ -17,6 +18,7 @@ export interface CreateOrderPayload {
     phone: string
     email: string
     address: string
+    addressId?: string
   }
   items: OrderItemInput[]
   note?: string

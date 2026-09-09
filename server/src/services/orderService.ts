@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product, UserCoupon } from '../models';
+import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product, UserCoupon, Address } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
@@ -67,6 +67,18 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
 
 export class OrderService {
   async create(userId: string, data: CreateOrderInput) {
+    // Validate address ownership if addressId is provided
+    if (data.customer.addressId) {
+      const address = await Address.findOne({ _id: data.customer.addressId, userId });
+      if (!address) {
+        throw new AppError('Địa chỉ không hợp lệ hoặc không thuộc về bạn', 400);
+      }
+      // Use the address from the Address model as source of truth
+      data.customer.address = `${address.street}, ${address.ward}, ${address.district}, ${address.province}`;
+      data.customer.name = address.recipientName;
+      data.customer.phone = address.phone;
+    }
+
     const productIds = data.items.map((i) => i.product);
 
     const products = await Product.find({ _id: { $in: productIds } });

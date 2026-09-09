@@ -144,7 +144,7 @@ export const ProductCard = memo(function ProductCard({
         </div>
 
         {/* Info */}
-        <div className="flex flex-1 flex-col gap-1 p-3.5">
+        <div className={cn("flex flex-1 flex-col gap-1 p-3.5", hideAddToCart && "pb-12")}>
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Star className="size-3.5 fill-amber-400 text-amber-400" />
             <span>{product.rating > 0 ? product.rating.toFixed(1) : 'Mới'}</span>

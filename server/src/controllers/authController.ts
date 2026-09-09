@@ -38,16 +38,24 @@ export const authController = {
   }),
 
   updateProfile: asyncHandler(async (req: AuthRequest, res) => {
-    const user = await User.findByIdAndUpdate(
-      req.user!._id,
-      {
-        ...(req.body.fullname !== undefined && { fullname: req.body.fullname }),
-        ...(req.body.phone !== undefined && { phone: req.body.phone }),
-        ...(req.body.address !== undefined && { address: req.body.address }),
-        ...(req.body.avatar !== undefined && { avatar: req.body.avatar }),
-      },
-      { new: true, runValidators: true },
-    );
+    const updateData: Record<string, unknown> = {};
+    if (req.body.fullname !== undefined) updateData.fullname = req.body.fullname;
+    if (req.body.phone !== undefined) updateData.phone = req.body.phone;
+    if (req.body.address !== undefined) updateData.address = req.body.address;
+    if (req.body.avatar !== undefined) updateData.avatar = req.body.avatar;
+
+    if (req.body.email !== undefined) {
+      const newEmail = req.body.email.toLowerCase().trim();
+      const currentUser = await User.findById(req.user!._id).select('email');
+      if (!currentUser) throw new AppError('Tài khoản không tồn tại', 404);
+      if (newEmail !== currentUser.email) {
+        const existing = await User.findOne({ email: newEmail });
+        if (existing) throw new AppError('Email đã được sử dụng', 409);
+      }
+      updateData.email = newEmail;
+    }
+
+    const user = await User.findByIdAndUpdate(req.user!._id, updateData, { new: true, runValidators: true });
     if (!user) throw new AppError('Tài khoản không tồn tại', 404);
     return successResponse(res, user, { message: 'Cập nhật hồ sơ thành công' });
   }),

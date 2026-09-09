@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 
 const profileSchema = z.object({
   fullname: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự'),
+  email: z.string().email('Email không hợp lệ').max(100),
   phone: z
     .string()
     .optional()
@@ -40,6 +41,7 @@ export default function ProfilePage() {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       fullname: user?.fullname ?? '',
+      email: user?.email ?? '',
       phone: user?.phone ?? '',
       address: user?.address ?? '',
     },
@@ -87,9 +89,19 @@ export default function ProfilePage() {
               )}
             />
 
-            <div className="text-muted-foreground text-sm">
-              Email: <span className="text-foreground">{user?.email}</span>
-            </div>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="khach@store3d.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

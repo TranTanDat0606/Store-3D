@@ -27,7 +27,7 @@ export const authApi = {
   me: () =>
     apiClient.get<ApiResponse<User>>('/auth/me').then((r) => r.data.data),
 
-  updateProfile: (data: Partial<Pick<User, 'fullname' | 'phone' | 'address' | 'avatar'>>) =>
+  updateProfile: (data: Partial<Pick<User, 'fullname' | 'email' | 'phone' | 'address' | 'avatar'>>) =>
     apiClient.put<ApiResponse<User>>('/auth/profile', data).then((r) => r.data.data),
 
   updatePassword: (data: { currentPassword: string; newPassword: string }) =>

@@ -15,7 +15,7 @@ export function ProductGalleryMobile({ product }: ProductGalleryMobileProps) {
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
 
-  const images = product.images.length > 0 ? product.images : ['']
+  const images = [...new Set(product.images)].filter(Boolean)
   const discountPercent = calculateDiscountPercent(product.originalPrice ?? 0, product.salePrice ?? 0)
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {

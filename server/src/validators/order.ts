@@ -14,6 +14,7 @@ export const createOrderSchema = z.object({
     phone: z.string().regex(phoneRegex, 'Số điện thoại không hợp lệ'),
     email: z.string().email('Email không hợp lệ').max(100),
     address: z.string().trim().min(5, 'Địa chỉ tối thiểu 5 ký tự').max(500),
+    addressId: z.string().trim().optional(),
   }),
   items: z.array(orderItemSchema).min(1, 'Giỏ hàng trống'),
   note: z.string().trim().max(1000, 'Ghi chú tối đa 1000 ký tự').optional().default(''),

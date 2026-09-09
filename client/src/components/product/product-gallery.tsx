@@ -13,7 +13,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
-  const images = product.images.length > 0 ? product.images : ['']
+  const images = [...new Set(product.images)].filter(Boolean)
   const discountPercent = calculateDiscountPercent(product.originalPrice ?? 0, product.salePrice ?? 0)
 
   return (

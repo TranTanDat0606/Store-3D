@@ -10,3 +10,4 @@ export { News, NewsStatus, type INews } from './News';
 export { ContactRequest, ContactStatus, type IContactRequest } from './ContactRequest';
 export { GameSession, GameSessionStatus, type IGameSession } from './GameSession';
 export { UserCoupon, UserCouponSource, type IUserCoupon } from './UserCoupon';
+export { Address, type IAddress } from './Address';
