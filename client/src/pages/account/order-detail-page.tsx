@@ -134,7 +134,7 @@ export default function OrderDetailPage() {
               />
             </Suspense>
           )}
-          {['pending', 'confirmed'].includes(order.status) && (
+          {order.status === 'pending' && (
             <Button variant="destructive" size="sm" onClick={() => setCancelDialogOpen(true)}>
               <Ban className="size-4" />
               Hủy đơn hàng

@@ -23,7 +23,7 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
 ]
 
 // One-way workflow — an order may only move forward along this chain.
-// Mirrors server ALLOWED_NEXT_STATUS; cancelled is reachable only from pending.
+// Mirrors server ALLOWED_NEXT_STATUS; admin can cancel from pending or confirmed.
 const ALLOWED_NEXT: Record<OrderStatus, OrderStatus[]> = {
   pending: ['confirmed', 'cancelled'],
   confirmed: ['shipping', 'cancelled'],

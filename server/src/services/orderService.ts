@@ -15,6 +15,7 @@ interface CouponApplication {
  * linear chain: pending → confirmed → shipping → completed.
  * A pending order may additionally be cancelled. Backward/skipped
  * transitions are rejected on the backend (not just in the UI).
+ * Customer may only cancel pending orders; admin may cancel pending or confirmed.
  */
 export const ALLOWED_NEXT_STATUS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.Pending]: [OrderStatus.Confirmed, OrderStatus.Cancelled],
@@ -312,19 +313,31 @@ export class OrderService {
     return updated;
   }
 
-  /** Customer: cancel their own order (pending or confirmed only). */
+  /** Customer: cancel their own order (pending only). */
   async cancelByUser(userId: string, orderId: string, reason?: string) {
-    const order = await Order.findById(orderId);
-    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
-    if (String(order.user) !== userId) throw new AppError('Không có quyền hủy đơn hàng này', 403);
+    // Atomic conditional update: only cancel if status is still pending and
+    // belongs to this user. This prevents race conditions where admin
+    // confirms the order at the same time user tries to cancel.
+    const updated = await Order.findOneAndUpdate(
+      {
+        _id: orderId,
+        user: userId,
+        status: OrderStatus.Pending,
+      },
+      { $set: { status: OrderStatus.Cancelled } },
+      { new: true },
+    );
 
-    const cancellableStatuses: OrderStatus[] = [OrderStatus.Pending, OrderStatus.Confirmed];
-    if (!cancellableStatuses.includes(order.status as OrderStatus)) {
+    if (!updated) {
+      // Distinguish between not-found and wrong-status
+      const order = await Order.findById(orderId);
+      if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+      if (String(order.user) !== userId) throw new AppError('Không có quyền hủy đơn hàng này', 403);
       throw new AppError('Không thể hủy đơn hàng ở trạng thái này', 400);
     }
 
     // Restore stock
-    const items = await OrderItem.find({ order: order._id }).select('product quantity');
+    const items = await OrderItem.find({ order: updated._id }).select('product quantity');
     if (items.length > 0) {
       await Product.bulkWrite(
         items.map((item) => ({
@@ -337,29 +350,31 @@ export class OrderService {
     }
 
     // Restore coupon usage
-    if (order.coupon?.code) {
-      if (order.coupon.code.startsWith('REWARD-')) {
-        // Restore UserCoupon: clear usedAt
+    if (updated.coupon?.code) {
+      if (updated.coupon.code.startsWith('REWARD-')) {
         await UserCoupon.updateOne(
-          { code: order.coupon.code, user: userId },
+          { code: updated.coupon.code, user: userId },
           { $unset: { usedAt: '' } },
         );
       } else {
-        // Restore admin Coupon usage count
         await Coupon.updateOne(
-          { code: order.coupon.code },
+          { code: updated.coupon.code },
           { $inc: { usedCount: -1 } },
         );
       }
     }
 
-    const updates: Record<string, unknown> = { status: OrderStatus.Cancelled };
-    if (reason) updates['note'] = (order.note ? order.note + '\n' : '') + `Lý do hủy: ${reason}`;
+    // Append cancel reason to note if provided
+    if (reason) {
+      const noteSuffix = `Lý do hủy: ${reason}`;
+      await Order.findByIdAndUpdate(orderId, {
+        $set: { note: updated.note ? updated.note + '\n' + noteSuffix : noteSuffix },
+      });
+    }
 
-    const updated = await Order.findByIdAndUpdate(orderId, { $set: updates }, { new: true })
+    return updated
       .populate('items')
-      .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
-    return updated;
+      .then((doc) => doc?.populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } }));
   }
 }
 

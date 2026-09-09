@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { Review, Product, Order, OrderItem, OrderStatus, PaymentStatus } from '../models';
+import { Review, Product, Order, OrderItem, OrderStatus } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 
@@ -21,9 +21,9 @@ export class ReviewService {
   }
 
   /**
-   * A user may review a product only after a qualifying purchase: they own an
-   * order containing the product and that order is either fully paid or has
-   * been delivered (completed).
+   * A user may review a product only after the order has been delivered
+   * (status = completed). Pending, confirmed, shipping, or cancelled
+   * orders do not qualify.
    */
   private async findQualifyingOrder(userId: string, productId: string) {
     const orderItems = await OrderItem.find({ product: productId }).select('order');
@@ -31,10 +31,7 @@ export class ReviewService {
     return Order.findOne({
       _id: { $in: orderIds },
       user: userId,
-      $or: [
-        { status: OrderStatus.Completed },
-        { 'payment.status': PaymentStatus.Paid },
-      ],
+      status: OrderStatus.Completed,
     });
   }
 
