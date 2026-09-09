@@ -12,7 +12,7 @@ const addressSchema = z.object({
   recipientName: z.string().trim().min(1, 'Tên người nhận là bắt buộc').max(100),
   phone: z.string().trim().regex(/^[0-9+\-\s]{8,15}$/, 'Số điện thoại không hợp lệ'),
   province: z.string().trim().min(1, 'Tỉnh/Thành phố là bắt buộc'),
-  district: z.string().trim().min(1, 'Quận/Huyện là bắt buộc'),
+  district: z.string().trim().max(100).optional().default(''),
   ward: z.string().trim().min(1, 'Phường/Xã là bắt buộc'),
   street: z.string().trim().min(1, 'Địa chỉ đường là bắt buộc').max(500),
   isDefault: z.boolean().optional(),

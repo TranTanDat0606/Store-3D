@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { Box, ChevronLeft, LayoutDashboard, MessageCircleQuestion, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
+import { Box, ChevronLeft, Gamepad2, LayoutDashboard, MessageCircleQuestion, Newspaper, Package, ShoppingCart, Star, Ticket, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -17,6 +17,7 @@ const navLinks = [
   { to: '/admin/khach-hang', label: 'Khách hàng', icon: Users },
   { to: '/admin/bai-viet', label: 'Bài viết', icon: Newspaper },
   { to: '/admin/ho-tro', label: 'Hỗ trợ', icon: MessageCircleQuestion },
+  { to: '/admin/mini-game', label: 'Mini Game', icon: Gamepad2 },
 ]
 
 const PAGE_TITLES: Record<string, string> = {
@@ -29,6 +30,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/khach-hang': 'Khách hàng',
   '/admin/bai-viet': 'Bài viết',
   '/admin/ho-tro': 'Hỗ trợ',
+  '/admin/mini-game': 'Mini Game',
 }
 
 export function AdminLayout() {

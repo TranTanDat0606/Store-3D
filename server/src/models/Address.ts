@@ -6,7 +6,7 @@ export interface IAddress {
   recipientName: string;
   phone: string;
   province: string;
-  district: string;
+  district?: string;
   ward: string;
   street: string;
   isDefault: boolean;
@@ -47,8 +47,8 @@ const addressSchema = new Schema<IAddress>(
     },
     district: {
       type: String,
-      required: [true, 'Quận/Huyện là bắt buộc'],
       trim: true,
+      default: '',
     },
     ward: {
       type: String,

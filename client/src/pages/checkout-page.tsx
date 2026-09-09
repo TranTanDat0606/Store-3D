@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Banknote, CreditCard, ShoppingBag, Info, Plus, ChevronDown, MapPin, Star, CircleCheck, Minus, Trash2, Pencil, RefreshCw } from 'lucide-react'
+import { Banknote, CreditCard, ShoppingBag, Info, Plus, ChevronDown, MapPin, Star, CircleCheck, Minus, Trash2, Pencil } from 'lucide-react'
 import { orderApi, couponApi, addressApi, authApi, type CreateOrderPayload } from '@/services'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmptyState } from '@/components/common/empty-state'
 import { CouponInput } from '@/components/checkout/coupon-input'
 import { cn, formatCurrency, resolveImageUrl } from '@/lib'
-import type { Address, Coupon, EligibleCoupon, PaymentMethod, CreateAddressPayload } from '@/types'
+import type { Address, Coupon, EligibleCoupon, PaymentMethod } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -53,48 +53,6 @@ function formatAddress(addr: Address): string {
   return [addr.street, addr.ward, addr.district, addr.province].filter(Boolean).join(', ')
 }
 
-function openAddressDialog(setters: {
-  setEditingAddressId: (id: string | null) => void
-  setAddressForm: (f: CreateAddressPayload) => void
-  setAddressError: (e: string) => void
-  setAddressDialogOpen: (open: boolean) => void
-}, user: { fullname?: string; phone?: string } | null) {
-  setters.setEditingAddressId(null)
-  setters.setAddressForm({
-    label: '',
-    recipientName: user?.fullname ?? '',
-    phone: user?.phone ?? '',
-    province: '',
-    district: '',
-    ward: '',
-    street: '',
-    isDefault: false,
-  })
-  setters.setAddressError('')
-  setters.setAddressDialogOpen(true)
-}
-
-function openEditAddressDialog(addr: Address, setters: {
-  setEditingAddressId: (id: string | null) => void
-  setAddressForm: (f: CreateAddressPayload) => void
-  setAddressError: (e: string) => void
-  setAddressDialogOpen: (open: boolean) => void
-}) {
-  setters.setEditingAddressId(addr._id)
-  setters.setAddressForm({
-    label: addr.label,
-    recipientName: addr.recipientName,
-    phone: addr.phone,
-    province: addr.province,
-    district: addr.district,
-    ward: addr.ward,
-    street: addr.street,
-    isDefault: addr.isDefault,
-  })
-  setters.setAddressError('')
-  setters.setAddressDialogOpen(true)
-}
-
 export default function CheckoutPage() {
   const { items, subtotal, clearCart, updateQuantity, removeItem } = useCart()
   const { user, updateUser } = useAuth()
@@ -113,24 +71,13 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [loadingAddresses, setLoadingAddresses] = useState(true)
   const [addressDropdownOpen, setAddressDropdownOpen] = useState(false)
-  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
-  const [editingAddressId, setEditingAddressId] = useState<string | null>(null)
-  const [addressForm, setAddressForm] = useState<CreateAddressPayload>({
-    label: '',
-    recipientName: '',
-    phone: '',
-    province: '',
-    district: '',
-    ward: '',
-    street: '',
-    isDefault: false,
-  })
-  const [addressError, setAddressError] = useState('')
-  const [addressSubmitting, setAddressSubmitting] = useState(false)
-  const [userAddressEditOpen, setUserAddressEditOpen] = useState(false)
-  const [userAddressEditValue, setUserAddressEditValue] = useState('')
-  const [userAddressEditError, setUserAddressEditError] = useState('')
-  const [userAddressEditSubmitting, setUserAddressEditSubmitting] = useState(false)
+  const [addressEditOpen, setAddressEditOpen] = useState(false)
+  const [addressEditTarget, setAddressEditTarget] = useState<{ type: 'user' | 'address'; id?: string } | null>(null)
+  const [addressEditLabel, setAddressEditLabel] = useState('')
+  const [addressEditValue, setAddressEditValue] = useState('')
+  const [addressEditIsDefault, setAddressEditIsDefault] = useState(false)
+  const [addressEditError, setAddressEditError] = useState('')
+  const [addressEditSubmitting, setAddressEditSubmitting] = useState(false)
 
   const form = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -145,7 +92,6 @@ export default function CheckoutPage() {
 
   const loadAddresses = useCallback(async () => {
     setLoadingAddresses(true)
-    setAddressError('')
     try {
       const res = await addressApi.list()
 
@@ -185,7 +131,6 @@ export default function CheckoutPage() {
         form.setValue('address', '', { shouldValidate: true })
       }
     } catch {
-      setAddressError('Không thể tải danh sách địa chỉ.')
       setAddresses([])
       setSelectedAddressId(null)
     } finally {
@@ -248,30 +193,51 @@ export default function CheckoutPage() {
   }
 
   const handleAddressSubmit = async () => {
-    setAddressError('')
-    if (!addressForm.recipientName.trim() || !addressForm.phone.trim() || !addressForm.province.trim() || !addressForm.district.trim() || !addressForm.ward.trim() || !addressForm.street.trim()) {
-      setAddressError('Vui lòng nhập đầy đủ thông tin địa chỉ')
+    setAddressEditError('')
+    const trimmed = addressEditValue.trim()
+    if (!trimmed || trimmed.length < 5) {
+      setAddressEditError('Địa chỉ tối thiểu 5 ký tự')
       return
     }
-    setAddressSubmitting(true)
+    setAddressEditSubmitting(true)
     try {
-      if (editingAddressId) {
-        await addressApi.update(editingAddressId, addressForm)
+      if (addressEditTarget?.type === 'user') {
+        const updated = await authApi.updateProfile({ address: trimmed })
+        updateUser(updated)
+        toast.success('Cập nhật địa chỉ thành công')
+      } else if (addressEditTarget?.type === 'address' && addressEditTarget.id) {
+        await addressApi.update(addressEditTarget.id, {
+          label: addressEditLabel.trim(),
+          recipientName: user?.fullname ?? '',
+          phone: user?.phone ?? '',
+          province: '',
+          ward: '',
+          street: trimmed,
+          isDefault: addressEditIsDefault,
+        })
         toast.success('Cập nhật địa chỉ thành công')
       } else {
-        const newAddr = await addressApi.create(addressForm)
+        const newAddr = await addressApi.create({
+          label: addressEditLabel.trim(),
+          recipientName: user?.fullname ?? '',
+          phone: user?.phone ?? '',
+          province: '',
+          ward: '',
+          street: trimmed,
+          isDefault: addressEditIsDefault,
+        })
         toast.success('Thêm địa chỉ thành công')
         setSelectedAddressId(newAddr._id)
         form.setValue('name', newAddr.recipientName)
         form.setValue('phone', newAddr.phone)
         form.setValue('address', formatAddress(newAddr))
       }
-      setAddressDialogOpen(false)
+      setAddressEditOpen(false)
       await loadAddresses()
     } catch (err) {
-      setAddressError(getErrorMessage(err))
+      setAddressEditError(getErrorMessage(err))
     } finally {
-      setAddressSubmitting(false)
+      setAddressEditSubmitting(false)
     }
   }
 
@@ -441,19 +407,7 @@ export default function CheckoutPage() {
 
                           {addressDropdownOpen && !loadingAddresses && (
                             <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden rounded-lg border bg-popover shadow-lg animate-in fade-in-0 zoom-in-95">
-                              {addressError ? (
-                                <div className="space-y-2 p-3">
-                                  <p className="text-sm text-destructive">{addressError}</p>
-                                  <button
-                                    type="button"
-                                    onClick={() => { loadAddresses() }}
-                                    className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-                                  >
-                                    <RefreshCw className="size-3.5" />
-                                    Thử lại
-                                  </button>
-                                </div>
-                              ) : addresses.length > 0 ? (
+                              {addresses.length > 0 ? (
                                 <div className="max-h-64 overflow-y-auto">
                                   {addresses.map((addr) => {
                                     const isUserAddress = addr._id === USER_ADDRESS_SENTINEL
@@ -496,13 +450,12 @@ export default function CheckoutPage() {
                                             onClick={(e) => {
                                               e.stopPropagation()
                                               setAddressDropdownOpen(false)
-                                              if (isUserAddress) {
-                                                setUserAddressEditValue(addr.street)
-                                                setUserAddressEditError('')
-                                                setUserAddressEditOpen(true)
-                                              } else {
-                                                openEditAddressDialog(addr, { setEditingAddressId, setAddressForm, setAddressError, setAddressDialogOpen })
-                                              }
+                                              setAddressEditTarget(isUserAddress ? { type: 'user' } : { type: 'address', id: addr._id })
+                                              setAddressEditLabel(isUserAddress ? '' : (addr.label ?? ''))
+                                              setAddressEditValue(addr.street)
+                                              setAddressEditIsDefault(isUserAddress ? false : addr.isDefault)
+                                              setAddressEditError('')
+                                              setAddressEditOpen(true)
                                             }}
                                             className="flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
                                           >
@@ -526,10 +479,12 @@ export default function CheckoutPage() {
                                   type="button"
                                   onClick={() => {
                                     setAddressDropdownOpen(false)
-                                    openAddressDialog(
-                                      { setEditingAddressId, setAddressForm, setAddressError, setAddressDialogOpen },
-                                      user
-                                    )
+                                    setAddressEditTarget({ type: 'address' })
+                                    setAddressEditLabel('')
+                                    setAddressEditValue('')
+                                    setAddressEditIsDefault(false)
+                                    setAddressEditError('')
+                                    setAddressEditOpen(true)
                                   }}
                                   className="flex w-full items-center gap-2 px-3 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
                                 >
@@ -560,152 +515,58 @@ export default function CheckoutPage() {
                 </form>
               </Form>
 
-              {/* Address Dialog */}
-              <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+              {/* Address Edit Dialog (unified) */}
+              <Dialog open={addressEditOpen} onOpenChange={setAddressEditOpen}>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>{editingAddressId ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}</DialogTitle>
-                    <DialogDescription>
-                      {editingAddressId ? 'Cập nhật thông tin địa chỉ' : 'Nhập thông tin địa chỉ giao hàng'}
-                    </DialogDescription>
+                    <DialogTitle>Sửa địa chỉ</DialogTitle>
+                    <DialogDescription>Cập nhật thông tin địa chỉ</DialogDescription>
                   </DialogHeader>
-                  {addressError && (
+                  {addressEditError && (
                     <div className="rounded-lg border border-destructive/50 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                      {addressError}
+                      {addressEditError}
                     </div>
                   )}
                   <div className="space-y-4">
-                    <Input
-                      placeholder="Nhãn (ví dụ: Nhà, Cơ quan)"
-                      value={addressForm.label}
-                      onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))}
-                    />
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Tên địa chỉ</label>
                       <Input
-                        placeholder="Tên người nhận"
-                        value={addressForm.recipientName}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, recipientName: e.target.value }))
-                        }
-                      />
-                      <Input
-                        placeholder="Số điện thoại"
-                        value={addressForm.phone}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, phone: e.target.value }))
-                        }
+                        placeholder="Nhà riêng / Công ty / ..."
+                        value={addressEditLabel}
+                        onChange={(e) => setAddressEditLabel(e.target.value)}
                       />
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-3">
-                      <Input
-                        placeholder="Tỉnh/Thành phố"
-                        value={addressForm.province}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, province: e.target.value }))
-                        }
-                      />
-                      <Input
-                        placeholder="Quận/Huyện"
-                        value={addressForm.district}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, district: e.target.value }))
-                        }
-                      />
-                      <Input
-                        placeholder="Phường/Xã"
-                        value={addressForm.ward}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, ward: e.target.value }))
-                        }
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Địa chỉ chi tiết</label>
+                      <Textarea
+                        placeholder="123 Nguyễn Văn A, phường X, TP.HCM"
+                        value={addressEditValue}
+                        onChange={(e) => setAddressEditValue(e.target.value)}
+                        rows={3}
                       />
                     </div>
-                    <Input
-                      placeholder="Số nhà, đường..."
-                      value={addressForm.street}
-                      onChange={(e) =>
-                        setAddressForm((prev) => ({ ...prev, street: e.target.value }))
-                      }
-                    />
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={addressForm.isDefault}
-                        onChange={(e) =>
-                          setAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))
-                        }
+                        checked={addressEditIsDefault}
+                        onChange={(e) => setAddressEditIsDefault(e.target.checked)}
                         className="rounded border-gray-300"
                       />
                       Đặt làm địa chỉ mặc định
                     </label>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setAddressDialogOpen(false)}>
+                    <Button variant="outline" onClick={() => setAddressEditOpen(false)}>
                       Hủy
                     </Button>
-                    <Button onClick={handleAddressSubmit} disabled={addressSubmitting}>
-                      {addressSubmitting
-                        ? 'Đang lưu...'
-                        : editingAddressId
-                          ? 'Cập nhật'
-                          : 'Thêm mới'}
+                    <Button onClick={handleAddressSubmit} disabled={addressEditSubmitting}>
+                      {addressEditSubmitting ? 'Đang lưu...' : 'Cập nhật'}
                     </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </CardContent>
           </Card>
-
-          {/* User Address Edit Dialog (simple string edit) */}
-          <Dialog open={userAddressEditOpen} onOpenChange={setUserAddressEditOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Sửa địa chỉ</DialogTitle>
-                <DialogDescription>Cập nhật địa chỉ mặc định từ hồ sơ cá nhân</DialogDescription>
-              </DialogHeader>
-              {userAddressEditError && (
-                <div className="rounded-lg border border-destructive/50 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                  {userAddressEditError}
-                </div>
-              )}
-              <div className="space-y-4">
-                <Input
-                  placeholder="Địa chỉ giao hàng"
-                  value={userAddressEditValue}
-                  onChange={(e) => setUserAddressEditValue(e.target.value)}
-                />
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setUserAddressEditOpen(false)}>
-                  Hủy
-                </Button>
-                <Button
-                  onClick={async () => {
-                    const trimmed = userAddressEditValue.trim()
-                    if (!trimmed || trimmed.length < 5) {
-                      setUserAddressEditError('Địa chỉ tối thiểu 5 ký tự')
-                      return
-                    }
-                    setUserAddressEditError('')
-                    setUserAddressEditSubmitting(true)
-                    try {
-                      const updated = await authApi.updateProfile({ address: trimmed })
-                      updateUser(updated)
-                      toast.success('Cập nhật địa chỉ thành công')
-                      setUserAddressEditOpen(false)
-                      await loadAddresses()
-                    } catch (err) {
-                      setUserAddressEditError(getErrorMessage(err))
-                    } finally {
-                      setUserAddressEditSubmitting(false)
-                    }
-                  }}
-                  disabled={userAddressEditSubmitting}
-                >
-                  {userAddressEditSubmitting ? 'Đang lưu...' : 'Lưu'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
 
           <Card>
             <CardHeader>

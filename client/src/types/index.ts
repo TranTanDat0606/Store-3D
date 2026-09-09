@@ -20,7 +20,7 @@ export interface Address {
   recipientName: string
   phone: string
   province: string
-  district: string
+  district?: string
   ward: string
   street: string
   isDefault: boolean
@@ -33,7 +33,7 @@ export interface CreateAddressPayload {
   recipientName: string
   phone: string
   province: string
-  district: string
+  district?: string
   ward: string
   street: string
   isDefault?: boolean

@@ -17,9 +17,9 @@ export const GRAVITY = 1400
 
 // ── Player Laser ──────────────────────────────────────────────────────
 export const LASER_SPEED = 600
-export const LASER_W = 32
+export const LASER_W = 50
 export const LASER_H = 6
-export const SHOOT_COOLDOWN = 1500
+export const SHOOT_COOLDOWN = 750
 
 // ── Enemy Laser (bird) ────────────────────────────────────────────────
 export const ENEMY_LASER_SPEED = 400

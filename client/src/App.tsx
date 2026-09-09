@@ -39,6 +39,7 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/users-page'))
 const AdminProductEditPage = lazy(() => import('@/pages/admin/product-edit-page'))
 const AdminNewsPage = lazy(() => import('@/pages/admin/news-page'))
 const AdminSupportPage = lazy(() => import('@/pages/admin/support-page'))
+const AdminMiniGamePage = lazy(() => import('@/pages/admin/mini-game-page'))
 const NotFoundPage = lazy(() => import('@/pages/not-found-page'))
 
 function PageFallback() {
@@ -103,6 +104,7 @@ function App() {
                   <Route path="khach-hang" element={<AdminUsersPage />} />
                   <Route path="bai-viet" element={<AdminNewsPage />} />
                   <Route path="ho-tro" element={<AdminSupportPage />} />
+                  <Route path="mini-game" element={<AdminMiniGamePage />} />
                 </Route>
               </Route>
             </Routes>

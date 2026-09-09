@@ -10,6 +10,14 @@ const CYAN = 0x4DE8FF
 const PURPLE = 0xB98BFF
 const DARK_BLUE = 0x0f1729
 
+// Exact pattern widths — derived from building loop geometry
+// distant: 24 buildings × 65px spacing, last at x=23*65=1495, max building width ~60
+const DISTANT_PATTERN_W = 23 * 65 + 60 // 1555
+// mid: 16 buildings × 95px spacing, last at x=15*95=1425, max building width ~95
+const MID_PATTERN_W = 15 * 95 + 95 // 1520
+// street: 14 lamps × 110px spacing, last at x=13*110=1430, plus neon signs extend to ~1480
+const STREET_PATTERN_W = 13 * 110 + 110 // 1540
+
 export class ParallaxCity {
   skyLayer: PIXI.Container
   distantLayer: PIXI.Container
@@ -83,8 +91,13 @@ export class ParallaxCity {
         }
       }
     }
+    // Two copies for seamless loop — clone reuses exact same geometry, no new Math.random()
     this.distantBuildings.push(g)
+    const gClone = g.clone()
+    this.distantBuildings.push(gClone)
     this.distantLayer.addChild(g)
+    this.distantLayer.addChild(gClone)
+    gClone.x = DISTANT_PATTERN_W
   }
 
   private createMidBuildings() {
@@ -117,8 +130,13 @@ export class ParallaxCity {
         }
       }
     }
+    // Two copies for seamless loop
     this.midBuildings.push(g)
+    const gClone = g.clone()
+    this.midBuildings.push(gClone)
     this.midLayer.addChild(g)
+    this.midLayer.addChild(gClone)
+    gClone.x = MID_PATTERN_W
   }
 
   private createStreetObjects() {
@@ -140,50 +158,60 @@ export class ParallaxCity {
       const signColor = [PINK, CYAN, PURPLE][i % 3]
       g.roundRect(x, GROUND_Y - 30, 30, 8, 2).fill({ color: signColor, alpha: 0.3 })
     }
+    // Two copies for seamless loop
     this.streetObjects.push(g)
+    const gClone = g.clone()
+    this.streetObjects.push(gClone)
     this.streetLayer.addChild(g)
+    this.streetLayer.addChild(gClone)
+    gClone.x = STREET_PATTERN_W
   }
 
   private createRoad() {
     const g = new PIXI.Graphics()
     const roadH = CANVAS_H - GROUND_Y
+    const roadW = CANVAS_W * 2
 
-    // Road base — dark asphalt
-    g.rect(0, 0, CANVAS_W, roadH).fill(NAVY2)
+    // Road base — dark asphalt (2x wide for seamless scroll wrap)
+    g.rect(0, GROUND_Y, roadW, roadH).fill(NAVY2)
 
     // Subtle road surface texture — horizontal panels
     for (let y = 8; y < roadH; y += 20) {
-      g.rect(0, y, CANVAS_W, 1).fill({ color: 0x1a2240, alpha: 0.3 })
+      g.rect(0, GROUND_Y + y, roadW, 1).fill({ color: 0x1a2240, alpha: 0.3 })
     }
 
     // Neon edge at top (road boundary)
-    g.rect(0, 0, CANVAS_W, 2).fill({ color: CYAN, alpha: 0.7 })
-    g.rect(0, 2, CANVAS_W, 1).fill({ color: CYAN, alpha: 0.2 })
+    g.rect(0, GROUND_Y, roadW, 2).fill({ color: CYAN, alpha: 0.7 })
+    g.rect(0, GROUND_Y + 2, roadW, 1).fill({ color: CYAN, alpha: 0.2 })
 
     // Neon edge at bottom
-    g.rect(0, roadH - 2, CANVAS_W, 2).fill({ color: PINK, alpha: 0.3 })
+    g.rect(0, GROUND_Y + roadH - 2, roadW, 2).fill({ color: PINK, alpha: 0.3 })
 
-    // Lane markings (scrolling dashed lines)
-    for (let i = 0; i < 22; i++) {
+    // Lane markings (scrolling dashed lines) — duplicated for 2x width
+    for (let i = 0; i < 44; i++) {
       const lx = i * 65
-      g.roundRect(lx, roadH * 0.45, 28, 2, 1).fill({ color: CYAN, alpha: 0.2 })
+      g.roundRect(lx, GROUND_Y + roadH * 0.45, 28, 2, 1).fill({ color: CYAN, alpha: 0.2 })
     }
 
     // Road reflection — subtle mirrored glow from above
-    g.rect(0, roadH * 0.6, CANVAS_W, roadH * 0.4).fill({ color: CYAN, alpha: 0.02 })
-    g.rect(0, roadH * 0.7, CANVAS_W, roadH * 0.3).fill({ color: PINK, alpha: 0.015 })
+    g.rect(0, GROUND_Y + roadH * 0.6, roadW, roadH * 0.4).fill({ color: CYAN, alpha: 0.02 })
+    g.rect(0, GROUND_Y + roadH * 0.7, roadW, roadH * 0.3).fill({ color: PINK, alpha: 0.015 })
 
     this.roadLayer.addChild(g)
   }
 
   update(bgOffset: number, scrollOffset: number) {
-    // Distant: slow parallax
-    this.distantLayer.x = -(bgOffset * 0.3) % CANVAS_W
+    // Wrap offsets to prevent floating-point drift over long sessions
+    const wrappedBg = bgOffset % Math.max(DISTANT_PATTERN_W, MID_PATTERN_W, STREET_PATTERN_W)
+    const wrappedScroll = scrollOffset % CANVAS_W
+
+    // Distant: slow parallax — modulo by pattern width for seamless loop
+    this.distantLayer.x = -(wrappedBg * 0.3) % DISTANT_PATTERN_W
     // Mid: medium parallax
-    this.midLayer.x = -(bgOffset * 0.6) % CANVAS_W
+    this.midLayer.x = -(wrappedBg * 0.6) % MID_PATTERN_W
     // Street: fast parallax
-    this.streetLayer.x = -(bgOffset * 1.0) % CANVAS_W
-    // Road: fastest
-    this.roadLayer.x = -(scrollOffset * 0.5) % CANVAS_W
+    this.streetLayer.x = -(wrappedBg * 1.0) % STREET_PATTERN_W
+    // Road: fastest (already 2x width, CANVAS_W modulo is correct)
+    this.roadLayer.x = -(wrappedScroll * 0.5) % CANVAS_W
   }
 }

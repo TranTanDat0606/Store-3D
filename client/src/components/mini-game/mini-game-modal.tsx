@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Loader2, Gamepad2 } from 'lucide-react'
@@ -55,29 +53,26 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Gamepad2 className="size-5" />
+      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden border-cyan-500/20 bg-[#0A0E1F] p-0">
+        <div className="flex items-center justify-between border-b border-cyan-500/10 px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <Gamepad2 className="size-5 text-cyan-400" />
             MIU-9 Future Run
           </DialogTitle>
-          <DialogDescription>
-            Bắn hạ kẻ thù, nhận điểm và quà tặng!
-          </DialogDescription>
-        </DialogHeader>
+        </div>
 
-        <div className="py-4">
+        <div className="overflow-y-auto px-6 pb-6">
           {isStarting && (
             <div className="flex flex-col items-center gap-3 py-8">
-              <Loader2 className="size-8 animate-spin text-primary" />
-              <p className="text-muted-foreground text-sm">Đang tải trò chơi...</p>
+              <Loader2 className="size-8 animate-spin text-cyan-400" />
+              <p className="text-sm text-cyan-300/60">Đang tải trò chơi...</p>
             </div>
           )}
 
           {error && (
-            <div className="rounded-lg bg-destructive/10 p-4 text-center">
-              <p className="text-sm text-destructive">{error}</p>
-              <Button variant="outline" size="sm" className="mt-3" onClick={handleStart}>
+            <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center">
+              <p className="text-sm text-red-400">{error}</p>
+              <Button variant="outline" size="sm" className="mt-3 border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={handleStart}>
                 Thử lại
               </Button>
             </div>
@@ -86,8 +81,8 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {!isStarting && !error && !started && !isDone && (
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="text-center">
-                <p className="text-lg font-semibold">Sẵn sàng chạy?</p>
-                <p className="text-muted-foreground mt-1 text-sm">
+                <p className="text-lg font-semibold text-white">Sẵn sàng chạy?</p>
+                <p className="mt-1 text-sm text-cyan-300/60">
                   Bắn hạ kẻ thù để tích điểm và nhận quà!
                 </p>
               </div>
@@ -113,15 +108,15 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {isDone && result && (
             <div className="space-y-4">
               <div className="text-center">
-                <p className="text-muted-foreground text-sm">Điểm của bạn</p>
-                <p className="text-4xl font-bold">{result.score}</p>
+                <p className="text-sm text-cyan-300/60">Điểm của bạn</p>
+                <p className="text-4xl font-bold text-white">{result.score}</p>
               </div>
               {result.reward ? (
                 <RewardCouponCard reward={result.reward} />
               ) : (
-                <div className="rounded-lg bg-muted p-4 text-center">
-                  <p className="text-sm">Bạn chưa đạt đủ điểm để nhận quà.</p>
-                  <p className="text-muted-foreground mt-1 text-xs">Cần tối thiểu 50 điểm. Thử lại lần sau nhé!</p>
+                <div className="rounded-lg border border-cyan-500/10 bg-cyan-500/5 p-4 text-center">
+                  <p className="text-sm text-white">Bạn chưa đạt đủ điểm để nhận quà.</p>
+                  <p className="mt-1 text-xs text-cyan-300/50">Cần tối thiểu 50 điểm. Thử lại lần sau nhé!</p>
                 </div>
               )}
             </div>

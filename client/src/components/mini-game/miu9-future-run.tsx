@@ -68,9 +68,8 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
       if (cancelled) return
 
       const rect = container!.getBoundingClientRect()
-      const cssH = Math.min(rect.width * (CANVAS_H / CANVAS_W), 700)
       canvas.style.width = rect.width + 'px'
-      canvas.style.height = cssH + 'px'
+      canvas.style.height = rect.height + 'px'
       renderer.resize(CANVAS_W, CANVAS_H)
 
       setPhase('menu')
@@ -97,9 +96,8 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
 
     function resize() {
       const rect = container!.getBoundingClientRect()
-      const cssH = Math.min(rect.width * (CANVAS_H / CANVAS_W), 700)
       canvas!.style.width = rect.width + 'px'
-      canvas!.style.height = cssH + 'px'
+      canvas!.style.height = rect.height + 'px'
     }
 
     resize()
@@ -292,7 +290,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
           phase === 'playing' && 'cursor-crosshair',
           phase === 'gameover' && gsRef.current.shakeTimer > 0 && 'ring-2 ring-red-500/50',
         )}
-        style={{ maxWidth: 1280, aspectRatio: `${CANVAS_W}/${CANVAS_H}` }}
+        style={{ maxWidth: 1280, maxHeight: '70vh', aspectRatio: `${CANVAS_W}/${CANVAS_H}` }}
       />
 
       {/* ═══════════════════════════════════════════════════════════════

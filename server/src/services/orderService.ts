@@ -75,7 +75,7 @@ export class OrderService {
         throw new AppError('Địa chỉ không hợp lệ hoặc không thuộc về bạn', 400);
       }
       // Use the address from the Address model as source of truth
-      data.customer.address = `${address.street}, ${address.ward}, ${address.district}, ${address.province}`;
+      data.customer.address = [address.street, address.ward, address.district, address.province].filter(Boolean).join(', ');
       data.customer.name = address.recipientName;
       data.customer.phone = address.phone;
     }

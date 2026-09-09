@@ -145,76 +145,92 @@ export class PixiRenderer {
   }
 
   private renderPlayer(gs: GameState) {
-    const g = this.playerGfx
-    g.clear()
+  const g = this.playerGfx
+  g.clear()
 
-    const ph = gs.isDucking ? PLAYER_DUCK_H : PLAYER_H
-    const py = gs.playerY
-    const px = PLAYER_X
+  const ph = gs.isDucking ? PLAYER_DUCK_H : PLAYER_H
+  const py = gs.playerY
+  const px = PLAYER_X
 
-    if (gs.invTimer > 0 && Math.floor(gs.invTimer / 50) % 2 === 0) {
-      g.alpha = 0.3
-    } else {
-      g.alpha = 1
-    }
+  if (gs.invTimer > 0 && Math.floor(gs.invTimer / 50) % 2 === 0) {
+    g.alpha = 0.3
+  } else {
+    g.alpha = 1
+  }
 
-    // Jump animation: tilt +10°, scale.y 1.15
-    const jumpTilt = gs.isJumping ? 0.17 : 0
-    const jumpScaleY = gs.isJumping ? 1.15 : 1
-    g.rotation = jumpTilt
-    g.scale.set(1, jumpScaleY)
+  // ── World placement ─────────────────────────────────────────
+  // Draw everything below in LOCAL coordinates (as if the character
+  // always stood at (0,0)), then move the whole graphic into the
+  // world with g.position, and rotate/scale around its own center
+  // with g.pivot. This keeps the jump tilt/squash centered on the
+  // cat itself instead of the world origin (0,0) — which is what
+  // made the sprite visibly fly away from its real hitbox while
+  // jumping. Lasers were unaffected because they never go through
+  // this rotation/scale step.
+  g.pivot.set(PLAYER_W / 2, ph / 2)
+  g.position.set(px + PLAYER_W / 2, py + ph / 2)
 
-    // Body
-    g.roundRect(px + 4, py + (gs.isDucking ? 2 : 10), PLAYER_W - 8, ph - (gs.isDucking ? 4 : 14), 10)
-      .fill(0xFF6FC4)
+  // Jump animation: tilt +10°, scale.y 1.15 — now correctly centered
+  const jumpTilt = gs.isJumping ? 0.17 : 0
+  const jumpScaleY = gs.isJumping ? 1.15 : 1
+  g.rotation = jumpTilt
+  g.scale.set(1, jumpScaleY)
 
-    // Head
-    const headY = gs.isDucking ? py : py - 2
-    g.ellipse(px + PLAYER_W / 2, headY + 9, 14, 11).fill(0xFF6FC4)
+  // From here on, (0,0) is the top-left of the character's own
+  // bounding box (PLAYER_W x ph) — same layout as before, just with
+  // px/py removed from every draw call.
 
-    // Ears
-    g.moveTo(px + 8, headY + 4).lineTo(px + 5, headY - 8).lineTo(px + 16, headY + 2).closePath().fill(0xFF6FC4)
-    g.moveTo(px + PLAYER_W - 8, headY + 4).lineTo(px + PLAYER_W - 5, headY - 8).lineTo(px + PLAYER_W - 16, headY + 2).closePath().fill(0xFF6FC4)
+  // Body
+  g.roundRect(4, (gs.isDucking ? 2 : 10), PLAYER_W - 8, ph - (gs.isDucking ? 4 : 14), 10)
+    .fill(0xFF6FC4)
 
-    // Inner ears
-    g.moveTo(px + 9, headY + 3).lineTo(px + 7, headY - 5).lineTo(px + 14, headY + 2).closePath().fill(0xF9A8D4)
-    g.moveTo(px + PLAYER_W - 9, headY + 3).lineTo(px + PLAYER_W - 7, headY - 5).lineTo(px + PLAYER_W - 14, headY + 2).closePath().fill(0xF9A8D4)
+  // Head
+  const headY = gs.isDucking ? 0 : -2
+  g.ellipse(PLAYER_W / 2, headY + 9, 14, 11).fill(0xFF6FC4)
 
-    // Visor
-    g.roundRect(px + 9, headY + 5, PLAYER_W - 18, 7, 3).fill(0x0f172a)
+  // Ears
+  g.moveTo(8, headY + 4).lineTo(5, headY - 8).lineTo(16, headY + 2).closePath().fill(0xFF6FC4)
+  g.moveTo(PLAYER_W - 8, headY + 4).lineTo(PLAYER_W - 5, headY - 8).lineTo(PLAYER_W - 16, headY + 2).closePath().fill(0xFF6FC4)
 
-    // Eyes
-    g.circle(px + 16, headY + 9, 3.5).fill(0x4DE8FF)
-    g.circle(px + PLAYER_W - 16, headY + 9, 3.5).fill(0x4DE8FF)
+  // Inner ears
+  g.moveTo(9, headY + 3).lineTo(7, headY - 5).lineTo(14, headY + 2).closePath().fill(0xF9A8D4)
+  g.moveTo(PLAYER_W - 9, headY + 3).lineTo(PLAYER_W - 7, headY - 5).lineTo(PLAYER_W - 14, headY + 2).closePath().fill(0xF9A8D4)
 
-    // Eye cores
-    g.circle(px + 16, headY + 9, 1.2).fill(0xecfeff)
-    g.circle(px + PLAYER_W - 16, headY + 9, 1.2).fill(0xecfeff)
+  // Visor
+  g.roundRect(9, headY + 5, PLAYER_W - 18, 7, 3).fill(0x0f172a)
 
-    // Nose
-    g.moveTo(px + PLAYER_W / 2 - 2, headY + 13).lineTo(px + PLAYER_W / 2, headY + 15).lineTo(px + PLAYER_W / 2 + 2, headY + 13).closePath().fill(0x9d174d)
+  // Eyes
+  g.circle(16, headY + 9, 3.5).fill(0x4DE8FF)
+  g.circle(PLAYER_W - 16, headY + 9, 3.5).fill(0x4DE8FF)
 
-    // Arm cannon
-    g.roundRect(px + PLAYER_W - 2, py + 16, 10, 6, 2).fill(0x1e293b)
-    g.circle(px + PLAYER_W + 8, py + 19, 3).fill(0x4DE8FF)
+  // Eye cores
+  g.circle(16, headY + 9, 1.2).fill(0xecfeff)
+  g.circle(PLAYER_W - 16, headY + 9, 1.2).fill(0xecfeff)
 
-    // Chest core
-    g.circle(px + PLAYER_W / 2, py + ph * 0.45, 5).fill(0x0f172a)
-    g.circle(px + PLAYER_W / 2, py + ph * 0.45, 3).fill(0x4DE8FF)
+  // Nose
+  g.moveTo(PLAYER_W / 2 - 2, headY + 13).lineTo(PLAYER_W / 2, headY + 15).lineTo(PLAYER_W / 2 + 2, headY + 13).closePath().fill(0x9d174d)
 
-    // Tail
-    g.moveTo(px + 4, py + ph * 0.4)
-      .quadraticCurveTo(px - 8, py + ph * 0.2, px - 4, py + ph * 0.1)
-      .stroke({ width: 2.5, color: 0xFF6FC4 })
+  // Arm cannon
+  g.roundRect(PLAYER_W - 2, 16, 10, 6, 2).fill(0x1e293b)
+  g.circle(PLAYER_W + 8, 19, 3).fill(0x4DE8FF)
 
-    // Armor lines
-    for (let i = 0; i < 3; i++) {
-      const ly = py + 16 + i * 6
-      if (ly < py + ph - 6) {
-        g.moveTo(px + 10, ly).lineTo(px + PLAYER_W - 10, ly).stroke({ width: 0.8, color: 0xf9a8d4, alpha: 0.3 })
-      }
+  // Chest core
+  g.circle(PLAYER_W / 2, ph * 0.45, 5).fill(0x0f172a)
+  g.circle(PLAYER_W / 2, ph * 0.45, 3).fill(0x4DE8FF)
+
+  // Tail
+  g.moveTo(4, ph * 0.4)
+    .quadraticCurveTo(-8, ph * 0.2, -4, ph * 0.1)
+    .stroke({ width: 2.5, color: 0xFF6FC4 })
+
+  // Armor lines
+  for (let i = 0; i < 3; i++) {
+    const ly = 16 + i * 6
+    if (ly < ph - 6) {
+      g.moveTo(10, ly).lineTo(PLAYER_W - 10, ly).stroke({ width: 0.8, color: 0xf9a8d4, alpha: 0.3 })
     }
   }
+}
 
   private syncEnemies(gs: GameState) {
     for (let i = this.enemySprites.length - 1; i >= 0; i--) {
@@ -268,18 +284,80 @@ export class PixiRenderer {
       g.rect(o.x + o.w - 14, o.y + o.h - 10, 6, 10).fill(0x1e1e2e)
     } else if (es.kind === 'bird') {
       const hover = Math.sin(elapsed * 0.005) * 3
-      g.moveTo(o.x + 8, o.y + o.h / 2 + hover)
-        .lineTo(o.x - 4, o.y + 4 + hover)
-        .lineTo(o.x + 16, o.y + o.h / 2 + hover)
-        .closePath().fill(0x7c3aed)
-      g.moveTo(o.x + o.w - 8, o.y + o.h / 2 + hover)
-        .lineTo(o.x + o.w + 4, o.y + 4 + hover)
-        .lineTo(o.x + o.w - 16, o.y + o.h / 2 + hover)
-        .closePath().fill(0x7c3aed)
-      g.ellipse(o.x + o.w / 2, o.y + o.h / 2 + hover, o.w / 2, o.h / 2).fill(0xa855f7)
-      g.circle(o.x + o.w / 2, o.y + o.h / 2 + hover, 6).fill(0x0f172a)
-      g.circle(o.x + o.w / 2, o.y + o.h / 2 + hover, 4).fill(0xef4444)
-      g.circle(o.x + o.w / 2, o.y + o.h / 2 + hover, 1.5).fill(0xfca5a5)
+      const bank = Math.sin(elapsed * 0.008) * 0.08 // nghiêng cánh nhẹ khi bay
+      const thrustPulse = 0.6 + Math.sin(elapsed * 0.02) * 0.4
+      const cx = o.x + o.w / 2
+      const cy = o.y + o.h / 2 + hover
+
+      const HULL = 0x2a2f45       // thân xám-xanh đậm
+      const HULL_LIGHT = 0x4b5470 // panel sáng hơn
+      const EDGE = 0x8b5cf6       // viền tím-xanh phát sáng
+      const COCKPIT = 0xff1744    // kính đỏ
+      const ENGINE = 0x22d3ee     // lửa phản lực cyan
+
+      g.rotation ? null : null // (no-op, giữ graphics local không đổi rotation container)
+
+      // ── Cánh sau xoè ngược (swept wings) ──────────────────────────
+      for (const side of [-1, 1]) {
+        const tilt = side * bank * o.h
+        g.moveTo(cx - 2, cy + 2)
+          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
+          .lineTo(cx + side * o.w * 0.68, cy + o.h * 0.58 + tilt)
+          .lineTo(cx + side * o.w * 0.15, cy + o.h * 0.12)
+          .closePath().fill(HULL)
+        // Viền cánh sáng
+        g.moveTo(cx - 2, cy + 2)
+          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
+          .stroke({ width: 1.2, color: EDGE, alpha: 0.7 })
+        // Đèn cảnh báo đầu cánh
+        g.circle(cx + side * o.w * 0.65, cy + o.h * 0.55 + tilt, 1.8).fill(side > 0 ? 0x22c55e : 0xef4444)
+      }
+
+      // ── Cánh mũi nhỏ phía trước (canard) ────────────────────────────
+      for (const side of [-1, 1]) {
+        g.moveTo(cx + side * o.w * 0.12, cy - o.h * 0.28)
+          .lineTo(cx + side * o.w * 0.32, cy - o.h * 0.36)
+          .lineTo(cx + side * o.w * 0.14, cy - o.h * 0.15)
+          .closePath().fill(HULL_LIGHT)
+      }
+
+      // ── Thân máy bay (fuselage) — thoi dài, mũi nhọn ────────────────
+      g.moveTo(cx + o.w * 0.48, cy)                    // mũi nhọn
+        .lineTo(cx + o.w * 0.2, cy - o.h * 0.22)
+        .lineTo(cx - o.w * 0.38, cy - o.h * 0.16)
+        .lineTo(cx - o.w * 0.5, cy - o.h * 0.05)
+        .lineTo(cx - o.w * 0.5, cy + o.h * 0.05)
+        .lineTo(cx - o.w * 0.38, cy + o.h * 0.16)
+        .lineTo(cx + o.w * 0.2, cy + o.h * 0.22)
+        .closePath().fill(HULL)
+
+      // Panel line sáng dọc thân
+      g.moveTo(cx + o.w * 0.4, cy).lineTo(cx - o.w * 0.42, cy)
+        .stroke({ width: 1, color: EDGE, alpha: 0.5 })
+
+      // Sống lưng giáp (dorsal ridge)
+      g.moveTo(cx + o.w * 0.1, cy - o.h * 0.22)
+        .lineTo(cx - o.w * 0.05, cy - o.h * 0.34)
+        .lineTo(cx - o.w * 0.25, cy - o.h * 0.2)
+        .closePath().fill(HULL_LIGHT)
+
+      // ── Buồng lái / mắt kính đỏ (cockpit) ───────────────────────────
+      g.ellipse(cx + o.w * 0.18, cy - o.h * 0.06, 7, 4).fill(0x0f172a)
+      g.ellipse(cx + o.w * 0.18, cy - o.h * 0.06, 5, 2.6).fill(COCKPIT)
+      g.ellipse(cx + o.w * 0.2, cy - o.h * 0.08, 1.8, 0.8).fill(0xffccd5)
+
+      // ── Vũ khí gắn dưới cánh (hardpoint) ────────────────────────────
+      for (const side of [-1, 1]) {
+        g.roundRect(cx + side * o.w * 0.28 - 4, cy + o.h * 0.1, 8, 3, 1).fill(0x1e293b)
+        g.circle(cx + side * o.w * 0.28 + (side > 0 ? 4 : -4), cy + o.h * 0.1 + 1.5, 1.2).fill(0xfbbf24)
+      }
+
+      // ── Động cơ phản lực + lửa phụt (đuôi) ──────────────────────────
+      g.roundRect(cx - o.w * 0.56, cy - o.h * 0.08, 8, o.h * 0.16, 2).fill(0x111827)
+      // Lõi lửa
+      g.ellipse(cx - o.w * 0.6, cy, 5 * thrustPulse, 3.5 * thrustPulse).fill({ color: ENGINE, alpha: 0.9 })
+      g.ellipse(cx - o.w * 0.68, cy, 8 * thrustPulse, 2.5 * thrustPulse).fill({ color: ENGINE, alpha: 0.4 })
+      g.ellipse(cx - o.w * 0.58, cy, 2.5, 1.8).fill(0xecfeff)
     } else if (es.kind === 'mouse') {
       const bodyColor = o.isCharging ? 0xdc2626 : 0xef4444
       g.roundRect(o.x + 2, o.y + 10, o.w - 4, o.h - 14, 5).fill(bodyColor)
