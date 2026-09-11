@@ -315,8 +315,10 @@ export function updateGameState(gs: GameState, dt: number, input: GameInput): 'c
   }
 
   // ── Scroll ────────────────────────────────────────────────────
-  gs.scrollOffset = (gs.scrollOffset + gs.speed * effectiveDt) % CANVAS_W
-  gs.bgOffset = (gs.bgOffset + gs.speed * 0.15 * effectiveDt) % CANVAS_W
+  // Do NOT wrap here — ParallaxCity.update() handles per-layer wrapping
+  // with positiveModulo at each layer's own pattern period.
+  gs.scrollOffset = gs.scrollOffset + gs.speed * effectiveDt
+  gs.bgOffset = gs.bgOffset + gs.speed * 0.15 * effectiveDt
 
   // ── Spawn obstacles ───────────────────────────────────────────
   gs.spawnTimer -= effectiveDt * 1000

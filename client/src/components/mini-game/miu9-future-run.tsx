@@ -312,7 +312,16 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
           START OVERLAY — MIU-9 Cyberpunk Onboarding
           ═══════════════════════════════════════════════════════════════ */}
       {phase === 'menu' && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto bg-gradient-to-b from-[#06071a]/95 via-[#0a0e2a]/90 to-[#06071a]/95 backdrop-blur-sm">
+        <div
+          className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto backdrop-blur-sm"
+          style={{
+            backgroundImage: 'url(/game-thumbnail.svg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#06071a]/80 via-[#0a0e2a]/70 to-[#06071a]/85" />
           {/* Decorative grid lines */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
             style={{

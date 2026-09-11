@@ -53,7 +53,7 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden border-cyan-500/20 bg-[#0A0E1F] p-0">
+      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden border-cyan-500/20 bg-[#0A0E1F] p-0 [&_[data-slot='dialog-close']]:bg-white/10 [&_[data-slot='dialog-close']]:text-white [&_[data-slot='dialog-close']]:hover:bg-white/20 [&_[data-slot='dialog-close']]:hover:text-cyan-300 [&_[data-slot='dialog-close']]:focus-visible:ring-cyan-400 [&_[data-slot='dialog-close']]:opacity-100">
         <div className="flex items-center justify-between border-b border-cyan-500/10 px-6 py-4">
           <DialogTitle className="flex items-center gap-2 text-white">
             <Gamepad2 className="size-5 text-cyan-400" />

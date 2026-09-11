@@ -15,7 +15,7 @@ const GAMES = [
     id: 'miu9-future-run',
     name: 'MIU-9 Future Run',
     description: 'Chạy bộ vô hạn, bắn hạ kẻ thù và nhận điểm!',
-    image: '/game-thumbnail.png',
+    image: '/game-thumbnail.svg',
     status: 'active' as const,
   },
 ]

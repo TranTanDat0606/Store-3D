@@ -272,8 +272,36 @@ export default function HomePage() {
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Khám phá theo danh mục bạn yêu thích</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {categories.map((cat) => (
+
+            {/* Mobile: horizontal scroll */}
+            <div className="scrollbar-none -mx-4 flex gap-3 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:hidden">
+              {categories.slice(0, 10).map((cat) => (
+                <Link
+                  key={cat._id}
+                  to={`/san-pham?categorySlug=${cat.slug}`}
+                  className="group flex w-28 shrink-0 flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center transition-all hover:-translate-y-1 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-500/5 dark:border-white/5 dark:bg-white/[0.02] dark:hover:border-cyan-500/20 dark:hover:bg-white/[0.04]"
+                >
+                  <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 dark:border-white/5 dark:bg-slate-900/60">
+                    {cat.image ? (
+                      <img
+                        src={resolveImageUrl(cat.image)}
+                        alt={cat.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    ) : (
+                      <Layers className="size-6 text-slate-400 dark:text-slate-500" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium text-slate-700 group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white transition-colors line-clamp-2">{cat.name}</span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Desktop: grid, max 6 */}
+            <div className="hidden grid-cols-6 gap-4 lg:grid">
+              {categories.slice(0, 6).map((cat) => (
                 <Link
                   key={cat._id}
                   to={`/san-pham?categorySlug=${cat.slug}`}
@@ -296,6 +324,17 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
+
+            {categories.length > 6 && (
+              <div className="mt-6 flex justify-center">
+                <Button variant="ghost" className="text-slate-500 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white" asChild>
+                  <Link to="/san-pham">
+                    Xem tất cả danh mục
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mx-auto max-w-7xl px-4 sm:px-6">

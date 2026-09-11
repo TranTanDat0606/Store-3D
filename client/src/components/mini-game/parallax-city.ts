@@ -2,6 +2,11 @@
 import * as PIXI from 'pixi.js'
 import { CANVAS_W, CANVAS_H, GROUND_Y } from './game-state'
 
+// Safe modulo that always returns a non-negative result
+function positiveModulo(value: number, modulus: number): number {
+  return ((value % modulus) + modulus) % modulus
+}
+
 // Design tokens
 const NAVY1 = 0x0A0E1F
 const NAVY2 = 0x131A33
@@ -10,13 +15,19 @@ const CYAN = 0x4DE8FF
 const PURPLE = 0xB98BFF
 const DARK_BLUE = 0x0f1729
 
-// Exact pattern widths — derived from building loop geometry
-// distant: 24 buildings × 65px spacing, last at x=23*65=1495, max building width ~60
-const DISTANT_PATTERN_W = 23 * 65 + 60 // 1555
-// mid: 16 buildings × 95px spacing, last at x=15*95=1425, max building width ~95
-const MID_PATTERN_W = 15 * 95 + 95 // 1520
-// street: 14 lamps × 110px spacing, last at x=13*110=1430, plus neon signs extend to ~1480
-const STREET_PATTERN_W = 13 * 110 + 110 // 1540
+// Source of truth: count + spacing define the grid.
+// Pattern width = count × spacing (clone starts at exact grid period).
+const DISTANT_COUNT = 24
+const DISTANT_SPACING = 65
+const DISTANT_PATTERN_W = DISTANT_COUNT * DISTANT_SPACING // 1560
+
+const MID_COUNT = 16
+const MID_SPACING = 95
+const MID_PATTERN_W = MID_COUNT * MID_SPACING // 1520
+
+const STREET_COUNT = 14
+const STREET_SPACING = 110
+const STREET_PATTERN_W = STREET_COUNT * STREET_SPACING // 1540
 
 export class ParallaxCity {
   skyLayer: PIXI.Container
@@ -70,8 +81,8 @@ export class ParallaxCity {
   private createDistantBuildings() {
     const g = new PIXI.Graphics()
     // Distant skyline — dark silhouettes with subtle neon windows
-    for (let i = 0; i < 24; i++) {
-      const x = i * 65
+    for (let i = 0; i < DISTANT_COUNT; i++) {
+      const x = i * DISTANT_SPACING
       const h = 50 + Math.random() * 140
       const w = 25 + Math.random() * 35
       // Building body
@@ -103,8 +114,8 @@ export class ParallaxCity {
   private createMidBuildings() {
     const g = new PIXI.Graphics()
     // Mid-height buildings — more detail, neon signs
-    for (let i = 0; i < 16; i++) {
-      const x = i * 95
+    for (let i = 0; i < MID_COUNT; i++) {
+      const x = i * MID_SPACING
       const h = 100 + Math.random() * 220
       const w = 45 + Math.random() * 50
       // Building body
@@ -142,8 +153,8 @@ export class ParallaxCity {
   private createStreetObjects() {
     const g = new PIXI.Graphics()
     // Street lamps with cyan glow
-    for (let i = 0; i < 14; i++) {
-      const x = i * 110
+    for (let i = 0; i < STREET_COUNT; i++) {
+      const x = i * STREET_SPACING
       // Lamp post
       g.rect(x, GROUND_Y - 55, 2, 55).fill({ color: 0x2a3050, alpha: 0.6 })
       // Lamp head
@@ -201,17 +212,20 @@ export class ParallaxCity {
   }
 
   update(bgOffset: number, scrollOffset: number) {
-    // Wrap offsets to prevent floating-point drift over long sessions
-    const wrappedBg = bgOffset % Math.max(DISTANT_PATTERN_W, MID_PATTERN_W, STREET_PATTERN_W)
-    const wrappedScroll = scrollOffset % CANVAS_W
+    // Each layer wraps independently at its own pattern width.
+    // Do NOT pre-wrap bgOffset by Math.max(...) — that causes discontinuities
+    // when different parallax speeds cause the wrapped value to jump.
+    const distantOffset = positiveModulo(bgOffset * 0.3, DISTANT_PATTERN_W)
+    const midOffset = positiveModulo(bgOffset * 0.6, MID_PATTERN_W)
+    const streetOffset = positiveModulo(bgOffset * 1.0, STREET_PATTERN_W)
 
-    // Distant: slow parallax — modulo by pattern width for seamless loop
-    this.distantLayer.x = -(wrappedBg * 0.3) % DISTANT_PATTERN_W
+    // Distant: slow parallax
+    this.distantLayer.x = -distantOffset
     // Mid: medium parallax
-    this.midLayer.x = -(wrappedBg * 0.6) % MID_PATTERN_W
+    this.midLayer.x = -midOffset
     // Street: fast parallax
-    this.streetLayer.x = -(wrappedBg * 1.0) % STREET_PATTERN_W
-    // Road: fastest (already 2x width, CANVAS_W modulo is correct)
-    this.roadLayer.x = -(wrappedScroll * 0.5) % CANVAS_W
+    this.streetLayer.x = -streetOffset
+    // Road: fastest (2x width, wraps by CANVAS_W)
+    this.roadLayer.x = -(scrollOffset * 0.5) % CANVAS_W
   }
 }

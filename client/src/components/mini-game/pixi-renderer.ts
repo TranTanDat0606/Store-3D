@@ -158,78 +158,119 @@ export class PixiRenderer {
     g.alpha = 1
   }
 
-  // ── World placement ─────────────────────────────────────────
-  // Draw everything below in LOCAL coordinates (as if the character
-  // always stood at (0,0)), then move the whole graphic into the
-  // world with g.position, and rotate/scale around its own center
-  // with g.pivot. This keeps the jump tilt/squash centered on the
-  // cat itself instead of the world origin (0,0) — which is what
-  // made the sprite visibly fly away from its real hitbox while
-  // jumping. Lasers were unaffected because they never go through
-  // this rotation/scale step.
   g.pivot.set(PLAYER_W / 2, ph / 2)
   g.position.set(px + PLAYER_W / 2, py + ph / 2)
 
-  // Jump animation: tilt +10°, scale.y 1.15 — now correctly centered
   const jumpTilt = gs.isJumping ? 0.17 : 0
   const jumpScaleY = gs.isJumping ? 1.15 : 1
   g.rotation = jumpTilt
   g.scale.set(1, jumpScaleY)
 
-  // From here on, (0,0) is the top-left of the character's own
-  // bounding box (PLAYER_W x ph) — same layout as before, just with
-  // px/py removed from every draw call.
+  // ── Cat ears (behind head) ──────────────────────────────────
+  const earPeak = gs.isDucking ? -3 : -10
+  // Left ear outer
+  g.moveTo(6, 6).lineTo(3, earPeak).lineTo(15, 4).closePath().fill(0xFF6FC4)
+  // Right ear outer
+  g.moveTo(PLAYER_W - 6, 6).lineTo(PLAYER_W - 3, earPeak).lineTo(PLAYER_W - 15, 4).closePath().fill(0xFF6FC4)
+  // Left ear inner
+  g.moveTo(7, 5).lineTo(5, earPeak + 3).lineTo(13, 4).closePath().fill(0xF9A8D4)
+  // Right ear inner
+  g.moveTo(PLAYER_W - 7, 5).lineTo(PLAYER_W - 5, earPeak + 3).lineTo(PLAYER_W - 13, 4).closePath().fill(0xF9A8D4)
 
-  // Body
-  g.roundRect(4, (gs.isDucking ? 2 : 10), PLAYER_W - 8, ph - (gs.isDucking ? 4 : 14), 10)
-    .fill(0xFF6FC4)
+  // ── Head (oversized chibi) ──────────────────────────────────
+  const headY = gs.isDucking ? -1 : -3
+  const headR = gs.isDucking ? 11 : 14
+  // Head shadow
+  g.ellipse(PLAYER_W / 2 + 1, headY + 10, headR + 1, headR - 2).fill(0xD44A8A)
+  // Head base
+  g.ellipse(PLAYER_W / 2, headY + 9, headR, headR - 3).fill(0xFF6FC4)
 
-  // Head
-  const headY = gs.isDucking ? 0 : -2
-  g.ellipse(PLAYER_W / 2, headY + 9, 14, 11).fill(0xFF6FC4)
+  // ── White muzzle (lower face) ───────────────────────────────
+  g.ellipse(PLAYER_W / 2, headY + 14, 7, 4).fill(0xFFF0F5)
 
-  // Ears
-  g.moveTo(8, headY + 4).lineTo(5, headY - 8).lineTo(16, headY + 2).closePath().fill(0xFF6FC4)
-  g.moveTo(PLAYER_W - 8, headY + 4).lineTo(PLAYER_W - 5, headY - 8).lineTo(PLAYER_W - 16, headY + 2).closePath().fill(0xFF6FC4)
+  // ── Visor (dark band across eyes) ───────────────────────────
+  g.roundRect(8, headY + 4, PLAYER_W - 16, 8, 3).fill(0x0f172a)
 
-  // Inner ears
-  g.moveTo(9, headY + 3).lineTo(7, headY - 5).lineTo(14, headY + 2).closePath().fill(0xF9A8D4)
-  g.moveTo(PLAYER_W - 9, headY + 3).lineTo(PLAYER_W - 7, headY - 5).lineTo(PLAYER_W - 14, headY + 2).closePath().fill(0xF9A8D4)
+  // ── Eyes (huge anime, cyan glow) ────────────────────────────
+  const eyeY = headY + 8
+  // Eye whites
+  g.ellipse(15, eyeY, 4.5, 4).fill(0xffffff)
+  g.ellipse(PLAYER_W - 15, eyeY, 4.5, 4).fill(0xffffff)
+  // Iris (cyan)
+  g.circle(16, eyeY, 3.2).fill(0x4DE8FF)
+  g.circle(PLAYER_W - 16, eyeY, 3.2).fill(0x4DE8FF)
+  // Pupils
+  g.circle(16.5, eyeY, 1.8).fill(0x0f172a)
+  g.circle(PLAYER_W - 15.5, eyeY, 1.8).fill(0x0f172a)
+  // Eye shine (white dot)
+  g.circle(15, eyeY - 1.5, 1).fill(0xffffff)
+  g.circle(PLAYER_W - 17, eyeY - 1.5, 1).fill(0xffffff)
+  // Subtle eye glow ring
+  g.circle(16, eyeY, 4.5).stroke({ width: 0.6, color: 0x4DE8FF, alpha: 0.4 })
+  g.circle(PLAYER_W - 16, eyeY, 4.5).stroke({ width: 0.6, color: 0x4DE8FF, alpha: 0.4 })
 
-  // Visor
-  g.roundRect(9, headY + 5, PLAYER_W - 18, 7, 3).fill(0x0f172a)
+  // ── Nose (dark pink triangle) ───────────────────────────────
+  g.moveTo(PLAYER_W / 2 - 1.5, headY + 12).lineTo(PLAYER_W / 2, headY + 14).lineTo(PLAYER_W / 2 + 1.5, headY + 12).closePath().fill(0x9D174D)
 
-  // Eyes
-  g.circle(16, headY + 9, 3.5).fill(0x4DE8FF)
-  g.circle(PLAYER_W - 16, headY + 9, 3.5).fill(0x4DE8FF)
+  // ── Body (pink armor) ───────────────────────────────────────
+  const bodyTop = gs.isDucking ? 3 : 14
+  const bodyH = ph - bodyTop - 4
+  // Body shadow
+  g.roundRect(5, bodyTop + 1, PLAYER_W - 8, bodyH, 8).fill(0xD44A8A)
+  // Body base
+  g.roundRect(4, bodyTop, PLAYER_W - 8, bodyH, 8).fill(0xFF6FC4)
+  // Armor plate highlight
+  g.roundRect(6, bodyTop + 1, PLAYER_W - 12, bodyH * 0.4, 4).fill({ color: 0xF9A8D4, alpha: 0.3 })
 
-  // Eye cores
-  g.circle(16, headY + 9, 1.2).fill(0xecfeff)
-  g.circle(PLAYER_W - 16, headY + 9, 1.2).fill(0xecfeff)
+  // ── Chest energy core (cyan) ────────────────────────────────
+  const coreY = bodyTop + bodyH * 0.35
+  g.circle(PLAYER_W / 2, coreY + 1, 6).fill(0x0f172a)
+  g.circle(PLAYER_W / 2, coreY, 5).fill(0x0f172a)
+  g.circle(PLAYER_W / 2, coreY, 3.5).fill(0x4DE8FF)
+  g.circle(PLAYER_W / 2, coreY, 1.5).fill(0xecfeff)
+  // Core glow ring
+  g.circle(PLAYER_W / 2, coreY, 6).stroke({ width: 0.5, color: 0x4DE8FF, alpha: 0.5 })
 
-  // Nose
-  g.moveTo(PLAYER_W / 2 - 2, headY + 13).lineTo(PLAYER_W / 2, headY + 15).lineTo(PLAYER_W / 2 + 2, headY + 13).closePath().fill(0x9d174d)
-
-  // Arm cannon
-  g.roundRect(PLAYER_W - 2, 16, 10, 6, 2).fill(0x1e293b)
-  g.circle(PLAYER_W + 8, 19, 3).fill(0x4DE8FF)
-
-  // Chest core
-  g.circle(PLAYER_W / 2, ph * 0.45, 5).fill(0x0f172a)
-  g.circle(PLAYER_W / 2, ph * 0.45, 3).fill(0x4DE8FF)
-
-  // Tail
-  g.moveTo(4, ph * 0.4)
-    .quadraticCurveTo(-8, ph * 0.2, -4, ph * 0.1)
-    .stroke({ width: 2.5, color: 0xFF6FC4 })
-
-  // Armor lines
+  // ── Armor lines ─────────────────────────────────────────────
   for (let i = 0; i < 3; i++) {
-    const ly = 16 + i * 6
+    const ly = bodyTop + 6 + i * 5
     if (ly < ph - 6) {
       g.moveTo(10, ly).lineTo(PLAYER_W - 10, ly).stroke({ width: 0.8, color: 0xf9a8d4, alpha: 0.3 })
     }
   }
+
+  // ── Arm cannon ──────────────────────────────────────────────
+  const cannonY = bodyTop + bodyH * 0.4
+  g.roundRect(PLAYER_W - 2, cannonY, 10, 6, 2).fill(0x1e293b)
+  g.circle(PLAYER_W + 8, cannonY + 3, 3).fill(0x4DE8FF)
+  g.circle(PLAYER_W + 8, cannonY + 3, 1.5).fill(0xecfeff)
+
+  // ── Cyan jet thrusters ──────────────────────────────────────
+  const thrusterY = ph - 4
+  // Left thruster
+  g.roundRect(8, thrusterY, 8, 5, 2).fill(0x0f172a)
+  g.roundRect(9, thrusterY + 5, 6, 3, 1).fill({ color: 0x4DE8FF, alpha: 0.8 })
+  g.roundRect(10, thrusterY + 7, 4, 2, 1).fill({ color: 0x4DE8FF, alpha: 0.4 })
+  // Right thruster
+  g.roundRect(PLAYER_W - 16, thrusterY, 8, 5, 2).fill(0x0f172a)
+  g.roundRect(PLAYER_W - 15, thrusterY + 5, 6, 3, 1).fill({ color: 0x4DE8FF, alpha: 0.8 })
+  g.roundRect(PLAYER_W - 14, thrusterY + 7, 4, 2, 1).fill({ color: 0x4DE8FF, alpha: 0.4 })
+
+  // ── Curved cyber tail ───────────────────────────────────────
+  const tailY = bodyTop + bodyH * 0.4
+  g.moveTo(4, tailY)
+    .quadraticCurveTo(-10, tailY - 8, -6, tailY - 16)
+    .stroke({ width: 2.8, color: 0xFF6FC4 })
+  // Tail tip glow
+  g.circle(-6, tailY - 16, 2).fill(0x4DE8FF)
+
+  // ── Compact mechanical legs ─────────────────────────────────
+  const legY = ph - 12
+  g.roundRect(10, legY, 7, 10, 2).fill(0x1e293b)
+  g.roundRect(PLAYER_W - 17, legY, 7, 10, 2).fill(0x1e293b)
+  // Leg cyan accent
+  g.rect(11, legY + 2, 5, 1).fill(0x4DE8FF)
+  g.rect(PLAYER_W - 16, legY + 2, 5, 1).fill(0x4DE8FF)
 }
 
   private syncEnemies(gs: GameState) {
@@ -284,108 +325,185 @@ export class PixiRenderer {
       g.rect(o.x + o.w - 14, o.y + o.h - 10, 6, 10).fill(0x1e1e2e)
     } else if (es.kind === 'bird') {
       const hover = Math.sin(elapsed * 0.005) * 3
-      const bank = Math.sin(elapsed * 0.008) * 0.08 // nghiêng cánh nhẹ khi bay
+      const bank = Math.sin(elapsed * 0.008) * 0.1
       const thrustPulse = 0.6 + Math.sin(elapsed * 0.02) * 0.4
       const cx = o.x + o.w / 2
       const cy = o.y + o.h / 2 + hover
 
-      const HULL = 0x2a2f45       // thân xám-xanh đậm
-      const HULL_LIGHT = 0x4b5470 // panel sáng hơn
-      const EDGE = 0x8b5cf6       // viền tím-xanh phát sáng
-      const COCKPIT = 0xff1744    // kính đỏ
-      const ENGINE = 0x22d3ee     // lửa phản lực cyan
+      const HULL = 0x1a1f35
+      const HULL_LIGHT = 0x2d3555
+      const EDGE = 0x8b5cf6
+      const COCKPIT = 0xff1744
+      const ENGINE = 0x22d3ee
+      const ACCENT = 0x4DE8FF
 
-      g.rotation ? null : null // (no-op, giữ graphics local không đổi rotation container)
-
-      // ── Cánh sau xoè ngược (swept wings) ──────────────────────────
-      for (const side of [-1, 1]) {
-        const tilt = side * bank * o.h
-        g.moveTo(cx - 2, cy + 2)
-          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
-          .lineTo(cx + side * o.w * 0.68, cy + o.h * 0.58 + tilt)
-          .lineTo(cx + side * o.w * 0.15, cy + o.h * 0.12)
-          .closePath().fill(HULL)
-        // Viền cánh sáng
-        g.moveTo(cx - 2, cy + 2)
-          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
-          .stroke({ width: 1.2, color: EDGE, alpha: 0.7 })
-        // Đèn cảnh báo đầu cánh
-        g.circle(cx + side * o.w * 0.65, cy + o.h * 0.55 + tilt, 1.8).fill(side > 0 ? 0x22c55e : 0xef4444)
+      // ── Engine exhaust trail ─────────────────────────────────
+      for (let i = 1; i <= 3; i++) {
+        const alpha = 0.15 / i
+        const size = i * 3
+        g.ellipse(cx - o.w * 0.5 - size * 1.5, cy, size * thrustPulse, size * 0.5 * thrustPulse)
+          .fill({ color: ENGINE, alpha })
       }
 
-      // ── Cánh mũi nhỏ phía trước (canard) ────────────────────────────
+      // ── Swept-back wings ─────────────────────────────────────
+      for (const side of [-1, 1]) {
+        const tilt = side * bank * o.h
+        // Main wing
+        g.moveTo(cx - 2, cy + 2)
+          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
+          .lineTo(cx + side * o.w * 0.7, cy + o.h * 0.6 + tilt)
+          .lineTo(cx + side * o.w * 0.15, cy + o.h * 0.12)
+          .closePath().fill(HULL)
+        // Wing edge glow
+        g.moveTo(cx - 2, cy + 2)
+          .lineTo(cx + side * o.w * 0.62, cy + o.h * 0.5 + tilt)
+          .stroke({ width: 1.5, color: EDGE, alpha: 0.8 })
+        // Wing tip light
+        g.circle(cx + side * o.w * 0.65, cy + o.h * 0.55 + tilt, 2)
+          .fill(side > 0 ? 0x22c55e : 0xef4444)
+        // Wing inner panel line
+        g.moveTo(cx, cy + 4)
+          .lineTo(cx + side * o.w * 0.45, cy + o.h * 0.35 + tilt)
+          .stroke({ width: 0.6, color: ACCENT, alpha: 0.3 })
+      }
+
+      // ── Canard wings (front) ─────────────────────────────────
       for (const side of [-1, 1]) {
         g.moveTo(cx + side * o.w * 0.12, cy - o.h * 0.28)
-          .lineTo(cx + side * o.w * 0.32, cy - o.h * 0.36)
-          .lineTo(cx + side * o.w * 0.14, cy - o.h * 0.15)
+          .lineTo(cx + side * o.w * 0.35, cy - o.h * 0.38)
+          .lineTo(cx + side * o.w * 0.16, cy - o.h * 0.15)
           .closePath().fill(HULL_LIGHT)
       }
 
-      // ── Thân máy bay (fuselage) — thoi dài, mũi nhọn ────────────────
-      g.moveTo(cx + o.w * 0.48, cy)                    // mũi nhọn
-        .lineTo(cx + o.w * 0.2, cy - o.h * 0.22)
-        .lineTo(cx - o.w * 0.38, cy - o.h * 0.16)
-        .lineTo(cx - o.w * 0.5, cy - o.h * 0.05)
-        .lineTo(cx - o.w * 0.5, cy + o.h * 0.05)
-        .lineTo(cx - o.w * 0.38, cy + o.h * 0.16)
-        .lineTo(cx + o.w * 0.2, cy + o.h * 0.22)
+      // ── Fuselage (sleek nose) ────────────────────────────────
+      g.moveTo(cx + o.w * 0.5, cy)
+        .lineTo(cx + o.w * 0.2, cy - o.h * 0.24)
+        .lineTo(cx - o.w * 0.38, cy - o.h * 0.18)
+        .lineTo(cx - o.w * 0.5, cy - o.h * 0.06)
+        .lineTo(cx - o.w * 0.5, cy + o.h * 0.06)
+        .lineTo(cx - o.w * 0.38, cy + o.h * 0.18)
+        .lineTo(cx + o.w * 0.2, cy + o.h * 0.24)
         .closePath().fill(HULL)
 
-      // Panel line sáng dọc thân
-      g.moveTo(cx + o.w * 0.4, cy).lineTo(cx - o.w * 0.42, cy)
-        .stroke({ width: 1, color: EDGE, alpha: 0.5 })
+      // Center fuselage panel line
+      g.moveTo(cx + o.w * 0.42, cy).lineTo(cx - o.w * 0.44, cy)
+        .stroke({ width: 1, color: EDGE, alpha: 0.6 })
 
-      // Sống lưng giáp (dorsal ridge)
-      g.moveTo(cx + o.w * 0.1, cy - o.h * 0.22)
-        .lineTo(cx - o.w * 0.05, cy - o.h * 0.34)
-        .lineTo(cx - o.w * 0.25, cy - o.h * 0.2)
+      // Dorsal ridge
+      g.moveTo(cx + o.w * 0.1, cy - o.h * 0.24)
+        .lineTo(cx - o.w * 0.05, cy - o.h * 0.36)
+        .lineTo(cx - o.w * 0.25, cy - o.h * 0.22)
         .closePath().fill(HULL_LIGHT)
 
-      // ── Buồng lái / mắt kính đỏ (cockpit) ───────────────────────────
-      g.ellipse(cx + o.w * 0.18, cy - o.h * 0.06, 7, 4).fill(0x0f172a)
-      g.ellipse(cx + o.w * 0.18, cy - o.h * 0.06, 5, 2.6).fill(COCKPIT)
-      g.ellipse(cx + o.w * 0.2, cy - o.h * 0.08, 1.8, 0.8).fill(0xffccd5)
+      // ── Cockpit (red eye) ───────────────────────────────────
+      g.ellipse(cx + o.w * 0.2, cy - o.h * 0.06, 7, 4.5).fill(0x0f172a)
+      g.ellipse(cx + o.w * 0.2, cy - o.h * 0.06, 5.5, 3).fill(COCKPIT)
+      g.ellipse(cx + o.w * 0.22, cy - o.h * 0.08, 2, 1).fill(0xffccd5)
+      // Cockpit glow ring
+      g.ellipse(cx + o.w * 0.2, cy - o.h * 0.06, 7, 4.5)
+        .stroke({ width: 0.5, color: COCKPIT, alpha: 0.5 })
 
-      // ── Vũ khí gắn dưới cánh (hardpoint) ────────────────────────────
+      // ── Weapon hardpoints ────────────────────────────────────
       for (const side of [-1, 1]) {
-        g.roundRect(cx + side * o.w * 0.28 - 4, cy + o.h * 0.1, 8, 3, 1).fill(0x1e293b)
-        g.circle(cx + side * o.w * 0.28 + (side > 0 ? 4 : -4), cy + o.h * 0.1 + 1.5, 1.2).fill(0xfbbf24)
+        g.roundRect(cx + side * o.w * 0.3 - 4, cy + o.h * 0.12, 8, 3, 1).fill(0x1e293b)
+        g.circle(cx + side * o.w * 0.3 + (side > 0 ? 4 : -4), cy + o.h * 0.12 + 1.5, 1.5)
+          .fill(0xfbbf24)
       }
 
-      // ── Động cơ phản lực + lửa phụt (đuôi) ──────────────────────────
-      g.roundRect(cx - o.w * 0.56, cy - o.h * 0.08, 8, o.h * 0.16, 2).fill(0x111827)
-      // Lõi lửa
-      g.ellipse(cx - o.w * 0.6, cy, 5 * thrustPulse, 3.5 * thrustPulse).fill({ color: ENGINE, alpha: 0.9 })
-      g.ellipse(cx - o.w * 0.68, cy, 8 * thrustPulse, 2.5 * thrustPulse).fill({ color: ENGINE, alpha: 0.4 })
+      // ── Engine nacelle + thrust ──────────────────────────────
+      g.roundRect(cx - o.w * 0.56, cy - o.h * 0.1, 10, o.h * 0.2, 2).fill(0x111827)
+      // Engine core
+      g.ellipse(cx - o.w * 0.6, cy, 5 * thrustPulse, 3.5 * thrustPulse)
+        .fill({ color: ENGINE, alpha: 0.9 })
+      // Engine glow
+      g.ellipse(cx - o.w * 0.68, cy, 8 * thrustPulse, 2.5 * thrustPulse)
+        .fill({ color: ENGINE, alpha: 0.4 })
+      // Engine bright core
       g.ellipse(cx - o.w * 0.58, cy, 2.5, 1.8).fill(0xecfeff)
+      // Engine rim
+      g.ellipse(cx - o.w * 0.56, cy, 5, 3.5)
+        .stroke({ width: 0.5, color: ENGINE, alpha: 0.6 })
     } else if (es.kind === 'mouse') {
-      const bodyColor = o.isCharging ? 0xdc2626 : 0xef4444
-      g.roundRect(o.x + 2, o.y + 10, o.w - 4, o.h - 14, 5).fill(bodyColor)
-      g.roundRect(o.x + 6, o.y, o.w - 12, 16, 4).fill(bodyColor)
-      g.circle(o.x + 8, o.y + 2, 5).fill(bodyColor)
-      g.circle(o.x + o.w - 8, o.y + 2, 5).fill(bodyColor)
-      g.circle(o.x + 8, o.y + 2, 3).fill(0xfca5a5)
-      g.circle(o.x + o.w - 8, o.y + 2, 3).fill(0xfca5a5)
-      g.rect(o.x + 12, o.y + 5, 5, 5).fill(o.chargeTriggered ? 0xfbbf24 : 0xffffff)
-      g.rect(o.x + o.w - 17, o.y + 5, 5, 5).fill(o.chargeTriggered ? 0xfbbf24 : 0xffffff)
-      g.circle(o.x + o.w / 2, o.y + 12, 2).fill(0x1e293b)
-      g.moveTo(o.x + o.w - 2, o.y + 16)
-        .lineTo(o.x + o.w + 14, o.y + 12)
-        .lineTo(o.x + o.w + 16, o.y + 14)
-        .lineTo(o.x + o.w + 2, o.y + 18)
-        .closePath().fill(0xd1d5db)
-      const legOff = o.isCharging ? 4 : 0
-      g.rect(o.x + 8 - legOff, o.y + o.h - 10, 6, 10).fill(0x1e1e2e)
-      g.rect(o.x + o.w - 14 + legOff, o.y + o.h - 10, 6, 10).fill(0x1e1e2e)
+      const bodyColor = o.isCharging ? 0x991b1b : 0x7f1d1d
+      const armorColor = o.isCharging ? 0xdc2626 : 0x991b1b
+      const cx = o.x + o.w / 2
+
+      // ── Charge energy aura ───────────────────────────────────
       if (o.isCharging) {
-        for (let i = 0; i < 3; i++) {
-          const ly = o.y + 10 + i * 12
-          g.moveTo(o.x - 10 - i * 5, ly).lineTo(o.x - 20 - i * 8, ly)
-            .stroke({ width: 1.5, color: 0xfbbf24, alpha: 0.5 })
+        for (let i = 3; i >= 1; i--) {
+          g.circle(cx, o.y + o.h / 2, 14 + i * 6)
+            .fill({ color: 0xfbbf24, alpha: 0.06 / i })
+        }
+        // Speed lines
+        for (let i = 0; i < 4; i++) {
+          const ly = o.y + 8 + i * 10
+          g.moveTo(o.x - 6 - i * 4, ly).lineTo(o.x - 18 - i * 8, ly)
+            .stroke({ width: 1.5, color: 0xfbbf24, alpha: 0.4 })
         }
       }
+
+      // ── Compact body (dark metallic armor) ───────────────────
+      g.roundRect(o.x + 2, o.y + 12, o.w - 4, o.h - 16, 5).fill(bodyColor)
+      // Armor plate
+      g.roundRect(o.x + 4, o.y + 14, o.w - 8, (o.h - 16) * 0.4, 3).fill(armorColor)
+      // Body edge highlight
+      g.roundRect(o.x + 2, o.y + 12, o.w - 4, o.h - 16, 5)
+        .stroke({ width: 0.8, color: 0xef4444, alpha: 0.4 })
+
+      // ── Head ─────────────────────────────────────────────────
+      g.roundRect(o.x + 6, o.y, o.w - 12, 16, 4).fill(armorColor)
+
+      // ── Pointed ears ─────────────────────────────────────────
+      for (const side of [-1, 1]) {
+        const ex = cx + side * 12
+        g.moveTo(ex - 4, o.y + 4).lineTo(ex, o.y - 6).lineTo(ex + 4, o.y + 4)
+          .closePath().fill(armorColor)
+        g.moveTo(ex - 2.5, o.y + 3).lineTo(ex, o.y - 3).lineTo(ex + 2.5, o.y + 3)
+          .closePath().fill(0xfca5a5)
+      }
+
+      // ── Red glowing eyes ─────────────────────────────────────
+      g.circle(o.x + 12, o.y + 6, 4).fill(0x0f172a)
+      g.circle(o.x + o.w - 12, o.y + 6, 4).fill(0x0f172a)
+      g.circle(o.x + 12, o.y + 6, 2.8).fill(0xef4444)
+      g.circle(o.x + o.w - 12, o.y + 6, 2.8).fill(0xef4444)
+      // Eye glow
+      g.circle(o.x + 12, o.y + 6, 4).stroke({ width: 0.5, color: 0xef4444, alpha: 0.6 })
+      g.circle(o.x + o.w - 12, o.y + 6, 4).stroke({ width: 0.5, color: 0xef4444, alpha: 0.6 })
+      // Eye shine
+      g.circle(o.x + 11, o.y + 5, 1).fill(0xffffff)
+      g.circle(o.x + o.w - 13, o.y + 5, 1).fill(0xffffff)
+
+      // ── Nose ─────────────────────────────────────────────────
+      g.circle(cx, o.y + 11, 1.5).fill(0x1e293b)
+
+      // ── Red laser sword ──────────────────────────────────────
+      const swordY = o.y + 16
+      // Blade
+      g.moveTo(o.x + o.w - 2, swordY)
+        .lineTo(o.x + o.w + 16, swordY - 3)
+        .lineTo(o.x + o.w + 18, swordY - 1)
+        .lineTo(o.x + o.w + 2, swordY + 2)
+        .closePath().fill(0xef4444)
+      // Blade energy edge
+      g.moveTo(o.x + o.w, swordY - 0.5)
+        .lineTo(o.x + o.w + 16, swordY - 3.5)
+        .stroke({ width: 1, color: 0xfca5a5, alpha: 0.8 })
+      // Blade tip glow
+      g.circle(o.x + o.w + 17, swordY - 2, 2).fill({ color: 0xef4444, alpha: 0.5 })
+
+      // ── Mechanical legs ──────────────────────────────────────
+      const legOff = o.isCharging ? 4 : 0
+      g.roundRect(o.x + 8 - legOff, o.y + o.h - 10, 7, 10, 2).fill(0x1e293b)
+      g.roundRect(o.x + o.w - 15 + legOff, o.y + o.h - 10, 7, 10, 2).fill(0x1e293b)
+      // Leg cyan accent
+      g.rect(o.x + 9 - legOff, o.y + o.h - 8, 5, 1).fill(0x4DE8FF)
+      g.rect(o.x + o.w - 14 + legOff, o.y + o.h - 8, 5, 1).fill(0x4DE8FF)
+
+      // ── Charge warning indicator ─────────────────────────────
       if (o.chargeTriggered && !o.isCharging) {
-        g.circle(o.x + o.w / 2, o.y - 16, 12).fill({ color: 0xfbbf24, alpha: 0.3 })
+        g.circle(cx, o.y - 14, 12).fill({ color: 0xfbbf24, alpha: 0.25 })
+        g.circle(cx, o.y - 14, 8).fill({ color: 0xfbbf24, alpha: 0.4 })
       }
     }
   }
