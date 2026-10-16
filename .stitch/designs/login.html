@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Đăng nhập &amp; Đăng ký — STORE 3D Việt Nam</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Be Vietnam Pro & Orbitron -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&amp;family=Orbitron:wght@700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config verbatim matching design system tokens -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface": "#ebe1d5",
+            "inverse-surface": "#ebe1d5",
+            "surface-container-high": "#2e2921",
+            "on-error": "#690005",
+            "surface-tint": "#f4be51",
+            "surface-container": "#241f17",
+            "surface-variant": "#39342c",
+            "background": "#17130c",
+            "on-primary-fixed-variant": "#5d4200",
+            "error": "#ffb4ab",
+            "primary-container": "#edb84c",
+            "tertiary-container": "#8ac6ff",
+            "outline": "#9b8f7c",
+            "surface-dim": "#17130c",
+            "surface": "#17130c",
+            "tertiary": "#c3dfff",
+            "on-tertiary-container": "#005282",
+            "primary": "#ffd78d",
+            "on-primary-container": "#674900",
+            "inverse-on-surface": "#353027",
+            "secondary-fixed-dim": "#acc7ff",
+            "secondary-fixed": "#d7e2ff",
+            "tertiary-fixed": "#cee5ff",
+            "on-secondary-container": "#f2f4ff",
+            "on-tertiary": "#003353",
+            "secondary-container": "#006cde",
+            "on-surface-variant": "#d3c5b0",
+            "on-secondary-fixed-variant": "#004491",
+            "on-secondary-fixed": "#001a40",
+            "primary-fixed": "#ffdea5",
+            "surface-container-lowest": "#120e07",
+            "on-error-container": "#ffdad6",
+            "on-primary": "#412d00",
+            "primary-fixed-dim": "#f4be51",
+            "outline-variant": "#4f4536",
+            "on-secondary": "#002f67",
+            "on-primary-fixed": "#271900",
+            "tertiary-fixed-dim": "#97cbff",
+            "surface-container-highest": "#39342c",
+            "secondary": "#acc7ff",
+            "on-background": "#ebe1d5",
+            "surface-bright": "#3e3830",
+            "on-tertiary-fixed-variant": "#004a76",
+            "inverse-primary": "#7b5800",
+            "on-tertiary-fixed": "#001d33",
+            "surface-container-low": "#1f1b14",
+            "error-container": "#93000a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {},
+          "fontFamily": {
+            "headline": [
+              "Be Vietnam Pro"
+            ],
+            "display": [
+              "Be Vietnam Pro"
+            ],
+            "body": [
+              "Be Vietnam Pro"
+            ],
+            "label": [
+              "Be Vietnam Pro"
+            ],
+            "orbitron": [
+              "Orbitron", "sans-serif"
+            ]
+          },
+          "fontSize": {}
+        },
+      },
+    }
+  </script>
+<style>
+    /* Custom Obsidian Gold Accents and Transitions */
+    .gold-glow {
+      box-shadow: 0 0 25px -4px rgba(237, 184, 76, 0.35);
+    }
+    .gold-glow-hover:hover {
+      box-shadow: 0 0 30px -2px rgba(237, 184, 76, 0.5);
+    }
+    .subtle-border {
+      border: 1px solid rgba(79, 69, 54, 0.45);
+    }
+    .subtle-border:hover {
+      border-color: rgba(237, 184, 76, 0.45);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body min-h-screen flex flex-col justify-between selection:bg-primary-container selection:text-surface-container-lowest antialiased">
+<!-- Minimal Top Header Bar (Focused Auth Viewport Navigation) -->
+<header class="w-full h-16 max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between z-20">
+<a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors duration-200 group text-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg transition-transform group-hover:-translate-x-1" data-icon="arrow_back">arrow_back</span>
+<span>Quay lại trang chủ</span>
+</a>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-orbitron text-xs tracking-widest text-primary font-bold">AUTHENTICATION</span>
+</div>
+</header>
+<!-- Main Split Layout Container -->
+<main class="flex-1 flex items-center justify-center px-4 md:px-8 py-6 my-auto">
+<div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 bg-surface-container-lowest rounded-xl subtle-border shadow-2xl overflow-hidden relative">
+<!-- Ambient Obsidian Gold Highlight (Decor) -->
+<div class="absolute -top-32 -left-32 w-80 h-80 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-32 -right-32 w-80 h-80 bg-secondary-container/15 rounded-full blur-3xl pointer-events-none"></div>
+<!-- LEFT PANEL: Brand, Slogan, High-end Figurine Art & Member Perks -->
+<div class="lg:col-span-6 p-8 md:p-12 flex flex-col justify-between bg-surface-container-low border-b lg:border-b-0 lg:border-r border-outline-variant/30 relative">
+<div class="space-y-6">
+<!-- Brand Logo Header -->
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-lg bg-surface-variant subtle-border flex items-center justify-center text-primary-container gold-glow">
+<span class="material-symbols-outlined text-2xl" data-icon="view_in_ar">view_in_ar</span>
+</div>
+<div>
+<span class="font-orbitron font-black text-2xl tracking-widest text-primary block leading-none">STORE 3D</span>
+<span class="text-[10px] tracking-wider text-outline font-semibold uppercase">High-End Collectibles Vietnam</span>
+</div>
+</div>
+<!-- Slogan -->
+<div>
+<h1 class="text-2xl md:text-3xl font-display font-extrabold text-on-surface tracking-tight leading-tight">
+              Không gian nghệ thuật in 3D Việt Nam
+            </h1>
+<p class="text-sm text-on-surface-variant mt-2 leading-relaxed">
+              Trải nghiệm tuyệt tác chế tác mô hình Resin 8K và FDM công nghệ cao. Hội tụ đỉnh cao điêu khắc số và tay nghề hoàn thiện thủ công.
+            </p>
+</div>
+<!-- Showcase Figurine Image -->
+<div class="relative w-full h-48 md:h-56 rounded-xl overflow-hidden border border-outline-variant/40 group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A museum-grade 3D printed dragon figurine sculpted in ultra-detailed 8K resin, placed on an obsidian pedestal in a dark moody studio. Cinematic rim lighting in rich obsidian gold and deep electric blue reflects on the intricate dragon scales and sharp claws. The background is a sleek minimalist dark gallery showcase with soft atmospheric mist, highlighting collector-grade craftsmanship and luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUqz3v_8mrE14Apf0zAw__PJAp3a4je_4lMhmna_nSWTxvRfo1Tg3BDp_ccngeR0qhTMSlYt38Z-yUAJBkCxKK8PWpBSexQoGTdFxkvsTkTnJPztMHtwFNBVbFRSL_XTZ0hFLddtXkEmzz7J1Hgr6g4p9-yuehflGRfZmSjA1KUkg_OSEMWP8x9H7-6aZrjSV0fPhs6SfcRZMhzFsH64UlFYuC_ML-XdbDY5J33bmlgfSF3-UKomxf9oihSJAOur33KqjtdKb_cD9q"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/30 to-transparent"></div>
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+<span class="text-xs font-medium text-primary bg-surface-container-highest/80 backdrop-blur-sm px-2.5 py-1 rounded-full border border-primary/20">
+                Phiên bản thủ công sơn mạ vàng
+              </span>
+<span class="font-orbitron text-xs text-on-surface/80">EDITION 8K</span>
+</div>
+</div>
+<!-- Exclusive Member Perks -->
+<div class="space-y-3 pt-2">
+<div class="text-xs font-semibold tracking-wider text-outline uppercase">Đặc quyền hội viên độc bản</div>
+<!-- Perk 1 -->
+<div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container/60 border border-outline-variant/20 hover:border-primary/40 transition-colors">
+<div class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center shrink-0 text-primary-container">
+<span class="material-symbols-outlined text-lg" data-icon="sell">sell</span>
+</div>
+<div>
+<h2 class="text-sm font-semibold text-on-surface">Thành viên nhận mã giảm giá riêng</h2>
+<p class="text-xs text-on-surface-variant leading-relaxed">Ưu đãi độc quyền lên đến 20% cho mỗi bộ sưu tập giới hạn.</p>
+</div>
+</div>
+<!-- Perk 2 -->
+<div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container/60 border border-outline-variant/20 hover:border-primary/40 transition-colors">
+<div class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center shrink-0 text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="precision_manufacturing">precision_manufacturing</span>
+</div>
+<div>
+<h2 class="text-sm font-semibold text-on-surface">Theo dõi đơn hàng mọi lúc</h2>
+<p class="text-xs text-on-surface-variant leading-relaxed">Cập nhật tiến độ in 3D thời gian thực từ khâu cắt lớp đến hoàn thiện sơn thủ công.</p>
+</div>
+</div>
+<!-- Perk 3 -->
+<div class="flex items-start gap-3 p-3 rounded-lg bg-surface-container/60 border border-outline-variant/20 hover:border-primary/40 transition-colors">
+<div class="w-8 h-8 rounded-md bg-surface-variant flex items-center justify-center shrink-0 text-primary-container">
+<span class="material-symbols-outlined text-lg" data-icon="favorite">favorite</span>
+</div>
+<div>
+<h2 class="text-sm font-semibold text-on-surface">Lưu danh sách yêu thích</h2>
+<p class="text-xs text-on-surface-variant leading-relaxed">Đồng bộ bộ sưu tập mô hình mong muốn trên mọi thiết bị.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs text-outline">
+<span class="material-symbols-outlined text-sm text-primary-container" data-icon="verified_user">verified_user</span>
+<span>Bảo mật dữ liệu tuyệt đối theo tiêu chuẩn mã hóa SSL</span>
+</div>
+</div>
+<!-- RIGHT PANEL: Authentication Interactive Form Cards -->
+<div class="lg:col-span-6 p-8 md:p-12 flex flex-col justify-center bg-surface-container">
+<!-- Tab Navigation Switcher -->
+<div class="w-full p-1 bg-surface-container-low rounded-lg subtle-border flex mb-8">
+<button class="flex-1 py-2.5 rounded-md text-sm font-bold transition-all duration-200 bg-primary-container text-surface-container-lowest gold-glow" id="tab-login-btn" onclick="switchAuthTab('login')" type="button">
+            Đăng nhập
+          </button>
+<button class="flex-1 py-2.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all duration-200" id="tab-register-btn" onclick="switchAuthTab('register')" type="button">
+            Đăng ký
+          </button>
+</div>
+<!-- FORM 1: LOGIN (Default Active) -->
+<div class="space-y-6" id="login-container">
+<div class="space-y-1">
+<h2 class="text-xl font-bold text-on-surface tracking-tight">Chào mừng bạn trở lại</h2>
+<p class="text-xs text-on-surface-variant">Nhập thông tin xác thực để truy cập bộ sưu tập mô hình 3D của bạn.</p>
+</div>
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Email Field -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold text-on-surface-variant" for="login-email">Email</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="mail">mail</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-3 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="login-email" name="email" placeholder="vidu@domain.com" required="" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5">
+<label class="block text-xs font-semibold text-on-surface-variant" for="login-password">Mật khẩu</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="lock">lock</span>
+</div>
+<input class="block w-full pl-10 pr-11 py-3 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="login-password" name="password" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Hiện hoặc ẩn mật khẩu" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface focus:outline-none" onclick="togglePasswordVisibility('login-password', 'login-pwd-icon')" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="login-pwd-icon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full mt-2 py-3.5 px-4 rounded-lg bg-primary-container text-surface-container-lowest font-bold text-sm gold-glow gold-glow-hover active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2" type="submit">
+<span>Đăng nhập</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- Toggle Link to Register -->
+<div class="text-center pt-2 text-xs text-on-surface-variant">
+<span>Chưa có tài khoản? </span>
+<button class="font-semibold text-primary hover:underline ml-1 focus:outline-none" onclick="switchAuthTab('register')" type="button">
+              Đăng ký
+            </button>
+</div>
+</div>
+<!-- FORM 2: REGISTER (Hidden Initially) -->
+<div class="space-y-5 hidden" id="register-container">
+<div class="space-y-1">
+<h2 class="text-xl font-bold text-on-surface tracking-tight">Tạo tài khoản STORE 3D</h2>
+<p class="text-xs text-on-surface-variant">Khám phá vũ trụ mô hình in 3D và tham gia cộng đồng nhà sưu tầm tinh hoa.</p>
+</div>
+<form class="space-y-3.5" onsubmit="event.preventDefault();">
+<!-- Full Name -->
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant" for="register-name">Họ và tên</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="person">person</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-2.5 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="register-name" name="fullname" placeholder="Nguyễn Văn A" required="" type="text"/>
+</div>
+</div>
+<!-- Email -->
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant" for="register-email">Email</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="mail">mail</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-2.5 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="register-email" name="email" placeholder="email@domain.com" required="" type="email"/>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant" for="register-phone">Số điện thoại</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="phone">phone</span>
+</div>
+<input class="block w-full pl-10 pr-4 py-2.5 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="register-phone" name="phone" placeholder="0912 345 678" required="" type="tel"/>
+</div>
+</div>
+<!-- Password -->
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant" for="register-password">Mật khẩu</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="lock">lock</span>
+</div>
+<input class="block w-full pl-10 pr-11 py-2.5 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="register-password" name="password" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Hiện hoặc ẩn mật khẩu" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface focus:outline-none" onclick="togglePasswordVisibility('register-password', 'reg-pwd-icon-1')" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="reg-pwd-icon-1">visibility</span>
+</button>
+</div>
+</div>
+<!-- Confirm Password -->
+<div class="space-y-1">
+<label class="block text-xs font-semibold text-on-surface-variant" for="register-confirm-password">Xác nhận mật khẩu</label>
+<div class="relative rounded-lg bg-surface-container-high border border-outline-variant/40 focus-within:border-primary-container focus-within:ring-1 focus-within:ring-primary-container transition-all">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg" data-icon="verified">verified</span>
+</div>
+<input class="block w-full pl-10 pr-11 py-2.5 bg-transparent text-sm text-on-surface placeholder:text-outline border-none focus:outline-none focus:ring-0" id="register-confirm-password" name="confirm_password" placeholder="••••••••" required="" type="password"/>
+<button aria-label="Hiện hoặc ẩn mật khẩu xác nhận" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-outline hover:text-on-surface focus:outline-none" onclick="togglePasswordVisibility('register-confirm-password', 'reg-pwd-icon-2')" type="button">
+<span class="material-symbols-outlined text-lg" data-icon="visibility" id="reg-pwd-icon-2">visibility</span>
+</button>
+</div>
+</div>
+<!-- Submit Register -->
+<button class="w-full mt-3 py-3 px-4 rounded-lg bg-primary-container text-surface-container-lowest font-bold text-sm gold-glow gold-glow-hover active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2" type="submit">
+<span>Tạo tài khoản</span>
+<span class="material-symbols-outlined text-lg" data-icon="person_add">person_add</span>
+</button>
+</form>
+<!-- Toggle Link to Login -->
+<div class="text-center pt-1 text-xs text-on-surface-variant">
+<span>Đã có tài khoản? </span>
+<button class="font-semibold text-primary hover:underline ml-1 focus:outline-none" onclick="switchAuthTab('login')" type="button">
+              Đăng nhập
+            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Clean Minimal Footer -->
+<footer class="w-full py-5 border-t border-outline-variant/20 text-center text-xs text-outline">
+<p>© 2025 STORE 3D. Bản quyền thuộc về Store 3D Vietnam.</p>
+</footer>
+<!-- Vanilla JavaScript for Tab switching and Password Visibility -->
+<script>
+    function switchAuthTab(target) {
+      const loginContainer = document.getElementById('login-container');
+      const registerContainer = document.getElementById('register-container');
+      const tabLoginBtn = document.getElementById('tab-login-btn');
+      const tabRegisterBtn = document.getElementById('tab-register-btn');
+
+      if (target === 'login') {
+        loginContainer.classList.remove('hidden');
+        registerContainer.classList.add('hidden');
+
+        tabLoginBtn.className = 'flex-1 py-2.5 rounded-md text-sm font-bold transition-all duration-200 bg-primary-container text-surface-container-lowest gold-glow';
+        tabRegisterBtn.className = 'flex-1 py-2.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all duration-200';
+      } else {
+        loginContainer.classList.add('hidden');
+        registerContainer.classList.remove('hidden');
+
+        tabRegisterBtn.className = 'flex-1 py-2.5 rounded-md text-sm font-bold transition-all duration-200 bg-primary-container text-surface-container-lowest gold-glow';
+        tabLoginBtn.className = 'flex-1 py-2.5 rounded-md text-sm font-medium text-on-surface-variant hover:text-on-surface transition-all duration-200';
+      }
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input || !icon) return;
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    }
+  </script>
+</body></html>

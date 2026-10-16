@@ -1,0 +1,33 @@
+{
+  "projectId": "15214270922225987910",
+  "projectTitle": "STORE3D-Full-Rebuild",
+  "stitchUrl": "https://stitch.withgoogle.com/projects/15214270922225987910",
+  "designSystem": {
+    "assetId": "16575537908031701223",
+    "name": "assets/16575537908031701223",
+    "displayName": "Obsidian Gold",
+    "summary": "Dark-only premium collectibles: bg #07090F, gold primary #EDB84C, blue secondary #3E8BFF, Be Vietnam Pro, round-8"
+  },
+  "designMd": ".stitch/DESIGN.md",
+  "screens": [
+    { "slug": "home-desktop", "id": "6cc128f4ea7d43278633fbf5684f4c77", "title": "Trang chủ STORE 3D (Desktop 1440)", "device": "DESKTOP" },
+    { "slug": "home-tablet", "id": "114289fe68fc4586974717ea2c8cef2f", "title": "Trang chủ STORE 3D (Tablet 1024)", "device": "TABLET" },
+    { "slug": "home-mobile", "id": "a6a4baaf21bc48a18ed3bb494570dc9c", "title": "Trang chủ STORE 3D (Mobile 390)", "device": "MOBILE" },
+    { "slug": "plp", "id": "b218cf11309943c49d273e6604a7ab85", "title": "Danh sách sản phẩm (PLP)", "device": "DESKTOP" },
+    { "slug": "pdp", "id": "20ddd2ef52e64777a7b2231a2b55369c", "title": "Chi tiết sản phẩm (PDP) — đã sửa tab + USP", "device": "DESKTOP", "supersedes": "03d0b069d5f8442ea9efb1f11e0a76da" },
+    { "slug": "checkout", "id": "ac8c685781aa4e0bb18cbb9c4d80d4b6", "title": "Thanh toán (Checkout) — chỉ COD + VietQR", "device": "DESKTOP", "supersedes": "d5c35dcade28418d87d4c039bc74f0ed" },
+    { "slug": "cart-drawer", "id": "ae747e45f6bd4cd28f5bfe82f187597a", "title": "Giỏ hàng (Cart Drawer) — ship 0₫, COD/VietQR", "device": "DESKTOP", "supersedes": "1ac63adb3f164ae0a06062c2c3a5c6c6" },
+    { "slug": "login", "id": "9aa10c2467734feb998bbe21df1fc1a2", "title": "Đăng nhập & Đăng ký", "device": "DESKTOP" },
+    { "slug": "account-orders", "id": "44657fd8660d4d75b98fc31c88382ed3", "title": "Tài khoản — Đơn hàng + timeline", "device": "DESKTOP", "supersedes": "771512edb05a4726b0b5656b9b08d08c" },
+    { "slug": "news", "id": "dc2a554a11af4c9c9cada3720278c3f4", "title": "Tin tức — đã sửa CTA", "device": "DESKTOP", "supersedes": "fa4d988a2767400c85efcdb904e38e59" },
+    { "slug": "contact", "id": "d8e12c1d2d0a44ab96a9fd0703ff55ee", "title": "Liên hệ", "device": "DESKTOP" },
+    { "slug": "navbar-footer-spec", "id": "64c0ae83c5a54c87aab83fd61ab319e4", "title": "Bảng đặc tả Navbar & Footer (6 trạng thái)", "device": "DESKTOP" },
+    { "slug": "logo-system", "id": "a4dbd53462834fcf9c48883d05f77785", "title": "Hệ thống logo STORE 3D (Brand sheet)", "device": "DESKTOP" },
+    { "slug": "admin-dashboard", "id": "00783493a3964b818c2a5307608b19c2", "title": "Admin — Bảng điều khiển", "device": "DESKTOP" },
+    { "slug": "admin-products", "id": "1d7c63e0f266477d8e4f2cc8b212989c", "title": "Admin — Quản lý sản phẩm", "device": "DESKTOP" },
+    { "slug": "admin-product-edit", "id": "4d7bb3d4f8ed4881990f12eaaaa3bcd5", "title": "Admin — Thêm/Sửa sản phẩm", "device": "DESKTOP" },
+    { "slug": "admin-orders", "id": "0d4def687dbe40338e6d1050e54b59eb", "title": "Admin — Quản lý đơn hàng", "device": "DESKTOP", "supersedes": "694ddc6c9ea24b6a8234c52f2dd6f559" },
+    { "slug": "admin-support", "id": "9fd81e75470945a3bb5ac16e08097d9a", "title": "Admin — Hỗ trợ khách hàng (inbox)", "device": "DESKTOP" }
+  ],
+  "note": "Superseded pre-edit screens remain on the Stitch canvas (no delete API) — delete manually on canvas if desired."
+}

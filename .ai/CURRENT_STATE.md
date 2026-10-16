@@ -6,7 +6,16 @@
 
 **Stable and working.** Fully functional Vietnamese e-commerce store for 3D-printed models. Client + API on Vercel, server on Render.
 
-## Full Redesign — Stitch Design Delivery (2026-10-16, awaiting Gate 1 owner approval)
+## FULL REBUILD — Design Track v2 "Obsidian Gold" (2026-10-16, awaiting GATE 1)
+
+- **Scope change (owner directive 2026-10-16):** FULL REBUILD of storefront + admin, **dark-only** premium futuristic collectibles, palette **Black/Gold/Blue/White**, new logo, AO BING hero ≈3 s cinematic (NO scroll-driven). This **supersedes** both the "Precision Showroom" light-first delivery below and CANONICAL_CONTEXT §6 (light+dark toggle, Ocean Blue) — `.ai/` docs to be rewritten after design approval. Workflow: workflow-router → **A**; skills used: web-design-director → enhance-prompt → generate-design → manage-design-system.
+- **Workflow evidence:** config comparison (nova-cms-test vs store3D) proved no missing config; behavior difference = project AGENTS.md small-task bias + legacy in-flight work. Full-rebuild classified LARGE/ARCHITECTURAL → full workflow.
+- **New Stitch project:** `projects/15214270922225987910` (STORE3D-Full-Rebuild) — https://stitch.withgoogle.com/projects/15214270922225987910
+- **Design System:** "Obsidian Gold" `assets/16575537908031701223` (DARK only; bg #07090F, gold #EDB84C, blue #3E8BFF, Be Vietnam Pro, round-8) — owner-approved via checkpoint before upload. Source doc `.stitch/DESIGN.md`; index `.stitch/metadata.json`.
+- **18 screens generated + QA'd** (storefront D/T/M, PLP, PDP, checkout, cart drawer, login, account+timeline, news, contact, navbar/footer spec, logo system, 5 admin) → `.stitch/designs/*.{png,html}`. 6 business-accuracy edits applied & re-verified (checkout: COD+VietQR only; cart: ship 0₫, COD/VietQR; PDP: 3 tabs; account: no fake VIP tier; news: real CTA; admin-orders: no upsell). Known placeholder copy (hotlines/addresses/counts) listed in Gate 1 report for replacement by API data at implementation.
+- **Blocked on owner:** GATE 1 design approval. No app code touched; no merge/deploy. Superseded pre-edit screen versions remain on Stitch canvas (no delete API) — manual cleanup optional.
+
+## Full Redesign — Stitch Design Delivery (2026-10-16, awaiting Gate 1 owner approval) — SUPERSEDED by track v2 above
 
 - **Status:** Design complete, delivered in Stitch project `projects/7002135967903808175` ("STORE 3D — Precision Showroom · Full Redesign 2026"). **No app source code was modified; nothing merged or deployed.**
 - **Direction:** "Precision Showroom" — light-first retail + equal dark theme, Ocean Blue #3B6EE8 primary, Be Vietnam Pro, Vietnamese-only UI, no glassmorphism/neon.
