@@ -1,10 +1,42 @@
 # Store3D — Current State
 
-> Last updated: 2026-09-09
+> Last updated: 2026-10-16
 
 ## Current Project Status
 
 **Stable and working.** Fully functional Vietnamese e-commerce store for 3D-printed models. Client + API on Vercel, server on Render.
+
+## Full Redesign — Stitch Design Delivery (2026-10-16, awaiting Gate 1 owner approval)
+
+- **Status:** Design complete, delivered in Stitch project `projects/7002135967903808175` ("STORE 3D — Precision Showroom · Full Redesign 2026"). **No app source code was modified; nothing merged or deployed.**
+- **Direction:** "Precision Showroom" — light-first retail + equal dark theme, Ocean Blue #3B6EE8 primary, Be Vietnam Pro, Vietnamese-only UI, no glassmorphism/neon.
+- **Design systems (uploaded as DESIGN.md assets):** Light `5196906f87fc4e7da713b17a6ba68d77` · Dark `881331f832114c5b952f940de32e6abe`.
+- **Inventory:** 45 canonical screens — 24 storefront desktop light, 11 admin light, 4 mobile light, 6 dark representative. Includes PLP-filtered, cart drawer, and checkout step-2 states from brief v2.
+- **QA:** 3-pass (visual screenshot review + automated HTML-text regex scan of all 45 screens + fix verification). ~30 `edit_screens` fix rounds; final pass = 0 hard-rule violations (no invented hotlines/ISO/SSL/24-7/promo strips/English UI/garbled text).
+- **Delivery report (screen-ID table, superseded mapping, demo-data policy, implementation proposal):** `C:\Users\Dat\AppData\Local\Temp\opencode\redesign\DELIVERY-REPORT-GATE1.md` (canonical screen IDs live there — Stitch `list_screens` does not enumerate generated screens).
+- **Blocked on owner:** Gate 1 approval (design direction + nav IA + truthfulness policy), W1 security PR merge, decision on WELCOME10 seed coupon.
+
+## Homepage Upgrade — AO BING Hero + Futuristic Light + Dynamic Categories (2026-10-16)
+
+- **Part 1 — IMPLEMENTED & COMMITTED** on branch `feat/aobing-hero` (worktree `..\store3d-aobing`, commit `e16462e`, based on master `1645394`). **Not merged/deployed** — awaiting user review.
+  - Scroll-driven hero (`client/src/components/home/aobing-hero.tsx`): CSS sticky pin (section 190svh mobile / 250svh desktop) + framer-motion `useScroll` progress → rAF-coalesced `video.currentTime` scrub (epsilon 1/24s). Scroll down = Gundam separates, up = reassembles, stop = freeze. Progress clamped to [0..1] (framer returns NaN past pin-end — regression guard). CTA "Mua ngay" fades in at progress 0.80–0.93; reduced-motion = static 100svh + immediate CTA; video error = poster fallback. CTA links to real AO BING product if it exists in DB (runtime search), else `/san-pham` — no fabricated product link.
+  - Asset: `client/public/assets/video/banner-aobing.mp4` re-encoded (ffmpeg: CRF20, GOP 12, faststart) 11.6MB→4.5MB; seek latency avg 15ms vs 82ms original (measured in-browser). Poster JPEG extracted. Original kept at `client/assets/source/` (not deployed).
+  - Old gradient hero + fabricated stats (500+/10K+/4.9) + HeroShowcase removed. Verified: desktop/tablet/mobile, light/dark, reduced-motion, error fallback, network (206 range), console clean. tsc 0 / oxlint 0 / vite build ✓.
+  - Local test: server (main tree) `npx tsx src/server.ts` w/ process-scope `MONGODB_URI=mongodb://127.0.0.1:27017/store3d` (Atlas SRV DNS blocked on this network; local mongod seeded, same DB name) + worktree `vite --port 5174`.
+- **Part 1.1 — HERO VISUAL & SCROLL FIX (2026-10-16, same branch, new commit on `feat/aobing-hero`):** fixed 5 user-reported issues per NAVBAR-HERO-SPEC:
+  - **Root causes:** ① `object-cover` + full-bleed 100svh box put video bottom 65px below fold at scroll 0 + `from-black/70` gradient darkened feet; ② hero `sticky top-0` == navbar `sticky top-0` (z-40) → video pinned UNDER navbar and slid under translucent navbar during first 65px (the "overlap + one-beat jolt"); ③ scrub mapped 100% duration (80%+ frames clip wing tips).
+  - **Fix (`aobing-hero.tsx`):** section `-mt-16` (overlay header, must match navbar `h-16`) + box `sticky top-16 h-[calc(100svh−4rem)]` → box pinned at 64px from pixel 0 (boxT=64 constant, no slide-under, progress aligned w/ pin, no dead zone); video `object-contain` in area `min(100vw×9/16, 100svh−152px)`; separate 88px control band (hint/CTA crossfade + cyan progress hairline) — no UI or gradient over video; section heights **160svh mobile / 190svh desktop**; **SCRUB_END=0.65** (frames 50–80% visually compared; 65% = full symmetric spread, feet+tips inside frame), scrub completes at scroll progress 0.93 (dwell→CTA full→unpin); CTA = cyan `#00E5FF`/text `#070A12` glow.
+  - **Also fixed:** ④ stale framer-motion inline style — `style={showStaticCta ? undefined : …}` never cleared `opacity:0` → fallback CTA was invisible (pre-existing); now explicit `{opacity:1,y:0,pointerEvents:'auto'}`. ⑤ pre-existing navbar horizontal overflow at ≤390px (`Đăng nhập` text cluster → docW 424>390): container `gap-4→gap-2 sm:gap-4`, login button shows `User` icon <sm / text ≥sm (mobile menu has no login entry — icon kept visible). Navbar edit is responsive-only, ≥sm unchanged.
+  - **Verified (Playwright, fresh):** desktop sweep 21 pts (boxT=64 const, vT≥navB−2, ct cap 3.277s=0.65×5.0417, reverse exact 1.736s, sh stable 4498); mobile+tablet 20/20 asserts; 1920/1536/1024/390 scroll-0 full-frame; reduced-motion (relative box, ct frozen, immediate CTA); fallback poster+CTA; idle & scroll-during-load no scrollY drift; no hscroll 390/768/1440; console only pre-existing 401/ORB. tsc 0 / oxlint 0 / vite build 0. Before/after shots: `store3D\.playwright-mcp\aobing\fix\` (before-*, after-*, final-*).
+  - **Pre-existing, NOT changed (out of scope):** nav links wrap to 2 lines at 768–1024 (md..lg compression — fixing needs responsive nav redesign); `/api/auth/me` 401 on cold start; `localhost:5000/uploads/*` ERR_BLOCKED_BY_ORB (env MIME/CORS).
+- **Parts 2+3 — DESIGN ONLY (round 2, dark-only "Obsidian Lab"; supersedes round-1 screens):** new DS **"Obsidian Cyan"** `a7dc9e137e704198b8593854991c0d0a` (DESIGN.md 4061B via upload instance `2064099079570118311`). Final 6 screens in project `7002135967903808175`:
+  - HOME-DESKTOP `6c3cac09b4ee4927b14de24c8f20edcd` (2560×7974) · HOME-TABLET `4a26cfc78b23430f82a61cb63589c1a7` · HOME-MOBILE `2072901430784e5797120f4b76463d92` (780×7700)
+  - NAVBAR-HERO-SPEC `c2938dd146d6404e982b03a8b2a89d04` (proposed: navbar 65px in-flow sticky; hero `min(100svh−64px, 100vw×9/16+128px)` object-contain; pin 190svh desktop/160svh mobile; CTA 0.80→0.93; reduced-motion static)
+  - CATEGORIES-DISCOVERY+STATES `79e8fe8a439e453499d001b5c49181e5` (6 real categories, auto-fit no cap, skeleton/error/empty)
+  - PLP-DARK-FILTERED `90bf95a1aca64e4fb07958b7503e07bf` (URL bar + chips + exact app sort/filter labels + real empty combo)
+  - New IA: Navbar→Hero→Danh mục→Nổi bật(8 API)→Ưu đãi(4)→CTA band→Footer; Aurora section + "Bán chạy" duplicate row removed
+  - **QA incidents:** flaky in-place edit corrupted old mobile `08f5c537` (replaced by regen `20729014`; first regen `5831806f` had AI photos with burned-in EN UI — discarded); browser 429 on 5 lh3 images recovered 13/13 after cooldown; desktop screenshots blocked (desktop window not visible) — verified via Stitch full-res + numeric browser checks instead
+  - Report: `C:\Users\Dat\AppData\Local\Temp\opencode\redesign\DELIVERY-REPORT-HOMEPAGE-DARK.md` (8-item VN delivery, gate stop). Superseded/raff screen IDs listed there for manual deletion (no delete_screen API). Round-1 screens (Home Light `e647…`, `6429…`, Home Dark `dd4ac66f…`, PLP `26bf…`, `020c…`) superseded.
 
 ## Implemented Features
 
