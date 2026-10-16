@@ -145,7 +145,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Button
           variant="ghost"
           size="icon"
@@ -271,8 +271,18 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="ghost" size="sm" className="ml-1" onClick={() => navigate('/dang-nhap')}>
-              Đăng nhập
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-1"
+              onClick={() => navigate('/dang-nhap')}
+              aria-label="Đăng nhập"
+              title="Đăng nhập"
+            >
+              {/* Icon thay text dưới sm: cluster quá rộng → tràn ngang (scroll
+                  ngang toàn trang tại 390px). Text giữ nguyên từ sm trở lên. */}
+              <User className="size-5 sm:hidden" aria-hidden="true" />
+              <span className="hidden sm:inline">Đăng nhập</span>
             </Button>
           )}
         </div>
