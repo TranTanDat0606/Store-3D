@@ -1,10 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { computeDiscount, computePreviewSubtotal } from '../src/services/discountMath';
-import { applyCouponSchema, parsePreviewItems } from '../src/validators/coupon';
+import { applyCouponSchema, parsePreviewItems, previewItemsSchema } from '../src/validators/coupon';
 import { AppError } from '../src/utils/AppError';
 
 const MIN_ORDER_MESSAGE = 'Đơn hàng chưa đạt giá trị tối thiểu để dùng mã giảm giá';
+
+/** Synthetic cart for the items-cap tests. */
+const manyItems = (n: number) => Array.from({ length: n }, (_, i) => ({ product: `p${i}`, quantity: 1 }));
 
 function isAppError(err: unknown, statusCode: number, message: string): boolean {
   return err instanceof AppError && err.statusCode === statusCode && err.message === message;
@@ -106,21 +110,34 @@ test('preview enforces minOrder and game cap on claimed subtotal exactly like or
     (err: unknown) => isAppError(err, 400, MIN_ORDER_MESSAGE),
   );
 
-  // Game cap applies to the claimed subtotal — preview and order path both run
-  // computeDiscount (orderService.resolveCoupon), so the numbers are identical.
+  // Game cap applies to the claimed subtotal the preview hands to the shared
+  // formula. Preview ≡ order parity is asserted structurally in the next test
+  // (single formula site) — NOT by comparing two identical calls.
   const claimed = await computePreviewSubtotal({ subtotal: 5_000_000 }, noLookup);
-  const previewPath = computeDiscount(
+  const capped = computeDiscount(
     { type: 'percent', value: 10, minOrder: 0, source: 'game' },
     claimed.subtotalVnd,
   );
-  const orderPath = computeDiscount(
-    { type: 'percent', value: 10, minOrder: 0, source: 'game' },
-    claimed.subtotalVnd,
-  );
+  assert.equal(capped.discountVnd, 200_000);
+  assert.equal(capped.capped, true);
+});
 
-  assert.deepEqual(previewPath, orderPath);
-  assert.equal(previewPath.discountVnd, 200_000);
-  assert.equal(previewPath.capped, true);
+// --- (a2) AC4: preview ≡ order parity is structural, not numeric ---
+
+test('AC4 parity: order and preview enter the same formula with the same CouponMathInput', () => {
+  // Invoking orderService would need a live DB, so parity is enforced here at
+  // the source seam: both services must (1) call computeDiscount and (2) pass
+  // byte-identical CouponMathInput objects; the formula itself must exist ONLY
+  // in discountMath.ts — a second inline copy in either service fails this test.
+  const codeOnly = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const order = codeOnly(readFileSync(new URL('../src/services/orderService.ts', import.meta.url), 'utf8'));
+  const preview = codeOnly(readFileSync(new URL('../src/services/couponService.ts', import.meta.url), 'utf8'));
+  const ADMIN = "{ type: coupon.type, value: coupon.discount, minOrder: coupon.minOrder, source: 'admin' }";
+  const GAME = "{ type: userCoupon.type, value: userCoupon.discount, minOrder: 0, source: 'game' }";
+  for (const src of [order, preview]) {
+    assert.doesNotMatch(src, /\/\s*100|MAX_DISCOUNT_VND/, 'discount formula leaked outside discountMath.ts');
+    assert.ok(src.includes('computeDiscount(') && src.includes(ADMIN) && src.includes(GAME));
+  }
 });
 
 // --- (c) route-boundary validator contract ---
@@ -190,4 +207,31 @@ test('preview items query parser ignores invalid JSON and falls back to subtotal
   assert.deepEqual(parsePreviewItems('[{"product":"p1","quantity":2}]'), [
     { product: 'p1', quantity: 2 },
   ]);
+});
+
+test('preview items schema rejects more than 50 items', () => {
+  const items = manyItems(51);
+  const schema = previewItemsSchema.safeParse(items);
+  assert.equal(schema.success, false);
+  assert.equal(
+    schema.success === false && schema.error.issues.some((i) => i.message.includes('tối đa 50')),
+    true,
+  );
+  // The trusted POST-body route (applyCouponSchema) inherits the same cap.
+  assert.equal(applyCouponSchema.safeParse({ code: 'SAVE10', items }).success, false);
+  // Boundary: exactly 50 items stays valid.
+  assert.equal(previewItemsSchema.safeParse(items.slice(0, 50)).success, true);
+});
+
+test('GET preview falls back to claimed subtotal when items exceed the schema cap', async () => {
+  const raw = JSON.stringify(manyItems(51));
+  // Same tolerant-parser seam as above: an over-cap `items` query must never
+  // 500 — it is dropped, so resolvePreview falls back to the claimed subtotal
+  // and no DB price lookup ever runs (noLookup throws).
+  assert.equal(parsePreviewItems(raw), undefined);
+  const preview = await computePreviewSubtotal(
+    { items: parsePreviewItems(raw), subtotal: 250_000 },
+    noLookup,
+  );
+  assert.deepEqual(preview, { subtotalVnd: 250_000, basis: 'client-claimed' });
 });

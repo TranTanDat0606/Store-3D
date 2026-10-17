@@ -18,7 +18,13 @@ export const previewItemSchema = z.object({
   quantity: z.coerce.number().int().min(1, 'Số lượng tối thiểu 1'),
 });
 
-export const previewItemsSchema = z.array(previewItemSchema);
+/**
+ * Cap on preview items: the public GET `?items=` query flows into
+ * `Product.find({ _id: { $in: ids } })` — unbounded ids must never reach Mongo.
+ */
+export const previewItemsSchema = z
+  .array(previewItemSchema)
+  .max(50, { message: 'Quá nhiều sản phẩm trong một yêu cầu (tối đa 50)' });
 
 export const applyCouponSchema = z.object({
   code: z.string().trim().min(1, 'Vui lòng nhập mã giảm giá'),
