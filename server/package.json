@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx --test tests/vietQr.test.ts tests/payment.test.ts tests/orderStatus.test.ts tests/productStatus.test.ts tests/discountPreview.test.ts tests/couponLifecycle.test.ts tests/orderCompensation.test.ts tests/atomicity.test.ts tests/webhookHardening.test.ts",
+    "test": "tsx --test tests/vietQr.test.ts tests/payment.test.ts tests/orderStatus.test.ts tests/productStatus.test.ts tests/discountPreview.test.ts tests/couponLifecycle.test.ts tests/orderCompensation.test.ts tests/atomicity.test.ts tests/webhookHardening.test.ts tests/userActive.test.ts",
     "seed": "tsx src/services/seed.ts",
     "seed:prod": "node dist/services/seed.js"
   },

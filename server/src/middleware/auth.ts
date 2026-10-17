@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { User, UserRole } from '../models';
 import { AppError } from '../utils/AppError';
+import { assertUserActive } from '../services/authService';
 import { TOKEN_COOKIE_NAME, verifyToken } from '../utils/token';
 
 export interface AuthRequest extends Request {
@@ -23,9 +24,17 @@ export async function requireAuth(req: AuthRequest, _res: Response, next: NextFu
     return next(new AppError('Phiên đăng nhập không hợp lệ hoặc đã hết hạn', 401));
   }
 
-  const user = await User.findById(payload.sub).select('_id role');
+  const user = await User.findById(payload.sub).select('_id role active');
   if (!user) {
     return next(new AppError('Tài khoản không tồn tại', 401));
+  }
+
+  // GAP-11 (Task 7): the session is revalidated on EVERY request — a user
+  // deactivated after logging in loses their existing cookie immediately.
+  try {
+    assertUserActive(user);
+  } catch (err) {
+    return next(err);
   }
 
   req.user = { _id: String(user._id), role: user.role };
@@ -37,6 +46,10 @@ export async function requireAuth(req: AuthRequest, _res: Response, next: NextFu
  * present; on a missing/invalid/expired token or a failed lookup it simply
  * leaves `req.user` unset. It never calls `next(err)`, so it can never turn a
  * public route into a 401 — read-only decoration for `GET /api/products`.
+ *
+ * Task 7 (GAP-11): a deactivated account is also left unattached — an
+ * inactive admin degrades to anonymous/public behaviour on a public GET
+ * instead of getting a 403.
  */
 export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
   try {
@@ -46,9 +59,11 @@ export async function optionalAuth(req: AuthRequest, _res: Response, next: NextF
     const payload = verifyToken(token);
     if (!payload) return next();
 
-    const user = await User.findById(payload.sub).select('_id role');
+    const user = await User.findById(payload.sub).select('_id role active');
     if (!user) return next();
 
+    // Throws for a deactivated account → caught below → treated as anonymous.
+    assertUserActive(user);
     req.user = { _id: String(user._id), role: user.role };
   } catch {
     // Never fail a public route because of auth decoration.
