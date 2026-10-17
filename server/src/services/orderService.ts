@@ -5,7 +5,7 @@ import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
 import { computeDiscount } from './discountMath';
 import { BANK_TRANSFER_MIN_VND } from '../config/payment';
-import { couponQuantityGuardQuery, assertCouponQuantityApplied } from './couponService';
+import { couponQuantityGuardQuery, assertCouponQuantityApplied, COUPON_EXHAUSTED_MESSAGE } from './couponService';
 import { compensationPlanFor, runCompensation } from './orderCreation';
 import type { CompensationAction, CompensationContext, OrderCreationStep } from './orderCreation';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
@@ -96,9 +96,33 @@ export function rewardCouponClaimQuery(
 }
 
 /**
- * The ONE DB implementation backing `releaseOrderCoupon`, shared by cancelByUser
- * and the admin-cancel branch of updateStatus (GAP-3). Classifies the order's
- * coupon code (game reward codes are `REWARD-` prefixed) and undoes its usage.
+ * ONE DB release executor for a list of GAP-3 actions — called by BOTH the
+ * cancel paths (via executeCouponRelease) and creation compensation (via
+ * executeCompensation). Carry-over (a): a usercoupon-release targets the
+ * UserCoupon by `_id` when the action carries the document id (create() knows
+ * it from the claim); only falls back to (code, user) when it doesn't — the
+ * cancel paths pass the `REWARD-` code string, which is never a valid
+ * ObjectId, so they keep the (code, user) targeting they always had.
+ */
+async function runCouponReleaseActions(actions: CouponReleaseAction[], owner: unknown): Promise<void> {
+  for (const action of actions) {
+    if (action.kind === 'coupon-restore') {
+      await Coupon.updateOne({ code: action.id }, { $inc: { usedCount: -1 } });
+    } else {
+      const isId = Types.ObjectId.isValid(action.id as string);
+      await UserCoupon.updateOne(
+        isId ? { _id: action.id } : { code: action.id, user: owner },
+        { $unset: { usedAt: '' } },
+      );
+    }
+  }
+}
+
+/**
+ * Classifies one cancelled order's coupon side effects (backing
+ * `releaseOrderCoupon`, shared by cancelByUser and the admin-cancel branch of
+ * updateStatus — GAP-3) and hands them to the ONE release executor
+ * (runCouponReleaseActions). Game reward codes are `REWARD-` prefixed.
  */
 async function executeCouponRelease(
   order: { coupon?: { code?: string } | null; user?: unknown },
@@ -108,14 +132,7 @@ async function executeCouponRelease(
   if (!code) return;
   const isReward = code.startsWith('REWARD-');
   const actions = releaseOrderCoupon(isReward ? { userCoupon: code } : { coupon: code });
-  const owner = userId ?? order.user;
-  for (const action of actions) {
-    if (action.kind === 'coupon-restore') {
-      await Coupon.updateOne({ code: action.id }, { $inc: { usedCount: -1 } });
-    } else {
-      await UserCoupon.updateOne({ code: action.id, user: owner }, { $unset: { usedAt: '' } });
-    }
-  }
+  await runCouponReleaseActions(actions, userId ?? order.user);
 }
 
 /**
@@ -140,25 +157,13 @@ async function restoreStockForItems(items: Array<{ product: unknown; quantity: n
 /**
  * DB executor for one GAP-4 compensation action (called best-effort from
  * create()'s catch; errors are logged by runCompensation, never rethrown —
- * the ORIGINAL creation error is always what propagates).
- * Carry-over (a): a usercoupon-release targets the UserCoupon by `_id` when
- * the action carries the document id (create() knows it from the claim);
- * only falls back to (code, user) when it doesn't.
+ * the ORIGINAL creation error is always what propagates). Coupon releases go
+ * through the SAME executor as the cancel paths (runCouponReleaseActions).
  */
 async function executeCompensation(action: CompensationAction, userId: string): Promise<void> {
   switch (action.kind) {
     case 'release-coupon': {
-      for (const ca of action.payload as CouponReleaseAction[]) {
-        if (ca.kind === 'coupon-restore') {
-          await Coupon.updateOne({ code: ca.id }, { $inc: { usedCount: -1 } });
-        } else {
-          const isId = Types.ObjectId.isValid(ca.id as string);
-          await UserCoupon.updateOne(
-            isId ? { _id: ca.id } : { code: ca.id, user: userId },
-            { $unset: { usedAt: '' } },
-          );
-        }
-      }
+      await runCouponReleaseActions(action.payload as CouponReleaseAction[], userId);
       break;
     }
     case 'restore-stock': {
@@ -198,7 +203,10 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
   // Try admin Coupon first
   const coupon = await Coupon.findOne({ code: normalizedCode });
   if (coupon) {
-    if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+    // UX-only optimistic pre-check: fail fast before order creation. It may
+    // race a concurrent order for the last unit — the atomic quantity guard at
+    // the 'coupon-marked' step below is what actually enforces the limit.
+    if (coupon.quantity <= coupon.usedCount) throw new AppError(COUPON_EXHAUSTED_MESSAGE, 400);
     if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
 
     // Single-source discount math — identical to the coupon preview path.
@@ -307,7 +315,7 @@ export class OrderService {
             { $set: { usedAt: new Date() } },
             { new: true },
           );
-          if (!claimed) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+          if (!claimed) throw new AppError(COUPON_EXHAUSTED_MESSAGE, 400);
           ctx.couponActions.push(...releaseOrderCoupon({ userCoupon: coupon.userCouponId }));
         }
       }

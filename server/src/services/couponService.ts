@@ -25,9 +25,13 @@ export function couponQuantityGuardQuery(couponId: unknown): {
   };
 }
 
+/** ONE copy for every "coupon sold out" rejection — the atomic guard's miss,
+ * the optimistic pre-checks, and a lost reward-claim race all say the same thing. */
+export const COUPON_EXHAUSTED_MESSAGE = 'Mã giảm giá đã hết lượt sử dụng';
+
 /** Pure seam (GAP-8): a missed quantity guard is a sold-out coupon, never a missing one. */
 export function assertCouponQuantityApplied<T>(consumed: T): NonNullable<T> {
-  if (consumed == null) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+  if (consumed == null) throw new AppError(COUPON_EXHAUSTED_MESSAGE, 400);
   return consumed;
 }
 
@@ -97,7 +101,7 @@ export class CouponService {
     // Try admin Coupon first
     const coupon = await Coupon.findOne({ code: normalizedCode });
     if (coupon) {
-      if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+      if (coupon.quantity <= coupon.usedCount) throw new AppError(COUPON_EXHAUSTED_MESSAGE, 400);
       if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
 
       const { discountVnd: discount, capped } = computeDiscount(
