@@ -4,6 +4,8 @@ import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
 import { computeDiscount } from './discountMath';
+import { compensationPlanFor, runCompensation } from './orderCreation';
+import type { CompensationAction, CompensationContext, OrderCreationStep } from './orderCreation';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
 
 interface CouponApplication {
@@ -75,6 +77,50 @@ async function executeCouponRelease(
     } else {
       await UserCoupon.updateOne({ code: action.id, user: owner }, { $unset: { usedAt: '' } });
     }
+  }
+}
+
+/**
+ * DB executor for one GAP-4 compensation action (called best-effort from
+ * create()'s catch; errors are logged by runCompensation, never rethrown —
+ * the ORIGINAL creation error is always what propagates).
+ * Carry-over (a): a usercoupon-release targets the UserCoupon by `_id` when
+ * the action carries the document id (create() knows it from the claim);
+ * only falls back to (code, user) when it doesn't.
+ */
+async function executeCompensation(action: CompensationAction, userId: string): Promise<void> {
+  switch (action.kind) {
+    case 'release-coupon': {
+      for (const ca of action.payload as CouponReleaseAction[]) {
+        if (ca.kind === 'coupon-restore') {
+          await Coupon.updateOne({ code: ca.id }, { $inc: { usedCount: -1 } });
+        } else {
+          const isId = Types.ObjectId.isValid(ca.id as string);
+          await UserCoupon.updateOne(
+            isId ? { _id: ca.id } : { code: ca.id, user: userId },
+            { $unset: { usedAt: '' } },
+          );
+        }
+      }
+      break;
+    }
+    case 'restore-stock': {
+      const items = action.payload as Array<{ product: unknown; quantity: number }>;
+      if (items.length > 0) {
+        await Product.bulkWrite(
+          items.map((i) => ({
+            updateOne: { filter: { _id: i.product }, update: { $inc: { stock: i.quantity } } },
+          })),
+        );
+      }
+      break;
+    }
+    case 'delete-items':
+      await OrderItem.deleteMany({ order: action.payload });
+      break;
+    case 'delete-order':
+      await Order.findByIdAndDelete(action.payload);
+      break;
   }
 }
 
@@ -191,14 +237,16 @@ export class OrderService {
       method: paymentMethod === PaymentMethod.BankTransfer ? 'bank-transfer' : 'cash',
       totalVnd: total,
     });
-    let rewardCouponMarked = false;
-    for (const step of plan) {
-      if (step === 'validate-minimum') {
+    // GAP-4: context for the compensating rollback. couponActions carries the
+    // document `_id` for a claimed reward coupon (executor targets `_id`).
+    const ctx: CompensationContext = { orderId: null, items: [], couponActions: [] };
+    for (const redemptionStep of plan) {
+      if (redemptionStep === 'validate-minimum') {
         // Payment threshold: bank-transfer requires total >= 1000 VND
         if (paymentMethod === PaymentMethod.BankTransfer && total < 1000) {
           throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
         }
-      } else if (step === 'mark-used') {
+      } else if (redemptionStep === 'mark-used') {
         // Claim the reward coupon atomically (guards against concurrent redemption).
         if (coupon && !coupon.isAdminCoupon) {
           const claimed = await UserCoupon.findOneAndUpdate(
@@ -207,14 +255,16 @@ export class OrderService {
             { new: true },
           );
           if (!claimed) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
-          rewardCouponMarked = true;
+          ctx.couponActions.push(...releaseOrderCoupon({ userCoupon: coupon.userCouponId }));
         }
       }
     }
 
     // Note: sequential writes (no DB transaction) — MongoDB Community standalone
     // does not support multi-document transactions (needs a replica set).
-    let adminCouponIncremented = false;
+    // GAP-4: each step is tagged; on failure the planner inverts everything
+    // persisted so far (best-effort, logged — the original error always wins).
+    let step: OrderCreationStep = 'order-created';
     try {
       const order = await Order.create({
         user: new Types.ObjectId(userId),
@@ -231,7 +281,9 @@ export class OrderService {
         },
         status: OrderStatus.Pending,
       });
+      ctx.orderId = order._id;
 
+      step = 'items-created';
       const orderItems = await OrderItem.create(
         lineTotals.map((lt) => ({
           order: order._id,
@@ -249,8 +301,9 @@ export class OrderService {
       );
 
       // Decrement stock atomically (guards against overselling under concurrency).
-      // Track decremented items so we can roll back on partial failure.
-      const decremented: { productId: string; quantity: number }[] = [];
+      // Each applied decrement lands in ctx.items so a partial failure restores
+      // exactly what was applied (GAP-4 compensates; no inline rollback).
+      step = 'stock-updated';
       for (const lt of lineTotals) {
         const updated = await Product.findOneAndUpdate(
           { _id: lt.productId, stock: { $gte: lt.quantity } },
@@ -258,49 +311,33 @@ export class OrderService {
           { new: true },
         );
         if (!updated) {
-          // Roll back previously decremented stock
-          if (decremented.length > 0) {
-            await Product.bulkWrite(
-              decremented.map((d) => ({
-                updateOne: {
-                  filter: { _id: d.productId },
-                  update: { $inc: { stock: d.quantity } },
-                },
-              })),
-            );
-          }
-          await OrderItem.deleteMany({ order: order._id });
-          await Order.findByIdAndDelete(order._id);
           throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
         }
-        decremented.push({ productId: lt.productId, quantity: lt.quantity });
+        ctx.items.push({ product: lt.productId, quantity: lt.quantity });
       }
 
       // Increment admin coupon usage (UserCoupons are already claimed via redemptionPlan)
+      step = 'coupon-marked';
       if (coupon?.isAdminCoupon) {
         await Coupon.updateOne(
           { code: coupon.code },
           { $inc: { usedCount: 1 } },
         );
-        adminCouponIncremented = true;
+        ctx.couponActions.push(...releaseOrderCoupon({ coupon: coupon.code }));
       }
 
+      step = 'done';
       return await this.getById(String(order._id));
     } catch (err) {
-      // GAP-5 (minimal — Task 4 replaces this with the step-tagged compensation
-      // planner): release any coupon usage consumed before the failure.
-      if (rewardCouponMarked && coupon) {
-        await UserCoupon.updateOne(
-          { code: coupon.code, user: userId },
-          { $unset: { usedAt: '' } },
-        );
-      }
-      if (adminCouponIncremented && coupon) {
-        await Coupon.updateOne(
-          { code: coupon.code },
-          { $inc: { usedCount: -1 } },
-        );
-      }
+      // GAP-4: compensating rollback for order creation. Runs the inverse
+      // actions for everything persisted up to the failed step — best-effort:
+      // a failing compensation action is logged and its siblings still run.
+      // The ORIGINAL error is always rethrown (runCompensation never throws).
+      await runCompensation(
+        compensationPlanFor(step, ctx),
+        (action) => executeCompensation(action, userId),
+        (compErr, action) => console.error(`[order-compensation] ${action.kind} failed:`, compErr),
+      );
       throw err;
     }
   }
