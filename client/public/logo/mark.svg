@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" role="img" aria-label="STORE 3D">
+  <!-- STORE 3D primary gold monogram — exact vector data from .stitch/designs/logo-system.html (Primary Lockup icon). -->
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" id="g-mark-grad-top" x1="50" y1="12" x2="50" y2="48">
+      <stop offset="0%" stop-color="#FFDEA5"/>
+      <stop offset="100%" stop-color="#EDB84C"/>
+    </linearGradient>
+    <linearGradient gradientUnits="userSpaceOnUse" id="g-mark-grad-left" x1="16" y1="48" x2="50" y2="88">
+      <stop offset="0%" stop-color="#EDB84C"/>
+      <stop offset="100%" stop-color="#9B731D"/>
+    </linearGradient>
+    <linearGradient gradientUnits="userSpaceOnUse" id="g-mark-grad-right" x1="50" y1="48" x2="84" y2="88">
+      <stop offset="0%" stop-color="#D49E35"/>
+      <stop offset="100%" stop-color="#5D4200"/>
+    </linearGradient>
+  </defs>
+  <!-- Top Face Isometric -->
+  <polygon fill="url(#g-mark-grad-top)" points="50,14 84,33 50,52 16,33" stroke="#FFDEA5" stroke-linejoin="round" stroke-width="1.5"/>
+  <!-- Left Face Isometric with 3D Layer Slices -->
+  <polygon fill="url(#g-mark-grad-left)" points="16,35 50,54 50,86 16,67" stroke="#EDB84C" stroke-linejoin="round" stroke-width="1.5"/>
+  <!-- Right Face Isometric with Cutout Tech lines -->
+  <polygon fill="url(#g-mark-grad-right)" points="50,54 84,35 84,67 50,86" stroke="#EDB84C" stroke-linejoin="round" stroke-width="1.5"/>
+  <!-- Central 3D Core Core-Line Slice -->
+  <line stroke="#07090F" stroke-linecap="round" stroke-width="2.5" x1="50" y1="20" x2="50" y2="46"/>
+  <line stroke="#07090F" stroke-linecap="round" stroke-width="2.5" x1="28" y1="47" x2="50" y2="60"/>
+  <line stroke="#07090F" stroke-linecap="round" stroke-width="2.5" x1="72" y1="47" x2="50" y2="60"/>
+</svg>
