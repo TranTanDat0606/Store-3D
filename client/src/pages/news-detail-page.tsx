@@ -107,7 +107,7 @@ function TocDesktop({ headings }: { headings: HeadingItem[] }) {
       className="rounded-2xl border p-5 shadow-sm border-border bg-foreground/[0.03]"
       style={{ width: TOC_WIDTH }}
     >
-      <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-foreground">
+      <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
         <List className="size-3.5" />
         Nội dung bài viết
       </p>
@@ -123,7 +123,7 @@ function TocDesktop({ headings }: { headings: HeadingItem[] }) {
                   h.level === 3 && 'ml-6',
                   active
                     ? 'border-l-accent/20 pl-3 font-semibold text-accent'
-                    : 'border-l-transparent pl-3 hover:border-l-border text-foreground hover:text-foreground'
+                    : 'border-l-transparent pl-3 text-muted-foreground hover:border-l-border hover:text-foreground'
                 )}
               >
                 <span
@@ -198,7 +198,7 @@ function TocMobile({ headings }: { headings: HeadingItem[] }) {
                       h.level === 3 && 'ml-4',
                       active
                         ? 'bg-accent/10 font-semibold text-accent'
-                        : 'text-foreground hover:bg-foreground/[0.05] hover:text-foreground'
+                        : 'text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground'
                     )}
                   >
                     <span
@@ -374,7 +374,7 @@ export default function NewsDetailPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">{news.author}</p>
-                      <p className="text-[11px] text-foreground">Store 3D Team</p>
+                      <p className="text-[11px] text-muted-foreground">Store 3D Team</p>
                     </div>
                   </div>
                   <div className="flex gap-1">

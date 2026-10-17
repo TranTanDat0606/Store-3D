@@ -259,7 +259,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
         <div className="flex w-full items-center justify-between px-1">
           <div className="rounded-xl border border-accent/25 bg-background/50 px-4 py-2 backdrop-blur-md">
             <span className="font-mono text-xs uppercase tracking-wider text-accent/70">Score</span>
-            <span className="ml-2 font-mono text-lg font-bold tabular-nums text-foreground drop-shadow-[0_0_6px_rgba(34,211,238,0.4)]">{String(displayScore).padStart(6, '0')}</span>
+            <span className="ml-2 font-mono text-lg font-bold tabular-nums text-foreground drop-shadow-[0_0_6px_rgba(62,139,255,0.4)]">{String(displayScore).padStart(6, '0')}</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="rounded-xl border border-accent/20 bg-background/50 px-3 py-1.5 backdrop-blur-md">
@@ -271,7 +271,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
                 key={i}
                 className={cn(
                   'text-xl transition-all duration-200',
-                  i < displayLives ? 'drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]' : 'opacity-25 grayscale',
+                  i < displayLives ? 'drop-shadow-[0_0_6px_rgba(244,63,94,0.6)]' : 'opacity-25 grayscale',
                 )}
               >
                 {i < displayLives ? '❤️' : '🖤'}
@@ -286,7 +286,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
         ref={containerRef}
         className={cn(
           'relative w-full overflow-hidden rounded-2xl border-2 border-accent/20',
-          'bg-background shadow-[0_0_40px_rgba(34,211,238,0.08)]',
+          'bg-background shadow-[0_0_40px_rgba(62,139,255,0.08)]',
           phase === 'playing' && 'cursor-crosshair',
           phase === 'gameover' && gsRef.current.shakeTimer > 0 && 'ring-2 ring-destructive/50',
         )}
@@ -325,7 +325,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
           {/* Decorative grid lines */}
           <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
             style={{
-              backgroundImage: 'linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.5) 1px, transparent 1px)',
+              backgroundImage: 'linear-gradient(rgba(62,139,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(62,139,255,0.5) 1px, transparent 1px)',
               backgroundSize: '60px 60px',
             }}
           />
@@ -342,7 +342,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
             <div className="h-px w-6 bg-gradient-to-l from-transparent to-accent/60 sm:w-8" />
           </div>
 
-          <h2 className="relative mb-0.5 text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-destructive via-foreground to-accent drop-shadow-[0_0_20px_rgba(34,211,238,0.3)] sm:text-3xl">
+          <h2 className="relative mb-0.5 text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-destructive via-foreground to-accent drop-shadow-[0_0_20px_rgba(62,139,255,0.3)] sm:text-3xl">
             MIU-9 FUTURE RUN
           </h2>
           <p className="relative mb-3 text-[10px] tracking-widest text-foreground/30 uppercase sm:mb-4 sm:text-xs">Cyber Cat // Endless Runner</p>
@@ -372,7 +372,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
 
           {/* Control Cards */}
           <div className="relative mb-3 flex gap-2 sm:mb-4 sm:gap-3">
-            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-accent/20 bg-gradient-to-b from-accent/10 to-accent/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-accent/40 hover:shadow-[0_0_20px_rgba(34,211,238,0.15)] sm:gap-1 sm:px-5 sm:py-3">
+            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-accent/20 bg-gradient-to-b from-accent/10 to-accent/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-accent/40 hover:shadow-[0_0_20px_rgba(62,139,255,0.15)] sm:gap-1 sm:px-5 sm:py-3">
               <div className="flex items-center gap-0.5 sm:gap-1">
                 <kbd className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-md border border-accent/30 bg-accent/10 px-1 font-mono text-xs font-bold text-accent sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-sm">W</kbd>
                 <span className="text-[8px] text-foreground/30 sm:text-[9px]">/</span>
@@ -383,7 +383,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
               <span className="hidden text-[9px] text-foreground/30 sm:block">Jump</span>
             </div>
 
-            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-destructive/20 bg-gradient-to-b from-destructive/10 to-destructive/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-destructive/40 hover:shadow-[0_0_20px_rgba(244,114,182,0.15)] sm:gap-1 sm:px-5 sm:py-3">
+            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-destructive/20 bg-gradient-to-b from-destructive/10 to-destructive/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-destructive/40 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)] sm:gap-1 sm:px-5 sm:py-3">
               <div className="flex items-center gap-0.5 sm:gap-1">
                 <kbd className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-md border border-destructive/30 bg-destructive/10 px-1 font-mono text-xs font-bold text-destructive sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-sm">S</kbd>
               </div>
@@ -392,7 +392,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
               <span className="hidden text-[9px] text-foreground/30 sm:block">Duck</span>
             </div>
 
-            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-warning/20 bg-gradient-to-b from-warning/10 to-warning/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-warning/40 hover:shadow-[0_0_20px_rgba(249,115,22,0.15)] sm:gap-1 sm:px-5 sm:py-3">
+            <div className="group flex flex-col items-center gap-0.5 rounded-xl border border-warning/20 bg-gradient-to-b from-warning/10 to-warning/5 px-3 py-2 backdrop-blur-sm transition-all hover:border-warning/40 hover:shadow-[0_0_20px_rgba(251,191,36,0.15)] sm:gap-1 sm:px-5 sm:py-3">
               <div className="flex items-center gap-0.5 sm:gap-1">
                 <kbd className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-md border border-warning/30 bg-warning/10 px-1 font-mono text-xs font-bold text-warning sm:h-7 sm:min-w-[28px] sm:px-1.5 sm:text-sm">F</kbd>
               </div>
@@ -443,7 +443,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
           <button
             type="button"
             onClick={startGame}
-            className="relative rounded-xl bg-gradient-to-r from-destructive to-accent px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_30px_rgba(34,211,238,0.25)] transition-all hover:shadow-[0_0_40px_rgba(34,211,238,0.4)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-12 sm:py-3.5 sm:text-sm"
+            className="relative rounded-xl bg-gradient-to-r from-destructive to-accent px-8 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_30px_rgba(62,139,255,0.25)] transition-all hover:shadow-[0_0_40px_rgba(62,139,255,0.4)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-12 sm:py-3.5 sm:text-sm"
           >
             Bắt đầu chơi
           </button>
@@ -461,7 +461,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/70 backdrop-blur-sm">
           <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
             style={{
-              backgroundImage: 'linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.5) 1px, transparent 1px)',
+              backgroundImage: 'linear-gradient(rgba(62,139,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(62,139,255,0.5) 1px, transparent 1px)',
               backgroundSize: '60px 60px',
             }}
           />
@@ -473,7 +473,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
             <button
               type="button"
               onClick={resumeGame}
-              className="rounded-xl bg-gradient-to-r from-destructive to-accent px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all hover:shadow-[0_0_35px_rgba(34,211,238,0.35)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-8 sm:py-3 sm:text-sm"
+              className="rounded-xl bg-gradient-to-r from-destructive to-accent px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_25px_rgba(62,139,255,0.2)] transition-all hover:shadow-[0_0_35px_rgba(62,139,255,0.35)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-8 sm:py-3 sm:text-sm"
             >
               Tiếp tục
             </button>
@@ -495,12 +495,12 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center overflow-y-auto bg-gradient-to-b from-background/95 via-background/90 to-background/95 backdrop-blur-md">
           <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
             style={{
-              backgroundImage: 'linear-gradient(rgba(244,114,182,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(244,114,182,0.5) 1px, transparent 1px)',
+              backgroundImage: 'linear-gradient(rgba(244,63,94,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(244,63,94,0.5) 1px, transparent 1px)',
               backgroundSize: '60px 60px',
             }}
           />
           <div className="relative mb-1 text-[9px] font-bold uppercase tracking-[0.3em] text-destructive/80 sm:text-[10px] sm:tracking-[0.4em]">⚠ System Collision ⚠</div>
-          <p className="relative mb-4 text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-destructive to-destructive drop-shadow-[0_0_20px_rgba(244,114,182,0.3)] sm:mb-5 sm:text-3xl" style={{ fontFamily: 'Orbitron, monospace' }}>
+          <p className="relative mb-4 text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-destructive to-destructive drop-shadow-[0_0_20px_rgba(244,63,94,0.3)] sm:mb-5 sm:text-3xl" style={{ fontFamily: 'Orbitron, monospace' }}>
             VA CHẠM HỆ THỐNG
           </p>
 
@@ -514,7 +514,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
             <div className="w-px bg-foreground/10" />
             <div className="text-center">
               <div className="mb-1 text-[9px] uppercase tracking-wider text-accent/50 sm:text-[10px]">Best</div>
-              <div className="font-mono text-xl font-bold text-accent drop-shadow-[0_0_10px_rgba(34,211,238,0.4)] sm:text-3xl">
+              <div className="font-mono text-xl font-bold text-accent drop-shadow-[0_0_10px_rgba(62,139,255,0.4)] sm:text-3xl">
                 {String(gsRef.current.bestScore).padStart(6, '0')}
               </div>
             </div>
@@ -526,7 +526,7 @@ export function Miu9FutureRun({ onGameEnd }: Miu9FutureRunProps) {
             <button
               type="button"
               onClick={startGame}
-              className="rounded-xl bg-gradient-to-r from-destructive to-accent px-5 py-2 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_25px_rgba(34,211,238,0.2)] transition-all hover:shadow-[0_0_35px_rgba(34,211,238,0.35)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-8 sm:py-3 sm:text-sm"
+              className="rounded-xl bg-gradient-to-r from-destructive to-accent px-5 py-2 text-xs font-bold uppercase tracking-wider text-foreground shadow-[0_0_25px_rgba(62,139,255,0.2)] transition-all hover:shadow-[0_0_35px_rgba(62,139,255,0.35)] hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-8 sm:py-3 sm:text-sm"
             >
               Chơi lại
             </button>

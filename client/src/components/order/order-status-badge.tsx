@@ -2,11 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import type { OrderStatus, PaymentStatus } from '@/types'
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending: 'bg-warning text-warning',
-  confirmed: 'bg-accent text-accent',
-  shipping: 'bg-accent text-accent',
-  completed: 'bg-success text-success',
-  cancelled: 'bg-destructive text-destructive',
+  pending: 'bg-warning/15 text-warning',
+  confirmed: 'bg-accent/15 text-accent',
+  shipping: 'bg-accent/15 text-accent',
+  completed: 'bg-success/15 text-success',
+  cancelled: 'bg-destructive/15 text-destructive',
 }
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -24,9 +24,9 @@ const PAYMENT_LABELS: Record<PaymentStatus, string> = {
 }
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  paid: 'border-transparent bg-success text-success',
+  paid: 'border-transparent bg-success/15 text-success',
   unpaid: 'border-transparent bg-muted text-foreground',
-  pending_payment: 'border-transparent bg-warning text-warning',
+  pending_payment: 'border-transparent bg-warning/15 text-warning',
 }
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {

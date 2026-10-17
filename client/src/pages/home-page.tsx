@@ -197,7 +197,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-5 max-w-xl text-lg leading-relaxed text-foreground"
+              className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground"
             >
               Khám phá bộ sưu tập figurine, đồ trang trí, mô hình kiến trúc và phụ kiện in 3D với
               chi tiết tuyệt hảo. Chất lượng cao, giao hàng toàn quốc.
@@ -247,7 +247,7 @@ export default function HomePage() {
               ].map((stat) => (
                 <div key={stat.label}>
                   <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-foreground">{stat.label}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
             </motion.div>
@@ -269,7 +269,7 @@ export default function HomePage() {
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <h2 className="text-2xl font-bold sm:text-3xl text-foreground">Danh mục sản phẩm</h2>
-                <p className="mt-1 text-sm text-foreground">Khám phá theo danh mục bạn yêu thích</p>
+                <p className="mt-1 text-sm text-muted-foreground">Khám phá theo danh mục bạn yêu thích</p>
               </div>
             </div>
 
@@ -291,7 +291,7 @@ export default function HomePage() {
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (
-                      <Layers className="size-6 text-foreground" />
+                      <Layers className="size-6 text-muted-foreground" />
                     )}
                   </div>
                   <span className="text-xs font-medium text-foreground group-hover:text-foreground transition-colors line-clamp-2">{cat.name}</span>
@@ -317,7 +317,7 @@ export default function HomePage() {
                         className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (
-                      <Layers className="size-8 text-foreground" />
+                      <Layers className="size-8 text-muted-foreground" />
                     )}
                   </div>
                   <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">{cat.name}</span>

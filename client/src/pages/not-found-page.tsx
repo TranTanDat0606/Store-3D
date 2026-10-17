@@ -17,7 +17,7 @@ export default function NotFoundPage() {
         Không tìm thấy trang
       </h2>
 
-      <p className="mb-8 max-w-md text-sm leading-relaxed text-foreground">
+      <p className="mb-8 max-w-md text-sm leading-relaxed text-muted-foreground">
         Trang bạn đang tìm kiếm có thể đã bị xóa, đổi tên hoặc tạm thời không khả dụng.
       </p>
 

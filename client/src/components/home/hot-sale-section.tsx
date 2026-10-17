@@ -39,7 +39,7 @@ export function HotSaleSection({ products }: HotSaleSectionProps) {
               </span>
               <h2 className="text-2xl font-bold sm:text-3xl text-foreground">Hot Sale</h2>
             </div>
-            <p className="mt-1 text-sm text-foreground">Ưu đãi giảm giá tốt nhất đang diễn ra</p>
+            <p className="mt-1 text-sm text-muted-foreground">Ưu đãi giảm giá tốt nhất đang diễn ra</p>
           </div>
           <Button variant="ghost" className="text-foreground hover:text-foreground" asChild>
             <Link to="/san-pham">
@@ -140,13 +140,13 @@ function SpotlightDeal({ product }: { product: Product }) {
       </div>
 
       <div className="relative flex flex-1 flex-col p-5 sm:p-6">
-        <div className="flex items-center gap-1.5 text-xs text-foreground">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Star className="size-3.5 fill-warning text-warning" />
           <span>{product.rating > 0 ? product.rating.toFixed(1) : 'Mới'}</span>
           {product.reviewCount > 0 && <span>· {product.reviewCount} đánh giá</span>}
         </div>
         <h3 className="mt-2 line-clamp-2 text-lg leading-snug font-bold sm:text-xl text-foreground">{product.name}</h3>
-        <p className="mt-1 line-clamp-2 text-sm text-foreground">
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
           {product.description || 'Mô hình in 3D chất lượng cao với chi tiết tuyệt hảo.'}
         </p>
 
@@ -156,7 +156,7 @@ function SpotlightDeal({ product }: { product: Product }) {
               {formatCurrency(product.salePrice)}
             </span>
             {discountPercent > 0 && (
-              <span className="text-sm line-through text-foreground">
+              <span className="text-sm line-through text-muted-foreground">
                 {formatCurrency(product.originalPrice)}
               </span>
             )}
@@ -204,7 +204,7 @@ function DealRow({ index, product }: { index: number; product: Product }) {
       to={`/san-pham/${product.slug}`}
       className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-accent/5 border-foreground/10 bg-muted/50 hover:border-accent/20 hover:bg-muted/70"
     >
-      <span className="w-4 shrink-0 text-sm font-extrabold tabular-nums text-foreground group-hover:text-destructive">
+      <span className="w-4 shrink-0 text-sm font-extrabold tabular-nums text-muted-foreground group-hover:text-destructive">
         {String(index).padStart(2, '0')}
       </span>
 
@@ -231,7 +231,7 @@ function DealRow({ index, product }: { index: number; product: Product }) {
         <div className="mt-0.5 flex items-center gap-1.5">
           <span className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(product.salePrice)}</span>
           {discountPercent > 0 && (
-            <span className="text-xs text-foreground line-through">{formatCurrency(product.originalPrice)}</span>
+            <span className="text-xs text-muted-foreground line-through">{formatCurrency(product.originalPrice)}</span>
           )}
         </div>
       </div>

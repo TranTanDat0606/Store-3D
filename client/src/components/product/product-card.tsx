@@ -121,9 +121,9 @@ export const ProductCard = memo(function ProductCard({
                 <Badge
                   className={cn(
                     'shadow-md',
-                    rank === 1 && 'bg-warning text-foreground shadow-warning/30',
-                    rank === 2 && 'bg-muted text-foreground shadow-shadow',
-                    rank === 3 && 'bg-warning text-foreground shadow-warning/30',
+                    rank === 1 && 'border-primary/40 bg-primary/15 text-primary shadow-primary/30',
+                    rank === 2 && 'bg-muted text-foreground ring-1 ring-foreground/25',
+                    rank === 3 && 'border-warning/40 bg-warning/10 text-warning shadow-warning/30',
                   )}
                 >
                   <Trophy className="mr-1 size-3" />
