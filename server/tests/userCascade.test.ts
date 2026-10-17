@@ -29,6 +29,17 @@ async function loadUserDeletionPlan(): Promise<UserDeletionPlan> {
   return mod.userDeletionPlan as UserDeletionPlan;
 }
 
+type RatingRefreshPipeline = (productId: unknown, excludingUserId: unknown) => Record<string, unknown>[];
+
+/**
+ * Task 10b seam: the pipeline is pure (no mongoose, no models, no I/O) so the
+ * exclusion semantics that make the cascade retry-safe are assertable as data.
+ */
+async function loadRatingRefreshPipeline(): Promise<RatingRefreshPipeline> {
+  const mod = (await import('../src/services/ratingRefresh')) as unknown as Record<string, unknown>;
+  return mod.ratingRefreshPipeline as RatingRefreshPipeline;
+}
+
 test('user deletion plan covers Reviews, Wishlist, Addresses, UserCoupons and GameSessions for deletion', async () => {
   const userDeletionPlan = await loadUserDeletionPlan();
   assert.equal(typeof userDeletionPlan, 'function', 'userDeletionPlan seam is missing (Task 10)');
@@ -64,5 +75,26 @@ test('user deletion plan keeps Orders as denormalized snapshots', async () => {
   assert.ok(
     !plan.some((entry) => entry.collection === 'orders' && entry.action === 'delete'),
     'no delete step may ever target orders',
+  );
+});
+
+test("rating refresh for a deleted user's products excludes that user's reviews (idempotent on retry)", async () => {
+  const ratingRefreshPipeline = await loadRatingRefreshPipeline();
+  assert.equal(
+    typeof ratingRefreshPipeline,
+    'function',
+    'ratingRefreshPipeline seam is missing (Task 10b)',
+  );
+
+  const pipeline = ratingRefreshPipeline('product-1', 'user-1');
+  assert.deepEqual(
+    pipeline[0],
+    { $match: { product: 'product-1', user: { $ne: 'user-1' } } },
+    'the aggregate must compute the POST-deletion truth by excluding this user own reviews',
+  );
+  assert.deepEqual(
+    ratingRefreshPipeline('product-1', 'user-1'),
+    pipeline,
+    'identical inputs must rebuild the identical pipeline, so a retry recomputes the same values',
   );
 });

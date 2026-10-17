@@ -1,6 +1,8 @@
+import { Types } from 'mongoose';
 import { Address, GameSession, Product, Review, User, UserRole, UserCoupon, Wishlist } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
+import { ratingRefreshPipeline } from './ratingRefresh';
 
 export interface UserDeletionPlanEntry {
   collection: string;
@@ -105,9 +107,28 @@ export class UserService {
     // If anything below throws, the account still exists so the delete can be
     // retried; deleting the user first would leave references dangling forever
     // with no owner left to re-trigger the cleanup.
-    // Product.rating/reviewCount are denormalized aggregates of the reviews we
-    // are about to remove — remember the affected products up front.
+    //
+    // Product.rating/reviewCount are denormalized aggregates of this user's
+    // reviews, so the refresh runs BEFORE any cascade deletion (Task 10b):
+    //   1. distinct() collects the affected products while the reviews still exist;
+    //   2. the refresh aggregates with `user: { $ne: id }` (ratingRefreshPipeline),
+    //      i.e. it computes the POST-deletion truth even though those reviews are
+    //      still in the collection.
+    // Guarantee: steps 1–2 are idempotent under retry. If a later step fails, the
+    // retry re-derives whatever reviews are left and recomputes the same values,
+    // and products whose reviews were already deleted keep the correct values
+    // step 2 wrote (a post-delete refresh would re-derive `[]` and leave them
+    // stale forever). Residual window: between step 2 and the reviews delete,
+    // Product.rating already excludes a review list that is still visible; that
+    // value is the correct post-cascade one, and a retry re-converges on it.
     const reviewedProductIds = await Review.distinct('product', { user: id });
+    // Mongoose casts query filters (distinct/deleteMany) but NOT aggregation
+    // pipelines, so the exclusion id must be a real ObjectId or `$ne` would
+    // silently match every review (string vs ObjectId never compare equal).
+    const excludingUserId = new Types.ObjectId(id);
+    for (const productId of reviewedProductIds) {
+      await this.refreshProductRating(productId, excludingUserId);
+    }
     for (const step of userDeletionPlan()) {
       // keep:true → documented no-op (Orders: retained denormalized snapshot).
       if (step.keep) continue;
@@ -121,9 +142,6 @@ export class UserService {
         else await model.updateMany({ [field]: id }, { $unset: { [field]: '' } });
       }
     }
-    for (const productId of reviewedProductIds) {
-      await this.refreshProductRating(productId);
-    }
 
     await user.deleteOne();
     return user;
@@ -131,13 +149,17 @@ export class UserService {
 
   /**
    * Same formula as reviewService.updateProductRating — recomputes the
-   * denormalized aggregates after the cascade deleted this user's reviews.
+   * denormalized aggregates. `excludingUserId` makes the result the truth
+   * AFTER that user's reviews are gone, so the caller can refresh before the
+   * cascade deletes and stay correct on a retry (see `remove`).
    */
-  private async refreshProductRating(productId: unknown): Promise<void> {
-    const stats = await Review.aggregate<{ _id: null; avg: number; count: number }>([
-      { $match: { product: productId } },
-      { $group: { _id: null, avg: { $avg: '$rating' }, count: { $sum: 1 } } },
-    ]);
+  private async refreshProductRating(
+    productId: unknown,
+    excludingUserId: Types.ObjectId,
+  ): Promise<void> {
+    const stats = await Review.aggregate<{ _id: null; avg: number; count: number }>(
+      ratingRefreshPipeline(productId, excludingUserId),
+    );
     const stat = stats[0];
     await Product.updateOne(
       { _id: productId },
