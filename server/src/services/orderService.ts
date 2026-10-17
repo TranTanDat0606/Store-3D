@@ -10,6 +10,72 @@ interface CouponApplication {
   code: string;
   discount: number;
   isAdminCoupon: boolean;
+  /** For reward (game) coupons: the UserCoupon to atomically claim after validation. */
+  userCouponId?: unknown;
+}
+
+export type CouponReleaseAction =
+  | { kind: 'coupon-restore'; id: unknown }
+  | { kind: 'usercoupon-release'; id: unknown };
+
+/**
+ * Pure seam (GAP-3): classify which coupon-usage side effects a cancelled order
+ * must undo. System percent/fixed coupons are restored via `Coupon.usedCount`;
+ * game reward coupons are released by clearing `UserCoupon.usedAt`. Returns an
+ * empty list when the order carried no coupon. Consumed by the cancel branches
+ * (via executeCouponRelease) and later by Task 4's compensation planner.
+ */
+export function releaseOrderCoupon(order: {
+  coupon?: unknown;
+  userCoupon?: unknown;
+}): CouponReleaseAction[] {
+  const actions: CouponReleaseAction[] = [];
+  if (order.coupon != null) actions.push({ kind: 'coupon-restore', id: order.coupon });
+  if (order.userCoupon != null) actions.push({ kind: 'usercoupon-release', id: order.userCoupon });
+  return actions;
+}
+
+/**
+ * Pure seam (GAP-5): the ordered steps for redeeming a coupon against a payment.
+ * The bank-transfer minimum (`validate-minimum`) is emitted BEFORE any `mark-used`
+ * step, and is the only step when the minimum would fail — so a reward coupon is
+ * never burned on an order that the payment threshold rejects. Cash orders skip the
+ * threshold and mark immediately.
+ */
+export function redemptionPlan(
+  coupon: unknown | null,
+  payment: { method: 'cash' | 'bank-transfer'; totalVnd: number },
+): Array<'validate-minimum' | 'mark-used'> {
+  const plan: Array<'validate-minimum' | 'mark-used'> = [];
+  if (payment.method === 'bank-transfer') {
+    plan.push('validate-minimum');
+    if (payment.totalVnd < 1000) return plan; // threshold fails → never mark
+  }
+  if (coupon) plan.push('mark-used');
+  return plan;
+}
+
+/**
+ * The ONE DB implementation backing `releaseOrderCoupon`, shared by cancelByUser
+ * and the admin-cancel branch of updateStatus (GAP-3). Classifies the order's
+ * coupon code (game reward codes are `REWARD-` prefixed) and undoes its usage.
+ */
+async function executeCouponRelease(
+  order: { coupon?: { code?: string } | null; user?: unknown },
+  userId?: string,
+): Promise<void> {
+  const code = order.coupon?.code;
+  if (!code) return;
+  const isReward = code.startsWith('REWARD-');
+  const actions = releaseOrderCoupon(isReward ? { userCoupon: code } : { coupon: code });
+  const owner = userId ?? order.user;
+  for (const action of actions) {
+    if (action.kind === 'coupon-restore') {
+      await Coupon.updateOne({ code: action.id }, { $inc: { usedCount: -1 } });
+    } else {
+      await UserCoupon.updateOne({ code: action.id, user: owner }, { $unset: { usedAt: '' } });
+    }
+  }
 }
 
 /**
@@ -48,20 +114,22 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
     return { code: coupon.code, discount, isAdminCoupon: true };
   }
 
-  // Fallback: check per-user reward coupons (atomic redemption)
+  // Fallback: peek at per-user reward coupons (GAP-5 — do NOT mark usedAt here;
+  // the claim happens after the bank-transfer threshold validates).
   if (userId) {
-    const userCoupon = await UserCoupon.findOneAndUpdate(
-      { code: normalizedCode, user: userId, usedAt: null, expiresAt: { $gt: new Date() } },
-      { $set: { usedAt: new Date() } },
-      { new: true },
-    );
+    const userCoupon = await UserCoupon.findOne({
+      code: normalizedCode,
+      user: userId,
+      usedAt: null,
+      expiresAt: { $gt: new Date() },
+    });
     if (userCoupon) {
       // Game reward coupons are capped at MAX_DISCOUNT_VND at order time (GAP-2).
       const { discountVnd: discount } = computeDiscount(
         { type: userCoupon.type, value: userCoupon.discount, minOrder: 0, source: 'game' },
         subtotal,
       );
-      return { code: userCoupon.code, discount, isAdminCoupon: false };
+      return { code: userCoupon.code, discount, isAdminCoupon: false, userCouponId: userCoupon._id };
     }
   }
 
@@ -115,91 +183,126 @@ export class OrderService {
     const coupon = await resolveCoupon(data.couponCode, subtotal, userId);
     const shipping = 0; // free shipping
     const total = subtotal - (coupon?.discount ?? 0) + shipping;
-
-    // Payment threshold: bank-transfer requires total >= 1000 VND
     const paymentMethod = data.paymentMethod || PaymentMethod.Cash;
-    if (paymentMethod === PaymentMethod.BankTransfer && total < 1000) {
-      throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
+
+    // GAP-5: validation strictly precedes marking — a reward coupon is never
+    // burned on an order the bank-transfer threshold rejects.
+    const plan = redemptionPlan(coupon, {
+      method: paymentMethod === PaymentMethod.BankTransfer ? 'bank-transfer' : 'cash',
+      totalVnd: total,
+    });
+    let rewardCouponMarked = false;
+    for (const step of plan) {
+      if (step === 'validate-minimum') {
+        // Payment threshold: bank-transfer requires total >= 1000 VND
+        if (paymentMethod === PaymentMethod.BankTransfer && total < 1000) {
+          throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
+        }
+      } else if (step === 'mark-used') {
+        // Claim the reward coupon atomically (guards against concurrent redemption).
+        if (coupon && !coupon.isAdminCoupon) {
+          const claimed = await UserCoupon.findOneAndUpdate(
+            { _id: coupon.userCouponId, usedAt: null },
+            { $set: { usedAt: new Date() } },
+            { new: true },
+          );
+          if (!claimed) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+          rewardCouponMarked = true;
+        }
+      }
     }
 
     // Note: sequential writes (no DB transaction) — MongoDB Community standalone
     // does not support multi-document transactions (needs a replica set).
-    const order = await Order.create({
-      user: new Types.ObjectId(userId),
-      customer: data.customer,
-      note: data.note || '',
-      subtotal,
-      discount: coupon?.discount ?? 0,
-      shipping,
-      total,
-      coupon: coupon ? { code: coupon.code, discount: coupon.discount } : undefined,
-      payment: {
-        method: paymentMethod,
-        status: PaymentStatus.Unpaid,
-      },
-      status: OrderStatus.Pending,
-    });
+    let adminCouponIncremented = false;
+    try {
+      const order = await Order.create({
+        user: new Types.ObjectId(userId),
+        customer: data.customer,
+        note: data.note || '',
+        subtotal,
+        discount: coupon?.discount ?? 0,
+        shipping,
+        total,
+        coupon: coupon ? { code: coupon.code, discount: coupon.discount } : undefined,
+        payment: {
+          method: paymentMethod,
+          status: PaymentStatus.Unpaid,
+        },
+        status: OrderStatus.Pending,
+      });
 
-    const orderItems = await OrderItem.create(
-      lineTotals.map((lt) => ({
-        order: order._id,
-        product: new Types.ObjectId(lt.productId),
-        name: lt.name,
-        image: lt.image,
-        price: lt.price,
-        quantity: lt.quantity,
-      })),
-    );
-
-    await Order.updateOne(
-      { _id: order._id },
-      { $set: { items: orderItems.map((oi) => oi._id) } },
-    );
-
-    // Decrement stock atomically (guards against overselling under concurrency).
-    // Track decremented items so we can roll back on partial failure.
-    const decremented: { productId: string; quantity: number }[] = [];
-    for (const lt of lineTotals) {
-      const updated = await Product.findOneAndUpdate(
-        { _id: lt.productId, stock: { $gte: lt.quantity } },
-        { $inc: { stock: -lt.quantity } },
-        { new: true },
+      const orderItems = await OrderItem.create(
+        lineTotals.map((lt) => ({
+          order: order._id,
+          product: new Types.ObjectId(lt.productId),
+          name: lt.name,
+          image: lt.image,
+          price: lt.price,
+          quantity: lt.quantity,
+        })),
       );
-      if (!updated) {
-        // Roll back previously decremented stock
-        if (decremented.length > 0) {
-          await Product.bulkWrite(
-            decremented.map((d) => ({
-              updateOne: {
-                filter: { _id: d.productId },
-                update: { $inc: { stock: d.quantity } },
-              },
-            })),
-          );
+
+      await Order.updateOne(
+        { _id: order._id },
+        { $set: { items: orderItems.map((oi) => oi._id) } },
+      );
+
+      // Decrement stock atomically (guards against overselling under concurrency).
+      // Track decremented items so we can roll back on partial failure.
+      const decremented: { productId: string; quantity: number }[] = [];
+      for (const lt of lineTotals) {
+        const updated = await Product.findOneAndUpdate(
+          { _id: lt.productId, stock: { $gte: lt.quantity } },
+          { $inc: { stock: -lt.quantity } },
+          { new: true },
+        );
+        if (!updated) {
+          // Roll back previously decremented stock
+          if (decremented.length > 0) {
+            await Product.bulkWrite(
+              decremented.map((d) => ({
+                updateOne: {
+                  filter: { _id: d.productId },
+                  update: { $inc: { stock: d.quantity } },
+                },
+              })),
+            );
+          }
+          await OrderItem.deleteMany({ order: order._id });
+          await Order.findByIdAndDelete(order._id);
+          throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
         }
-        // Restore reward coupon if one was atomically redeemed
-        if (coupon && !coupon.isAdminCoupon) {
-          await UserCoupon.updateOne(
-            { code: coupon.code, user: userId },
-            { $unset: { usedAt: '' } },
-          );
-        }
-        await OrderItem.deleteMany({ order: order._id });
-        await Order.findByIdAndDelete(order._id);
-        throw new AppError(`Sản phẩm "${lt.name}" không đủ hàng`, 400);
+        decremented.push({ productId: lt.productId, quantity: lt.quantity });
       }
-      decremented.push({ productId: lt.productId, quantity: lt.quantity });
-    }
 
-    // Increment admin coupon usage (UserCoupons are already atomically marked via findOneAndUpdate)
-    if (coupon?.isAdminCoupon) {
-      await Coupon.updateOne(
-        { code: coupon.code },
-        { $inc: { usedCount: 1 } },
-      );
-    }
+      // Increment admin coupon usage (UserCoupons are already claimed via redemptionPlan)
+      if (coupon?.isAdminCoupon) {
+        await Coupon.updateOne(
+          { code: coupon.code },
+          { $inc: { usedCount: 1 } },
+        );
+        adminCouponIncremented = true;
+      }
 
-    return this.getById(String(order._id));
+      return await this.getById(String(order._id));
+    } catch (err) {
+      // GAP-5 (minimal — Task 4 replaces this with the step-tagged compensation
+      // planner): release any coupon usage consumed before the failure.
+      if (rewardCouponMarked && coupon) {
+        await UserCoupon.updateOne(
+          { code: coupon.code, user: userId },
+          { $unset: { usedAt: '' } },
+        );
+      }
+      if (adminCouponIncremented && coupon) {
+        await Coupon.updateOne(
+          { code: coupon.code },
+          { $inc: { usedCount: -1 } },
+        );
+      }
+      throw err;
+    }
   }
 
   /** Customer's own orders. */
@@ -289,6 +392,9 @@ export class OrderService {
           })),
         );
       }
+      // GAP-3: admin cancel restores coupon usage too — same implementation as
+      // cancelByUser (executeCouponRelease → releaseOrderCoupon).
+      await executeCouponRelease(order);
     }
 
     const updates: Record<string, unknown> = { status: data.status };
@@ -351,20 +457,9 @@ export class OrderService {
       );
     }
 
-    // Restore coupon usage
-    if (updated.coupon?.code) {
-      if (updated.coupon.code.startsWith('REWARD-')) {
-        await UserCoupon.updateOne(
-          { code: updated.coupon.code, user: userId },
-          { $unset: { usedAt: '' } },
-        );
-      } else {
-        await Coupon.updateOne(
-          { code: updated.coupon.code },
-          { $inc: { usedCount: -1 } },
-        );
-      }
-    }
+    // Restore coupon usage (GAP-3: shared implementation with the admin-cancel
+    // branch — executeCouponRelease → releaseOrderCoupon).
+    await executeCouponRelease(updated, userId);
 
     // Append cancel reason to note if provided
     if (reason) {
