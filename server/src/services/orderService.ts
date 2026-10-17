@@ -119,6 +119,25 @@ async function executeCouponRelease(
 }
 
 /**
+ * ONE stock-restore seam shared by every path that must undo a creation-time
+ * decrement: order-creation compensation ('restore-stock'), the admin-cancel
+ * branch of updateStatus, and cancelByUser. Per-item `$inc` preserves
+ * duplicate-product summing (two line items for the same product restore both
+ * quantities in one bulkWrite).
+ */
+async function restoreStockForItems(items: Array<{ product: unknown; quantity: number }>): Promise<void> {
+  if (items.length === 0) return;
+  await Product.bulkWrite(
+    items.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { stock: item.quantity } },
+      },
+    })),
+  );
+}
+
+/**
  * DB executor for one GAP-4 compensation action (called best-effort from
  * create()'s catch; errors are logged by runCompensation, never rethrown —
  * the ORIGINAL creation error is always what propagates).
@@ -143,14 +162,7 @@ async function executeCompensation(action: CompensationAction, userId: string): 
       break;
     }
     case 'restore-stock': {
-      const items = action.payload as Array<{ product: unknown; quantity: number }>;
-      if (items.length > 0) {
-        await Product.bulkWrite(
-          items.map((i) => ({
-            updateOne: { filter: { _id: i.product }, update: { $inc: { stock: i.quantity } } },
-          })),
-        );
-      }
+      await restoreStockForItems(action.payload as Array<{ product: unknown; quantity: number }>);
       break;
     }
     case 'delete-items':
@@ -490,16 +502,7 @@ export class OrderService {
     // can be cancelled, and they had their stock decremented at creation time).
     if (data.status === OrderStatus.Cancelled && fromStatus !== OrderStatus.Cancelled) {
       const items = await OrderItem.find({ order: updated._id }).select('product quantity');
-      if (items.length > 0) {
-        await Product.bulkWrite(
-          items.map((item) => ({
-            updateOne: {
-              filter: { _id: item.product },
-              update: { $inc: { stock: item.quantity } },
-            },
-          })),
-        );
-      }
+      await restoreStockForItems(items);
       // GAP-3: admin cancel restores coupon usage too — same implementation as
       // cancelByUser (executeCouponRelease → releaseOrderCoupon).
       await executeCouponRelease(updated);
@@ -533,16 +536,7 @@ export class OrderService {
 
     // Restore stock
     const items = await OrderItem.find({ order: updated._id }).select('product quantity');
-    if (items.length > 0) {
-      await Product.bulkWrite(
-        items.map((item) => ({
-          updateOne: {
-            filter: { _id: item.product },
-            update: { $inc: { stock: item.quantity } },
-          },
-        })),
-      );
-    }
+    await restoreStockForItems(items);
 
     // Restore coupon usage (GAP-3: shared implementation with the admin-cancel
     // branch — executeCouponRelease → releaseOrderCoupon).
