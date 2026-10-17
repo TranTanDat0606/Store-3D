@@ -1,6 +1,6 @@
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Box, ChevronLeft, Gamepad2, LayoutDashboard, LogOut, Menu, MessageCircleQuestion, Newspaper, Package, ShoppingCart, Star, Ticket, Users, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { contactApi } from '@/services'
 import { Button } from '@/components/ui/button'
@@ -107,11 +107,41 @@ export function AdminLayout() {
   const { pathname } = useLocation()
   const [supportCount, setSupportCount] = useState(0)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const navHamburgerRef = useRef<HTMLButtonElement>(null)
+  const navDrawerRef = useRef<HTMLDivElement>(null)
+  const wasNavOpen = useRef(false)
 
   // Close mobile nav on route change
   useEffect(() => {
     setMobileNavOpen(false)
   }, [pathname])
+
+  // AC9: admin drawer a11y — Escape closes, focus moves in, body scroll locked.
+  // Cleanup runs on close AND unmount, so route-change-close also restores state.
+  useEffect(() => {
+    if (!mobileNavOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileNavOpen(false)
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    navDrawerRef.current?.focus()
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mobileNavOpen])
+
+  // AC9: return focus to the hamburger when the drawer closes (not on initial mount).
+  useEffect(() => {
+    if (mobileNavOpen) {
+      wasNavOpen.current = true
+    } else if (wasNavOpen.current) {
+      wasNavOpen.current = false
+      navHamburgerRef.current?.focus()
+    }
+  }, [mobileNavOpen])
 
   useEffect(() => {
     contactApi.adminCountNew().then(setSupportCount).catch(() => {})
@@ -147,8 +177,9 @@ export function AdminLayout() {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  ref={navHamburgerRef}
                   onClick={() => setMobileNavOpen(true)}
-                  className="flex size-9 items-center justify-center rounded-lg border border-border bg-background text-foreground lg:hidden"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-background text-foreground lg:hidden"
                   aria-label="Mở menu"
                 >
                   <Menu className="size-5" />
@@ -183,13 +214,20 @@ export function AdminLayout() {
                 className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm lg:hidden"
                 onClick={() => setMobileNavOpen(false)}
               />
-              <div className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar shadow-xl lg:hidden">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-label="Thực đơn quản trị"
+                ref={navDrawerRef}
+                tabIndex={-1}
+                className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar shadow-xl focus:outline-none lg:hidden"
+              >
                 <div className="flex items-center justify-between pl-5 pr-3 pt-4">
                   <span className="sr-only">Điều hướng quản trị</span>
                   <button
                     type="button"
                     onClick={() => setMobileNavOpen(false)}
-                    className="ml-auto flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                    className="ml-auto flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                     aria-label="Đóng menu"
                   >
                     <X className="size-5" />

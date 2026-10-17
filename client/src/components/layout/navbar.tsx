@@ -112,6 +112,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const desktopSearchRef = useRef<HTMLInputElement>(null)
+  const hamburgerRef = useRef<HTMLButtonElement>(null)
+  const drawerRef = useRef<HTMLDivElement>(null)
+  const wasMobileOpen = useRef(false)
 
   useEffect(() => {
     if (!debouncedSearch.trim()) {
@@ -183,6 +186,33 @@ export function Navbar() {
 
   const closeMobile = () => setMobileOpen(false)
 
+  // AC9: mobile drawer a11y — Escape closes, focus moves in, body scroll locked.
+  // Cleanup runs on close AND unmount, so navigation-close also restores state.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileOpen(false)
+    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    drawerRef.current?.focus()
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [mobileOpen])
+
+  // AC9: return focus to the hamburger when the drawer closes (not on initial mount).
+  useEffect(() => {
+    if (mobileOpen) {
+      wasMobileOpen.current = true
+    } else if (wasMobileOpen.current) {
+      wasMobileOpen.current = false
+      hamburgerRef.current?.focus()
+    }
+  }, [mobileOpen])
+
   const desktopLinkClass = (active: boolean) =>
     `border-b-2 pb-1 text-base transition-colors duration-200 ${
       active
@@ -204,7 +234,8 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="text-muted-foreground hover:bg-secondary! hover:text-primary! xl:hidden"
+            className="text-muted-foreground hover:bg-secondary! hover:text-primary! min-h-11 min-w-11 xl:hidden"
+            ref={hamburgerRef}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Mở menu"
             aria-expanded={mobileOpen}
@@ -283,6 +314,7 @@ export function Navbar() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm kiếm mô hình, Resin 8K, FDM..."
+              aria-label="Tìm kiếm sản phẩm"
               className="rounded-lg border-border bg-secondary/80 py-2 pr-12 pl-9 text-sm focus-visible:border-primary"
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => { setShowSuggestions(false); setSearchResults([]) }, 200)}
@@ -302,16 +334,13 @@ export function Navbar() {
           </form>
 
           <div className="flex items-center gap-1">
-            <Link to={isAuthenticated ? '/tai-khoan/yeu-thich' : '/dang-nhap'} className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                title="Yêu thích"
-                aria-label="Danh sách yêu thích"
-                className="text-muted-foreground hover:bg-secondary! hover:text-primary! active:scale-95"
-              >
-                <Heart className="size-5" />
-              </Button>
+            <Link
+              to={isAuthenticated ? '/tai-khoan/yeu-thich' : '/dang-nhap'}
+              aria-label="Danh sách yêu thích"
+              title="Yêu thích"
+              className="text-muted-foreground hover:bg-secondary! hover:text-primary! active:scale-95 relative flex min-h-11 min-w-11 items-center justify-center rounded-md transition-colors xl:min-h-9 xl:min-w-9"
+            >
+              <Heart className="size-5" />
               {isAuthenticated && wishlist.length > 0 && (
                 <span className="border-primary bg-secondary text-primary absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full border px-0.5 text-[10px] leading-none font-bold">
                   {wishlist.length}
@@ -325,7 +354,7 @@ export function Navbar() {
               onClick={openCart}
               aria-label="Giỏ hàng"
               title="Giỏ hàng"
-              className="text-muted-foreground relative hover:bg-secondary! hover:text-primary! active:scale-95"
+              className="text-muted-foreground relative hover:bg-secondary! hover:text-primary! active:scale-95 min-h-11 min-w-11 xl:min-h-9 xl:min-w-9"
             >
               <ShoppingBag className="size-5" />
               {totalItems > 0 && (
@@ -479,8 +508,11 @@ export function Navbar() {
           />
           <div
             role="dialog"
+            aria-modal="true"
             aria-label="Menu điều hướng"
-            className="border-border bg-card absolute inset-y-0 left-0 flex w-[88%] max-w-[340px] flex-col overflow-y-auto border-r p-5 shadow-2xl"
+            ref={drawerRef}
+            tabIndex={-1}
+            className="border-border bg-card absolute inset-y-0 left-0 flex w-[88%] max-w-[340px] flex-col overflow-y-auto border-r p-5 shadow-2xl focus:outline-none"
           >
             <div className="border-border/60 flex items-center justify-between border-b pb-4">
               <Link to="/" onClick={closeMobile} className="flex items-center gap-2">
@@ -493,7 +525,7 @@ export function Navbar() {
                 type="button"
                 onClick={closeMobile}
                 aria-label="Đóng menu"
-                className="bg-secondary text-muted-foreground hover:text-foreground flex size-8 items-center justify-center rounded-full transition-colors"
+                className="bg-secondary text-muted-foreground hover:text-foreground flex min-h-11 min-w-11 items-center justify-center rounded-full transition-colors"
               >
                 <X className="size-4" />
               </button>
@@ -505,6 +537,7 @@ export function Navbar() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm mô hình..."
+                aria-label="Tìm kiếm sản phẩm"
                 className="rounded-lg border-border bg-secondary/80 py-2.5 pl-9 text-sm focus-visible:border-primary"
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => { setShowSuggestions(false); setSearchResults([]) }, 200)}

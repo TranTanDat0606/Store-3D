@@ -104,6 +104,17 @@ html.theme-transition *::after {
     color 0.25s ease;
 }
 
+/* AC9: respect prefers-reduced-motion — suppress app transitions/animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 
 
 
