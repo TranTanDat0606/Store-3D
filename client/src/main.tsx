@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <BrowserRouter>
         <App />
-        <Toaster theme="dark" position="top-right" closeButton duration={4000} />
+        <Toaster theme="dark" richColors position="top-right" closeButton duration={4000} />
       </BrowserRouter>
     </ThemeProvider>
   </StrictMode>,
