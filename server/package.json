@@ -7,7 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx --test tests/vietQr.test.ts tests/payment.test.ts tests/orderStatus.test.ts",
+    "test": "tsx --test tests/vietQr.test.ts tests/payment.test.ts tests/orderStatus.test.ts tests/productStatus.test.ts",
     "seed": "tsx src/services/seed.ts",
     "seed:prod": "node dist/services/seed.js"
   },

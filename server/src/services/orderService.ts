@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product, UserCoupon, Address } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
+import { assertItemsActive } from './productQuery';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
 
 interface CouponApplication {
@@ -83,9 +84,8 @@ export class OrderService {
     const productIds = data.items.map((i) => i.product);
 
     const products = await Product.find({ _id: { $in: productIds } });
-    if (products.length !== productIds.length) {
-      throw new AppError('Có sản phẩm không tồn tại trong giỏ hàng', 400);
-    }
+    // GAP-1: requested ids must exist (404) and every product must still be sellable (400).
+    assertItemsActive(products, data.items);
 
     const productMap = new Map(products.map((p) => [String(p._id), p]));
 

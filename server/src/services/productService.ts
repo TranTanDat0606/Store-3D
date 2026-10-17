@@ -1,19 +1,17 @@
 import mongoose from 'mongoose';
-import type { FilterQuery, Types } from 'mongoose';
+import type { FilterQuery } from 'mongoose';
 import { Product, ProductStatus, Category } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import slugify from '../utils/slugify';
+import { buildPublicProductFilter } from './productQuery';
 import type { CreateProductInput, UpdateProductInput } from '../validators/product';
 
-type ProductFilter = FilterQuery<InstanceType<typeof Product>>;
+// toObjectId moved to productQuery.ts (pure builders need it); re-exported here
+// so existing importers keep working unchanged.
+export { toObjectId } from './productQuery';
 
-export function toObjectId(id: string): Types.ObjectId {
-  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-    throw new AppError('ID không hợp lệ', 400);
-  }
-  return new mongoose.Types.ObjectId(id);
-}
+type ProductFilter = FilterQuery<InstanceType<typeof Product>>;
 
 async function ensureUniqueSlug(name: string, slug: string | undefined, excludeId?: string): Promise<string> {
   const base = (slug && slug.trim() ? slug : slugify(name)) || slugify(name);
@@ -29,23 +27,13 @@ async function ensureUniqueSlug(name: string, slug: string | undefined, excludeI
 }
 
 export class ProductService {
+  /**
+   * Public product listing filter — only active products are ever listed.
+   * Admin parameter pass-through lives in `buildAdminProductFilter` (productQuery.ts)
+   * for the dedicated admin routes that will serve it (news `/admin/*` pattern).
+   */
   private buildFilter(params: Record<string, unknown>): ProductFilter {
-    const filter: ProductFilter = {};
-    const { category, material, printerType, status, featured, minPrice, maxPrice } = params;
-
-    if (category) filter.category = toObjectId(String(category));
-    if (material) filter.material = material;
-    if (printerType) filter.printerType = printerType;
-    if (status) filter.status = status;
-    if (featured === 'true') filter.featured = true;
-    if (featured === 'false') filter.featured = false;
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      filter.salePrice = {
-        ...(minPrice !== undefined ? { $gte: Number(minPrice) } : {}),
-        ...(maxPrice !== undefined ? { $lte: Number(maxPrice) } : {}),
-      };
-    }
-    return filter;
+    return buildPublicProductFilter(params) as ProductFilter;
   }
 
   async list(params: Record<string, unknown>) {
@@ -171,8 +159,12 @@ export class ProductService {
   }
 
   async getBySlug(slug: string) {
-    let product = await Product.findOne({ slug }).populate('category', 'name slug');
+    // Public path (GAP-1): the slug lookup only ever resolves active products.
+    let product = await Product.findOne({ ...buildPublicProductFilter({ slug }) }).populate('category', 'name slug');
     if (!product && mongoose.isValidObjectId(slug)) {
+      // ObjectId fallback: used by the admin product-edit flow (productApi.getById),
+      // so an inactive product stays editable/reactivable by its managers.
+      // It can never be ordered: orderService.create re-validates status via assertItemsActive.
       product = await Product.findById(slug).populate('category', 'name slug');
     }
     if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
