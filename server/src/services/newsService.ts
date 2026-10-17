@@ -3,6 +3,23 @@ import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import type { CreateNewsInput, UpdateNewsInput } from '../validators/news';
 
+/**
+ * GAP-12 seam: the PUBLIC slug lookup may only ever resolve published
+ * articles — drafts and other statuses must be indistinguishable from
+ * "not found" on the public site.
+ */
+export function publicNewsSlugQuery(slug: string): { slug: string; status: 'published' } {
+  return { slug, status: NewsStatus.Published };
+}
+
+/**
+ * GAP-12 counterpart: admin lookups by id carry NO status filter, so drafts
+ * stay editable/reactivable through GET /news/admin/:id.
+ */
+export function adminNewsIdQuery(id: string): { _id: string } {
+  return { _id: id };
+}
+
 export class NewsService {
   /** Public: list published news. */
   async list(params: Record<string, unknown>) {
@@ -21,14 +38,16 @@ export class NewsService {
     return apiFeatures(News.find(), filter, { ...options, sort: '-createdAt' });
   }
 
+  /** Public: published articles only — a draft slug is a 404 (GAP-12). */
   async getBySlug(slug: string) {
-    const news = await News.findOne({ slug });
+    const news = await News.findOne(publicNewsSlugQuery(slug));
     if (!news) throw new AppError('Không tìm thấy bài viết', 404);
     return news;
   }
 
+  /** Admin: unfiltered by status so drafts remain editable (GAP-12). */
   async getById(id: string) {
-    const news = await News.findById(id);
+    const news = await News.findOne(adminNewsIdQuery(id));
     if (!news) throw new AppError('Không tìm thấy bài viết', 404);
     return news;
   }
