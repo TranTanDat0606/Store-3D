@@ -9,6 +9,45 @@ export function generateOrderCode(): string {
   return `ST3D-${randomBytes(3).toString('hex').toUpperCase()}`;
 }
 
+// --- webhook hardening seams (GAP-9, GAP-10) ---
+
+/** An order can only be marked paid by a webhook while it is still pending
+ *  or confirmed — a cancelled/completed/shipping order must never be
+ *  resurrected by a (forged or delayed) payment webhook. */
+export function canMarkPaid(currentStatus: string): boolean {
+  return currentStatus === OrderStatus.Pending || currentStatus === OrderStatus.Confirmed;
+}
+
+/** Wired guard: throws the 409 the webhook route surfaces. */
+export function assertCanMarkPaid(currentStatus: string): void {
+  if (!canMarkPaid(currentStatus)) {
+    throw new AppError('Đơn hàng không ở trạng thái có thể xác nhận thanh toán', 409);
+  }
+}
+
+export interface WebhookRoutePolicy {
+  requireSignature: boolean;
+  simulateEnabled: boolean;
+}
+
+/** Route registration policy: production ALWAYS requires a signature and
+ *  never registers the /webhook/simulate route; development keeps current
+ *  behavior (signature enforced only when a secret is configured, simulate
+ *  route available for local QA). */
+export function webhookRoutePolicy(env: string, hasSecret: boolean): WebhookRoutePolicy {
+  if (env === 'production') return { requireSignature: true, simulateEnabled: false };
+  return { requireSignature: hasSecret, simulateEnabled: true };
+}
+
+/** Boot guard: production refuses to start without PAYMENT_WEBHOOK_SECRET,
+ *  because in production unsigned webhooks are never accepted — starting
+ *  without a secret would make every legitimate webhook fail with 401. */
+export function assertWebhookBootConfig(env: string, paymentWebhookSecret: string): void {
+  if (env === 'production' && !paymentWebhookSecret) {
+    throw new Error('PAYMENT_WEBHOOK_SECRET is required in production');
+  }
+}
+
 export interface ReconcileOrder {
   status: PaymentStatus | string;
   qrExpiresAt?: Date;
@@ -94,6 +133,11 @@ export class PaymentService {
     const order = await Order.findOne({ 'payment.orderCode': orderCode });
     if (!order) throw new AppError('Không tìm thấy đơn hàng với mã chuyển khoản này', 404);
 
+    // GAP-9: a webhook must never resurrect a cancelled/completed/shipping
+    // order. Checked before reconcile so the state conflict wins over QR
+    // expiry/amount errors — and no side effect (status write, email) runs.
+    assertCanMarkPaid(order.status);
+
     const reconcileInput: ReconcileOrder = {
       status: order.payment.status,
       qrExpiresAt: order.payment.qrExpiresAt,
@@ -106,7 +150,10 @@ export class PaymentService {
     if (order.payment.status === PaymentStatus.Paid) return order;
 
     const updatedOrder = await Order.findOneAndUpdate(
-      { _id: order._id, 'payment.status': { $ne: PaymentStatus.Paid } },
+      // Belt-and-braces: the payable status is part of the atomic filter, so
+      // an admin cancelling between the check above and this write still
+      // blocks the resurrection (no read-then-write window).
+      { _id: order._id, status: { $in: [OrderStatus.Pending, OrderStatus.Confirmed] }, 'payment.status': { $ne: PaymentStatus.Paid } },
       {
         $set: {
           'payment.status': PaymentStatus.Paid,
