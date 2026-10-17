@@ -4,6 +4,7 @@ import { AppError, assertOwnership, resourceNotFound } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
 import { computeDiscount } from './discountMath';
+import { BANK_TRANSFER_MIN_VND } from '../config/payment';
 import { couponQuantityGuardQuery, assertCouponQuantityApplied } from './couponService';
 import { compensationPlanFor, runCompensation } from './orderCreation';
 import type { CompensationAction, CompensationContext, OrderCreationStep } from './orderCreation';
@@ -54,7 +55,7 @@ export function redemptionPlan(
   const plan: Array<'validate-minimum' | 'mark-used'> = [];
   if (payment.method === 'bank-transfer') {
     plan.push('validate-minimum');
-    if (payment.totalVnd < 1000) return plan; // threshold fails → never mark
+    if (payment.totalVnd < BANK_TRANSFER_MIN_VND) return plan; // threshold fails → never mark
   }
   if (coupon) plan.push('mark-used');
   return plan;
@@ -248,8 +249,9 @@ export class OrderService {
     let subtotal = 0;
 
     for (const item of data.items) {
-      const product = productMap.get(item.product);
-      if (!product) throw resourceNotFound('product');
+      // assertItemsActive above already 404s any requested id it could not
+      // resolve, so the map lookup (same `products`) cannot miss.
+      const product = productMap.get(item.product)!;
       if (product.stock < item.quantity) {
         throw new AppError(`Sản phẩm "${product.name}" không đủ hàng`, 400);
       }
@@ -280,8 +282,8 @@ export class OrderService {
     const ctx: CompensationContext = { orderId: null, items: [], couponActions: [] };
     for (const redemptionStep of plan) {
       if (redemptionStep === 'validate-minimum') {
-        // Payment threshold: bank-transfer requires total >= 1000 VND
-        if (paymentMethod === PaymentMethod.BankTransfer && total < 1000) {
+        // Payment threshold: bank-transfer requires total >= BANK_TRANSFER_MIN_VND
+        if (paymentMethod === PaymentMethod.BankTransfer && total < BANK_TRANSFER_MIN_VND) {
           throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
         }
       } else if (redemptionStep === 'mark-used') {
