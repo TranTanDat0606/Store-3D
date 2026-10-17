@@ -1,5 +1,6 @@
 import axios from 'axios'
-import type { ApiResponse } from '@/types'
+import { toast } from 'sonner'
+import { conflictToastMessage, getApiErrorInfo } from '@/lib/apiError'
 
 export const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:5000/api' : '/api')
 
@@ -21,19 +22,25 @@ apiClient.interceptors.response.use(
     }
     return response
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    // Cross-plan contract §4 (Plan 2 T7): 409 is the ONLY globally toasted
+    // status — the stale-data/duplicate conflict surfaces here so every
+    // mutation path gets it from this single point. 401 has no global toast
+    // (the client has no 401 interceptor today — auth stays call-site driven;
+    // no double-toast, behavior unchanged). 400/403/404/others are surfaced
+    // by call sites via getErrorMessage/getApiErrorInfo — no global toast.
+    if (axios.isAxiosError(error) && error.response?.status === 409) {
+      toast.error(conflictToastMessage())
+    }
+    return Promise.reject(error)
+  },
 )
 
 // Extract the Vietnamese error message from any error shape.
+// Back-compat shim (Plan 2 T7): reimplemented on top of getApiErrorInfo —
+// identical string outcomes for existing callers on envelope messages and 400s.
 export function getErrorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data as ApiResponse<unknown> | undefined
-    if (data?.message) return data.message
-    if (error.message === 'Network Error') return 'Không thể kết nối tới máy chủ'
-    return error.message
-  }
-  if (error instanceof Error) return error.message
-  return 'Đã có lỗi xảy ra, vui lòng thử lại'
+  return getApiErrorInfo(error).message
 }
 
 export default apiClient
