@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sản phẩm yêu thích | STORE 3D - Mô hình in 3D cao cấp</title>
+<!-- Google Fonts: Be Vietnam Pro & Orbitron -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;family=Orbitron:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-background": "#ebe1d5",
+            "on-tertiary-container": "#005282",
+            "on-surface-variant": "#d3c5b0",
+            "on-primary-fixed-variant": "#5d4200",
+            "secondary-container": "#006cde",
+            "surface-container-low": "#1f1b14",
+            "error-container": "#93000a",
+            "outline": "#9b8f7c",
+            "on-secondary-container": "#f2f4ff",
+            "surface-container-lowest": "#120e07",
+            "tertiary-fixed": "#cee5ff",
+            "surface-dim": "#17130c",
+            "surface-variant": "#39342c",
+            "primary-fixed-dim": "#f4be51",
+            "secondary": "#acc7ff",
+            "surface-container-highest": "#39342c",
+            "tertiary-fixed-dim": "#97cbff",
+            "inverse-on-surface": "#353027",
+            "on-secondary": "#002f67",
+            "on-secondary-fixed": "#001a40",
+            "on-tertiary-fixed": "#001d33",
+            "inverse-primary": "#7b5800",
+            "primary-fixed": "#ffdea5",
+            "error": "#ffb4ab",
+            "background": "#17130c",
+            "primary-container": "#edb84c",
+            "surface-tint": "#f4be51",
+            "outline-variant": "#4f4536",
+            "surface-container": "#241f17",
+            "on-tertiary": "#003353",
+            "on-secondary-fixed-variant": "#004491",
+            "inverse-surface": "#ebe1d5",
+            "on-primary-fixed": "#271900",
+            "surface": "#17130c",
+            "on-surface": "#ebe1d5",
+            "on-error-container": "#ffdad6",
+            "tertiary-container": "#8ac6ff",
+            "on-tertiary-fixed-variant": "#004a76",
+            "surface-container-high": "#2e2921",
+            "primary": "#ffd78d",
+            "surface-bright": "#3e3830",
+            "on-primary": "#412d00",
+            "tertiary": "#c3dfff",
+            "on-primary-container": "#674900",
+            "secondary-fixed-dim": "#acc7ff",
+            "on-error": "#690005",
+            "secondary-fixed": "#d7e2ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {},
+          "fontFamily": {
+            "headline": [
+              "Be Vietnam Pro"
+            ],
+            "display": [
+              "Be Vietnam Pro"
+            ],
+            "body": [
+              "Be Vietnam Pro"
+            ],
+            "label": [
+              "Be Vietnam Pro"
+            ],
+            "orbitron": [
+              "Orbitron", "sans-serif"
+            ]
+          },
+          "fontSize": {}
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-[#07090F] text-[#FFFFFF] font-body selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col antialiased">
+<!-- ================= TOP NAVBAR ================= -->
+<header class="sticky top-0 z-50 w-full bg-[#07090F]/90 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-center h-16 px-4 md:px-6 max-w-7xl mx-auto">
+<!-- Brand Logo Left -->
+<div class="flex items-center gap-8">
+<a class="flex items-center gap-2 group" href="/">
+<div class="w-9 h-9 rounded-lg bg-surface-container border border-primary-container/40 flex items-center justify-center text-primary-container shadow-[0_0_12px_rgba(237,184,76,0.2)]">
+<span class="material-symbols-outlined" data-icon="deployed_code">deployed_code</span>
+</div>
+<span class="font-orbitron font-extrabold text-2xl tracking-wider text-primary-container group-hover:brightness-110 transition-all">STORE 3D</span>
+</a>
+<!-- Desktop Navigation Links -->
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 text-sm font-medium" href="#">Trang chủ</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 text-sm font-medium" href="#">Sản phẩm</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 text-sm font-medium flex items-center gap-1" href="#">
+<span>Danh mục</span>
+<span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span>
+</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 text-sm font-medium" href="#">Tin tức</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors pb-1 text-sm font-medium" href="#">Liên hệ</a>
+</nav>
+</div>
+<!-- Search & Trailing Actions -->
+<div class="flex items-center gap-3 md:gap-5">
+<!-- Live Search Bar -->
+<div class="relative hidden sm:block w-52 md:w-64">
+<input class="w-full bg-[#151A24] border border-outline-variant/40 rounded-lg pl-9 pr-4 py-1.5 text-xs text-on-surface placeholder-outline focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Tìm mô hình Resin, PLA..." type="text"/>
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-outline text-lg" data-icon="search">search</span>
+</div>
+<!-- Trailing Icon Action: Wishlist (Active highlight indicator) -->
+<a class="relative p-2 rounded-lg bg-surface-container-high/60 text-primary-container border border-primary-container/30 transition-transform active:scale-95" href="/tai-khoan/yeu-thich" title="Sản phẩm yêu thích">
+<span class="material-symbols-outlined fill-icon text-xl" data-icon="favorite">favorite</span>
+<span class="absolute -top-1 -right-1 bg-primary-container text-[#07090F] font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-orbitron">4</span>
+</a>
+<!-- Trailing Icon Action: Shopping Bag -->
+<a class="relative p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-transform active:scale-95" href="#" title="Giỏ hàng">
+<span class="material-symbols-outlined text-xl" data-icon="shopping_bag">shopping_bag</span>
+<span class="absolute -top-1 -right-1 bg-secondary-container text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-orbitron">2</span>
+</a>
+<!-- Trailing User Account Info -->
+<div class="flex items-center gap-2 pl-2 border-l border-outline-variant/40">
+<div class="w-8 h-8 rounded-full bg-[#151A24] border border-primary-container/50 flex items-center justify-center text-primary-container font-bold text-xs font-orbitron">
+            A
+          </div>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-xs font-semibold text-on-surface leading-tight">Nguyễn Văn A</span>
+<span class="text-[10px] text-primary-container uppercase font-semibold tracking-wider">Khách hàng</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- ================= BREADCRUMB ================= -->
+<div class="w-full bg-[#0B0F17] border-b border-outline-variant/20 py-2.5 px-4 md:px-6">
+<div class="max-w-7xl mx-auto flex items-center gap-2 text-xs text-on-surface-variant">
+<a class="hover:text-primary-container transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="home">home</span>
+        Trang chủ
+      </a>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-primary-container transition-colors" href="#">Tài khoản của tôi</a>
+<span class="material-symbols-outlined text-xs text-outline" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary-container font-medium">Sản phẩm yêu thích</span>
+</div>
+</div>
+<!-- ================= MAIN CONTAINER ================= -->
+<main class="max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-8 flex-grow">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+<!-- ================= LEFT COLUMN: ACCOUNT SIDEBAR ================= -->
+<aside class="lg:col-span-3 w-full flex flex-col gap-5">
+<!-- User Info Card -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-4 shadow-md">
+<div class="flex items-center gap-3.5 mb-3.5">
+<div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#151A24] to-[#241F17] border border-primary-container/40 flex items-center justify-center text-primary-container font-orbitron font-extrabold text-xl shadow-[0_0_10px_rgba(237,184,76,0.15)]">
+              A
+            </div>
+<div class="overflow-hidden">
+<div class="flex items-center gap-1.5">
+<h3 class="font-headline font-bold text-base text-on-surface truncate">Nguyễn Văn A</h3>
+</div>
+<span class="inline-block px-2 py-0.5 mt-0.5 rounded text-[10px] font-semibold bg-primary-container/15 text-primary-container border border-primary-container/30 uppercase tracking-wide">
+                Khách hàng
+              </span>
+</div>
+</div>
+<div class="pt-3 border-t border-outline-variant/20 flex flex-col gap-1.5 text-xs text-on-surface-variant">
+<p class="truncate flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="mail">mail</span>
+              vana.collector@store3d.vn
+            </p>
+<div class="flex justify-between items-center bg-[#151A24] px-3 py-2 rounded-lg border border-outline-variant/20 mt-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-base" data-icon="toll">toll</span>
+<span class="text-xs text-on-surface">12.450 pts</span>
+</div>
+<a class="text-[11px] text-primary-container hover:underline font-medium" href="#">Đổi quà</a>
+</div>
+</div>
+</div>
+<!-- Side Navigation Menu -->
+<nav class="bg-surface-container-low rounded-xl border border-outline-variant/20 shadow-md p-2 flex flex-col gap-1">
+<!-- Item 1: Overview -->
+<a class="text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-3 py-2.5 rounded-lg flex items-center justify-between text-sm transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+<span>Tổng quan tài khoản</span>
+</div>
+</a>
+<!-- Item 2: Orders -->
+<a class="text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-3 py-2.5 rounded-lg flex items-center justify-between text-sm transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-lg" data-icon="package_2">package_2</span>
+<span>Đơn hàng của tôi</span>
+</div>
+<span class="text-[11px] font-orbitron bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant">12</span>
+</a>
+<!-- Item 3: Wishlist (ACTIVE STATE) -->
+<a class="bg-surface-container-highest text-primary font-bold border-l-4 border-primary px-3 py-2.5 rounded-r-lg flex items-center justify-between text-sm shadow-[0_0_15px_rgba(237,184,76,0.08)]" href="/tai-khoan/yeu-thich">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined fill-icon text-primary-container text-lg" data-icon="favorite">favorite</span>
+<span class="text-primary-container font-semibold">Sản phẩm yêu thích</span>
+</div>
+<span class="text-[11px] font-orbitron bg-primary-container text-[#07090F] font-bold px-2 py-0.5 rounded-full">4</span>
+</a>
+<!-- Item 4: Coupons -->
+<a class="text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-3 py-2.5 rounded-lg flex items-center justify-between text-sm transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-lg" data-icon="confirmation_number">confirmation_number</span>
+<span>Mã giảm giá &amp; Ưu đãi</span>
+</div>
+<span class="text-[11px] font-orbitron bg-[#151A24] text-secondary border border-secondary/30 px-1.5 py-0.2 rounded">3</span>
+</a>
+<!-- Item 5: Addresses -->
+<a class="text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-3 py-2.5 rounded-lg flex items-center gap-3 text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="location_on">location_on</span>
+<span>Sổ địa chỉ nhận hàng</span>
+</a>
+<!-- Item 6: Security -->
+<a class="text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface px-3 py-2.5 rounded-lg flex items-center gap-3 text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="lock_reset">lock_reset</span>
+<span>Đổi mật khẩu &amp; Bảo mật</span>
+</a>
+<!-- Item 7: Logout -->
+<div class="pt-2 mt-1 border-t border-outline-variant/20">
+<a class="text-error/80 hover:bg-error-container/30 hover:text-error px-3 py-2.5 rounded-lg flex items-center gap-3 text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+<span>Đăng xuất</span>
+</a>
+</div>
+</nav>
+<!-- Technical Support Box -->
+<div class="bg-gradient-to-b from-[#151A24] to-surface-container-low border border-outline-variant/30 rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-center gap-2.5">
+<div class="p-2 rounded-lg bg-secondary-container/20 text-secondary border border-secondary/30">
+<span class="material-symbols-outlined text-xl" data-icon="support_agent">support_agent</span>
+</div>
+<div>
+<p class="text-xs font-semibold text-on-surface">Hỗ trợ kỹ thuật in 3D</p>
+<p class="text-[11px] text-outline font-orbitron">Hotline: <span class="text-primary-container font-bold">1900 1234</span></p>
+</div>
+</div>
+<p class="text-[11px] text-on-surface-variant leading-relaxed">
+            Giờ làm việc: <strong class="text-on-surface">8:30 – 21:00</strong> các ngày trong tuần.
+          </p>
+<button class="w-full py-2 px-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/40 text-xs font-medium text-on-surface hover:text-primary-container transition-all flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm" data-icon="precision_manufacturing">precision_manufacturing</span>
+            Cần hỗ trợ in 3D riêng?
+          </button>
+</div>
+</aside>
+<!-- ================= RIGHT COLUMN: WISHLIST CONTENT ================= -->
+<section class="lg:col-span-9 w-full flex flex-col gap-6">
+<!-- Top Wishlist Header & Actions -->
+<div class="bg-surface-container-low border border-outline-variant/20 rounded-xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h1 class="text-xl md:text-2xl font-bold font-headline text-on-surface flex items-center gap-2">
+                Sản phẩm yêu thích
+                <span class="text-sm font-orbitron font-normal px-2.5 py-0.5 rounded-full bg-primary-container/20 text-primary-container border border-primary-container/30">4</span>
+</h1>
+</div>
+<p class="text-xs md:text-sm text-on-surface-variant mt-1 max-w-xl">
+              Bộ sưu tập các mô hình Resin 8K Ultra và FDM độc bản bạn đang quan tâm và theo dõi giá.
+            </p>
+</div>
+<!-- Controls: Sort & Batch CTA -->
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative inline-block text-left">
+<select class="bg-[#151A24] border border-outline-variant/40 rounded-lg py-2 pl-3 pr-8 text-xs text-on-surface appearance-none focus:outline-none focus:border-primary-container cursor-pointer">
+<option selected="">Mới thêm gần nhất</option>
+<option>Giá: Thấp đến cao</option>
+<option>Giá: Cao đến thấp</option>
+<option>Được quan tâm nhất</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-base" data-icon="unfold_more">unfold_more</span>
+</div>
+<button class="px-3.5 py-2 rounded-lg border border-primary-container text-primary-container hover:bg-primary-container hover:text-[#07090F] transition-all text-xs font-semibold flex items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(237,184,76,0.15)]">
+<span class="material-symbols-outlined text-base" data-icon="add_shopping_cart">add_shopping_cart</span>
+<span>Thêm tất cả vào giỏ hàng</span>
+</button>
+</div>
+</div>
+<!-- ================= WISHLIST PRODUCT GRID (4 ITEMS) ================= -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+<!-- ========== CARD 1: Thần Long Ao Bing ========== -->
+<div class="group bg-[#0E1219] border border-[#1E2532] hover:border-primary-container/70 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(237,184,76,0.15)] relative">
+<!-- Card Image Box -->
+<div class="relative w-full aspect-square bg-[#07090F] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A masterfully sculpted 3D printed translucent dragon statue Ao Bing resting on a dark obsidian base with bioluminescent cyan accents and golden glow. The figurine reveals incredible ultra-high 8K micro detail with shimmering resin reflections. Dramatic museum quality studio lighting against a pitch black atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBS5NXsvZl5fX-lEVY2YrqxKsafZiFkKvGOQSI1Mbty7Qczbjx-2YYt6Kk08tgWg_f5IT26SRu0gwHuB5_p5ef4M4YY3uD2Pzkrn7yXhuWry6wrtpxs7vUUysJ1cbsewuoTrPTTvY_K6cxYyxkEAp1E68gpuUy_LWylxjzbaHm8OI7AfA4n964HjJCozaBCPyzodXxJJVzS2FE-vvB3-fmaIoNrVswxllDuEYda73LqbVPuDsfouq37Nb_FQnRNK0d7GE7AManieN05"/>
+<!-- Badges -->
+<div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold font-orbitron bg-red-600/90 text-white shadow-sm">-22%</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-[#151A24]/90 text-secondary border border-secondary/30 backdrop-blur-sm">Resin 8K</span>
+</div>
+<!-- Unsave/Heart Button (Filled Gold) -->
+<button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-[#0E1219]/80 backdrop-blur-sm border border-primary-container/40 flex items-center justify-center text-primary-container hover:scale-110 active:scale-95 transition-all shadow-md z-10" title="Bỏ khỏi yêu thích">
+<span class="material-symbols-outlined fill-icon text-lg" data-icon="favorite">favorite</span>
+</button>
+</div>
+<!-- Card Body Content -->
+<div class="p-3.5 flex flex-col flex-grow justify-between gap-2.5">
+<div>
+<!-- Rating and Stock Status -->
+<div class="flex items-center justify-between text-[11px] mb-1">
+<div class="flex items-center gap-1 text-[#FBBF24]">
+<span class="material-symbols-outlined fill-icon text-xs" data-icon="star">star</span>
+<span class="font-bold font-orbitron text-white">5.0</span>
+<span class="text-outline text-[10px]">(128)</span>
+</div>
+<span class="text-[10px] text-emerald-400 font-medium">Còn hàng (Xưởng sẵn)</span>
+</div>
+<!-- Product Title -->
+<h4 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary-container transition-colors leading-snug">
+                  Tượng Thần Long Ao Bing Edition (Resin 8K Ultra)
+                </h4>
+</div>
+<!-- Pricing & Action Row -->
+<div class="pt-2 border-t border-outline-variant/20 flex items-end justify-between">
+<div>
+<div class="text-[11px] text-outline line-through font-orbitron">890.000₫</div>
+<div class="text-base font-orbitron font-extrabold text-primary-container">690.000₫</div>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary-container text-[#07090F] hover:brightness-110 active:scale-90 flex items-center justify-center transition-all shadow-[0_0_12px_rgba(237,184,76,0.3)]" title="Thêm vào giỏ">
+<span class="material-symbols-outlined text-lg font-bold" data-icon="shopping_bag">shopping_bag</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ========== CARD 2: Samurai Oni ========== -->
+<div class="group bg-[#0E1219] border border-[#1E2532] hover:border-primary-container/70 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(237,184,76,0.15)] relative">
+<div class="relative w-full aspect-square bg-[#07090F] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A highly detailed 3D printed collectible bust of an armored Oni Samurai with a demonic mask and katana elements. Finished in matte charcoal black with metallic gold leaf filigree accents. Precision SLA resin layerless quality shot in moody studio rim lighting with deep shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVMocLukC4Q03wfSaCYUujlJ0WQ8GxyAHxzxDPGBA8jBV9YZE9_FFWixSzo18iefzv8f-M9ekR2nyOZ9jOhSxarkXW7yPKa5FMReq6a_GZW4vHMi3e8oZ6Fc94DJowTgL5ZotNAYLX0Pt9WmlvHiYk7v5KeSxk3V1esP9Im4UMFvJ6tol15z0gifuu1_Zte98O6NyBex_CP5rYObJSf2lEDaENMLOfAzuZpCTbPaeadYNI65mQ4HHyorKy84OM9dfUmyHDz0itUwmT"/>
+<div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold font-orbitron bg-amber-500/90 text-[#07090F]">Bản Collector #24</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-[#151A24]/90 text-secondary border border-secondary/30 backdrop-blur-sm">Resin SLA</span>
+</div>
+<button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-[#0E1219]/80 backdrop-blur-sm border border-primary-container/40 flex items-center justify-center text-primary-container hover:scale-110 active:scale-95 transition-all shadow-md z-10" title="Bỏ khỏi yêu thích">
+<span class="material-symbols-outlined fill-icon text-lg" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-3.5 flex flex-col flex-grow justify-between gap-2.5">
+<div>
+<div class="flex items-center justify-between text-[11px] mb-1">
+<div class="flex items-center gap-1 text-[#FBBF24]">
+<span class="material-symbols-outlined fill-icon text-xs" data-icon="star">star</span>
+<span class="font-bold font-orbitron text-white">5.0</span>
+<span class="text-outline text-[10px]">(94)</span>
+</div>
+<span class="text-[10px] text-amber-400 font-medium">Sắp hết: còn 2 bản</span>
+</div>
+<h4 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary-container transition-colors leading-snug">
+                  Tượng Bán Thân Kiếm Sĩ Oni Samurai Mặt Nạ
+                </h4>
+</div>
+<div class="pt-2 border-t border-outline-variant/20 flex items-end justify-between">
+<div>
+<div class="text-[11px] text-outline line-through font-orbitron">1.700.000₫</div>
+<div class="text-base font-orbitron font-extrabold text-primary-container">1.450.000₫</div>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary-container text-[#07090F] hover:brightness-110 active:scale-90 flex items-center justify-center transition-all shadow-[0_0_12px_rgba(237,184,76,0.3)]" title="Thêm vào giỏ">
+<span class="material-symbols-outlined text-lg font-bold" data-icon="shopping_bag">shopping_bag</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ========== CARD 3: Rồng Khớp Động Articulated Dragon ========== -->
+<div class="group bg-[#0E1219] border border-[#1E2532] hover:border-primary-container/70 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(237,184,76,0.15)] relative">
+<div class="relative w-full aspect-square bg-[#07090F] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="An articulated flexible 3D printed oriental serpent dragon printed in lustrous silk gold PLA filament. The serpentine body curls elegantly across an obsidian dark showcase table with brilliant light reflections bouncing off its golden scales and sharp horns." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvAEsmOK5-EB2W0u37Lsdx2Eq7I5VkuwbygA41pEphl7im66w8YQF5IxKqP0VZsirkYg-UfiRngcpqj22SokeNqbLmmvf6KX0R57p1x6m0_NAJC-YNqMRHVyKsZH-0bqqew6wOjbkwDScz6INlGrotHK8z2kWA6xYlUuLveepKftC8LawtMWDXsCCHdH3nTx1HS8AqxyI1I-DyyDeQP7O677mrU51LgUExwP4PgjtG9oGot9hmG5p4y1d1qUj8LXajiSXT8V-3VX-v"/>
+<div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold font-orbitron bg-red-600/90 text-white shadow-sm">-20%</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-[#151A24]/90 text-primary border border-primary-container/30 backdrop-blur-sm">PLA Silk Gold</span>
+</div>
+<button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-[#0E1219]/80 backdrop-blur-sm border border-primary-container/40 flex items-center justify-center text-primary-container hover:scale-110 active:scale-95 transition-all shadow-md z-10" title="Bỏ khỏi yêu thích">
+<span class="material-symbols-outlined fill-icon text-lg" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-3.5 flex flex-col flex-grow justify-between gap-2.5">
+<div>
+<div class="flex items-center justify-between text-[11px] mb-1">
+<div class="flex items-center gap-1 text-[#FBBF24]">
+<span class="material-symbols-outlined fill-icon text-xs" data-icon="star">star</span>
+<span class="font-bold font-orbitron text-white">4.9</span>
+<span class="text-outline text-[10px]">(189)</span>
+</div>
+<span class="text-[10px] text-emerald-400 font-medium">Còn hàng</span>
+</div>
+<h4 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary-container transition-colors leading-snug">
+                  Rồng Khớp Động Articulated Dragon Gold Hoàng Gia
+                </h4>
+</div>
+<div class="pt-2 border-t border-outline-variant/20 flex items-end justify-between">
+<div>
+<div class="text-[11px] text-outline line-through font-orbitron">450.000₫</div>
+<div class="text-base font-orbitron font-extrabold text-primary-container">360.000₫</div>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary-container text-[#07090F] hover:brightness-110 active:scale-90 flex items-center justify-center transition-all shadow-[0_0_12px_rgba(237,184,76,0.3)]" title="Thêm vào giỏ">
+<span class="material-symbols-outlined text-lg font-bold" data-icon="shopping_bag">shopping_bag</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ========== CARD 4: Kê Tay Bàn Phím Voronoi (TẠM HẾT HÀNG) ========== -->
+<div class="group bg-[#0E1219] border border-[#1E2532] hover:border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 relative opacity-95">
+<div class="relative w-full aspect-square bg-[#07090F] overflow-hidden">
+<img class="w-full h-full object-cover grayscale-[30%] group-hover:scale-105 transition-transform duration-500" data-alt="An ergonomic mechanical keyboard wrist rest with an intricate organic Voronoi cellular lattice structure 3D printed in matte carbon PETG. Displayed beside a premium custom cyberpunk mechanical keyboard on a dark slate desk with soft accent cyan lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE7_oA9hKIKwcC7L6k6OxVF-Beu67l4WgLmSPALoYvNrHcuWTt86u9ZtdQAIJAfB8U0fUs90M1lyWg5m7Q3ZA90bRbLmzW6LRlJffQPX7rDnEeNCUU_MFOw0e2pnhrvxcqg9dWFHbK3HArN9Exne4or9wITrB56dXmkYELa_E2G6s8SfRjI-UP94Uid-PM00z7J24IH85pSIE5Vr35SmSBojS0YX1JBloO5mxp_0nh-8XC-VNsSp9N-WVGrp05cbiXF19dpaYqAuvF"/>
+<div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start z-10">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold font-orbitron bg-stone-700/90 text-stone-200">Hết hàng</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-[#151A24]/90 text-outline border border-outline-variant/40 backdrop-blur-sm">PETG Carbon</span>
+</div>
+<button class="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-[#0E1219]/80 backdrop-blur-sm border border-primary-container/40 flex items-center justify-center text-primary-container hover:scale-110 active:scale-95 transition-all shadow-md z-10" title="Bỏ khỏi yêu thích">
+<span class="material-symbols-outlined fill-icon text-lg" data-icon="favorite">favorite</span>
+</button>
+</div>
+<div class="p-3.5 flex flex-col flex-grow justify-between gap-2.5">
+<div>
+<div class="flex items-center justify-between text-[11px] mb-1">
+<div class="flex items-center gap-1 text-[#FBBF24]">
+<span class="material-symbols-outlined fill-icon text-xs" data-icon="star">star</span>
+<span class="font-bold font-orbitron text-white">4.8</span>
+<span class="text-outline text-[10px]">(53)</span>
+</div>
+<span class="text-[10px] text-amber-500 font-medium">Tạm hết (Nhận in 48h)</span>
+</div>
+<h4 class="font-headline font-bold text-sm text-on-surface line-clamp-2 hover:text-primary-container transition-colors leading-snug">
+                  Kê Tay Bàn Phím Khối Đa Diện Voronoi PETG
+                </h4>
+</div>
+<div class="pt-2 border-t border-outline-variant/20 flex items-end justify-between gap-2">
+<div>
+<div class="text-[11px] text-outline line-through font-orbitron">600.000₫</div>
+<div class="text-base font-orbitron font-extrabold text-primary-container">520.000₫</div>
+</div>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-container-high border border-outline-variant/50 text-[11px] font-medium text-on-surface-variant hover:text-primary-container hover:border-primary-container/40 transition-colors flex items-center gap-1 active:scale-95">
+<span class="material-symbols-outlined text-sm" data-icon="history_toggle_off">history_toggle_off</span>
+<span>Đặt in 48h</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= ON-DEMAND 3D PRINTING BANNER ================= -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#151A24] via-[#1A1F2C] to-surface-container-low border border-primary-container/30 p-5 md:p-6 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 border border-primary-container/40 flex items-center justify-center text-primary-container flex-shrink-0">
+<span class="material-symbols-outlined text-2xl" data-icon="upload_file">upload_file</span>
+</div>
+<div>
+<h3 class="text-base font-bold text-on-surface">Bạn có file 3D muốn in riêng?</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">Gửi file STL / OBJ ngay để nhận báo giá tự động công nghệ Resin &amp; FDM trong 2h.</p>
+</div>
+</div>
+<button class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary-container text-[#07090F] font-bold text-xs hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(237,184,76,0.25)] flex items-center justify-center gap-2 flex-shrink-0">
+<span class="material-symbols-outlined text-base font-bold" data-icon="publish">publish</span>
+<span>Gửi file in 3D</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+<!-- ================= FOOTER ================= -->
+<footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 mt-12 py-10 md:py-12">
+<div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col gap-8">
+<!-- Top Columns Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Col 1: Brand Info -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded bg-surface-container border border-primary-container/40 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="deployed_code">deployed_code</span>
+</div>
+<span class="font-orbitron font-extrabold text-lg tracking-wider text-primary-container">STORE 3D</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+            STORE 3D - Tiên phong mô hình in 3D Resin 8K Ultra &amp; FDM cao cấp tại Việt Nam. Thiết kế độc bản, độ sắc nét tuyệt đối cho các nhà sưu tập.
+          </p>
+<div class="flex items-center gap-2.5 pt-1 text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="verified">verified</span>
+<span class="text-xs text-on-surface font-medium">Bảo hành 1 đổi 1 trong 7 ngày</span>
+</div>
+</div>
+<!-- Col 2: Showroom System -->
+<div class="flex flex-col gap-3">
+<h4 class="font-headline font-bold text-sm text-on-surface">Hệ thống Showroom</h4>
+<div class="flex flex-col gap-2.5 text-xs text-on-surface-variant">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-sm text-primary-container mt-0.5" data-icon="location_on">location_on</span>
+<div>
+<strong class="text-on-surface">Hà Nội:</strong> 45 Tràng Tiền, Quận Hoàn Kiếm
+              </div>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-sm text-primary-container mt-0.5" data-icon="location_on">location_on</span>
+<div>
+<strong class="text-on-surface">TP. Hồ Chí Minh:</strong> 120 Lê Lợi, Quận 1
+              </div>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<span class="material-symbols-outlined text-sm text-primary-container" data-icon="call">call</span>
+<div>Hotline: <strong class="text-primary-container font-orbitron">1900 1234</strong> (8:30 – 21:00)</div>
+</div>
+</div>
+</div>
+<!-- Col 3: Policy & Links -->
+<div class="flex flex-col gap-3">
+<h4 class="font-headline font-bold text-sm text-on-surface">Hỗ trợ &amp; Chính sách</h4>
+<ul class="flex flex-col gap-1.5 text-xs text-on-surface-variant">
+<li><a class="hover:text-primary transition-colors" href="#">Về chúng tôi</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Hướng dẫn mua hàng</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Chính sách đổi trả 7 ngày</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Chính sách bảo mật</a></li>
+<li><a class="hover:text-primary transition-colors" href="#">Điều khoản dịch vụ</a></li>
+</ul>
+</div>
+<!-- Col 4: Payments & Security Commitment -->
+<div class="flex flex-col gap-3">
+<h4 class="font-headline font-bold text-sm text-on-surface">Phương thức thanh toán</h4>
+<p class="text-xs text-on-surface-variant">Hỗ trợ 2 phương thức an toàn và tiện lợi:</p>
+<div class="flex items-center gap-2">
+<div class="px-3 py-1.5 rounded-lg bg-[#151A24] border border-outline-variant/40 text-xs font-semibold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-primary-container" data-icon="payments">payments</span>
+<span>COD</span>
+</div>
+<div class="px-3 py-1.5 rounded-lg bg-[#151A24] border border-outline-variant/40 text-xs font-semibold text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary" data-icon="qr_code_2">qr_code_2</span>
+<span>VietQR</span>
+</div>
+</div>
+<div class="mt-2 p-2.5 rounded-lg bg-[#151A24]/70 border border-outline-variant/30 flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-400 text-lg" data-icon="shield">shield</span>
+<div class="text-[11px] text-on-surface-variant">
+<span class="font-semibold text-on-surface">Thanh toán an toàn</span><br/>
+              Miễn phí vận chuyển toàn quốc 0₫
+            </div>
+</div>
+</div>
+</div>
+<!-- Bottom Copyright Bar -->
+<div class="pt-6 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-on-surface-variant">
+<p>© 2025 STORE 3D. Bản quyền thuộc về Hệ sinh thái Mô hình Obsidian Gold.</p>
+<div class="flex items-center gap-4 text-[11px]">
+<span>Phiên bản in 3D FDM &amp; Resin 8K</span>
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<span>Hotline: 1900 1234</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

@@ -1,6 +1,6 @@
 # Store3D — Current State
 
-> Last updated: 2026-10-16
+> Last updated: 2026-10-17
 
 ## Current Project Status
 
@@ -12,8 +12,11 @@
 - **Workflow evidence:** config comparison (nova-cms-test vs store3D) proved no missing config; behavior difference = project AGENTS.md small-task bias + legacy in-flight work. Full-rebuild classified LARGE/ARCHITECTURAL → full workflow.
 - **New Stitch project:** `projects/15214270922225987910` (STORE3D-Full-Rebuild) — https://stitch.withgoogle.com/projects/15214270922225987910
 - **Design System:** "Obsidian Gold" `assets/16575537908031701223` (DARK only; bg #07090F, gold #EDB84C, blue #3E8BFF, Be Vietnam Pro, round-8) — owner-approved via checkpoint before upload. Source doc `.stitch/DESIGN.md`; index `.stitch/metadata.json`.
-- **18 screens generated + QA'd** (storefront D/T/M, PLP, PDP, checkout, cart drawer, login, account+timeline, news, contact, navbar/footer spec, logo system, 5 admin) → `.stitch/designs/*.{png,html}`. 6 business-accuracy edits applied & re-verified (checkout: COD+VietQR only; cart: ship 0₫, COD/VietQR; PDP: 3 tabs; account: no fake VIP tier; news: real CTA; admin-orders: no upsell). Known placeholder copy (hotlines/addresses/counts) listed in Gate 1 report for replacement by API data at implementation.
-- **Blocked on owner:** GATE 1 design approval. No app code touched; no merge/deploy. Superseded pre-edit screen versions remain on Stitch canvas (no delete API) — manual cleanup optional.
+- **GATE 1 v2 (2026-10-17) — full route coverage, awaiting owner approval:**
+  - **40 screens** (was 18): +22 new covering every storefront route from `client/src/App.tsx` (QR payment, order success, review form, account dashboard/coupons/wishlist/profile, news detail, PLP search+empty states, mobile PDP, 404, overlays spec, mini-game modal, AI chat) and every admin module (categories, coupons, reviews, users, news CRUD, order-detail drawer, mini-game config). Index: `.stitch/metadata.json`.
+  - **Business-accuracy pass (2 rounds, 20 `edit_screens` calls):** removed all Visa/Mastercard/MoMo/Napas badges (COD+VietQR only), all VIP/membership language (RBAC CUSTOMER only), all "24/7" → "8:30–21:00", all "SSL 256-bit" claims, all "Napas247"/"MB Bank" references; hotline standardized to placeholder "1900 1234" (real value from config at implementation). Verified by regex scan of all 40 HTMLs (0 visible violations; only HTML comments mention removed terms) + visual QA of 27 screens this pass.
+  - **Git audit (read-only, 2026-10-17):** local = `master` (04bcdb2, ahead 2 of origin/master) + `feat/aobing-hero` (7a5a05c, worktree `..\store3d-aobing`, no upstream); remote = origin/master only; no dev/demo/member/* branches exist yet; 1 worktree; 0 stashes/tags; untracked `review-artifacts/`. Target structure (main/dev/demo/member/{khang,thien,dat,khanh}) requires owner-approved ref renames/creations — **no branch ops executed**.
+  - **Blocked on owner:** GATE 1 v2 approval (design + coverage). No app code touched; no merge/push/deploy; no git history changes. Superseded pre-edit screens remain on Stitch canvas (no delete API).
 
 ## Full Redesign — Stitch Design Delivery (2026-10-16, awaiting Gate 1 owner approval) — SUPERSEDED by track v2 above
 
