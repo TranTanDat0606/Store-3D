@@ -4,7 +4,7 @@ import { paymentService } from '../services/paymentService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { successResponse } from '../utils/apiResponse';
 import { UserRole } from '../models';
-import { AppError } from '../utils/AppError';
+import { assertOwnership } from '../utils/AppError';
 import type { AuthRequest } from '../middleware/auth';
 
 export const orderController = {
@@ -23,9 +23,8 @@ export const orderController = {
   getById: asyncHandler(async (req: AuthRequest, res: Response) => {
     const order = await orderService.getById(req.params.id);
     const isAdmin = req.user!.role === UserRole.Admin;
-    if (!isAdmin && String(order.user) !== req.user!._id) {
-      throw new AppError('Không có quyền xem đơn hàng này', 403);
-    }
+    // GAP-13: someone else's order → 403 with the shared forbidden copy.
+    if (!isAdmin) assertOwnership(order.user, req.user!._id);
     return successResponse(res, order);
   }),
 

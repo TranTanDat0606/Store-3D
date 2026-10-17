@@ -1,5 +1,5 @@
 import { Address, type IAddress } from '../models/Address';
-import { AppError } from '../utils/AppError';
+import { assertOwnership, resourceNotFound } from '../utils/AppError';
 
 export interface CreateAddressInput {
   userId: string;
@@ -30,8 +30,10 @@ class AddressService {
   }
 
   async getById(addressId: string, userId: string): Promise<IAddress> {
-    const address = await Address.findOne({ _id: addressId, userId });
-    if (!address) throw new AppError('Không tìm thấy địa chỉ', 404);
+    // GAP-13: genuinely missing → 404; another user's address → 403.
+    const address = await Address.findOne({ _id: addressId });
+    if (!address) throw resourceNotFound('address');
+    assertOwnership(address.userId, userId);
     return address;
   }
 
@@ -54,8 +56,9 @@ class AddressService {
   }
 
   async update(addressId: string, userId: string, data: UpdateAddressInput): Promise<IAddress> {
-    const address = await Address.findOne({ _id: addressId, userId });
-    if (!address) throw new AppError('Không tìm thấy địa chỉ', 404);
+    const address = await Address.findOne({ _id: addressId });
+    if (!address) throw resourceNotFound('address');
+    assertOwnership(address.userId, userId);
 
     Object.assign(address, data);
     await address.save();
@@ -63,8 +66,12 @@ class AddressService {
   }
 
   async delete(addressId: string, userId: string): Promise<void> {
-    const address = await Address.findOneAndDelete({ _id: addressId, userId });
-    if (!address) throw new AppError('Không tìm thấy địa chỉ', 404);
+    // Ownership is checked BEFORE the delete — a foreign address is rejected
+    // with 403 and never removed by the probe.
+    const address = await Address.findOne({ _id: addressId });
+    if (!address) throw resourceNotFound('address');
+    assertOwnership(address.userId, userId);
+    await Address.deleteOne({ _id: address._id });
 
     // If deleted address was default, set the most recent one as default
     if (address.isDefault) {
@@ -77,8 +84,9 @@ class AddressService {
   }
 
   async setDefault(addressId: string, userId: string): Promise<IAddress> {
-    const address = await Address.findOne({ _id: addressId, userId });
-    if (!address) throw new AppError('Không tìm thấy địa chỉ', 404);
+    const address = await Address.findOne({ _id: addressId });
+    if (!address) throw resourceNotFound('address');
+    assertOwnership(address.userId, userId);
 
     await Address.updateMany(
       { userId },

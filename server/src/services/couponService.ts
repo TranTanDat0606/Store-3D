@@ -1,5 +1,5 @@
 import { Coupon, UserCoupon, Product } from '../models';
-import { AppError } from '../utils/AppError';
+import { AppError, duplicateResource, resourceNotFound } from '../utils/AppError';
 import {
   computeDiscount,
   computePreviewSubtotal,
@@ -53,23 +53,23 @@ export class CouponService {
 
   async getById(id: string) {
     const coupon = await Coupon.findById(id);
-    if (!coupon) throw new AppError('Không tìm thấy mã giảm giá', 404);
+    if (!coupon) throw resourceNotFound('coupon');
     return coupon;
   }
 
   async create(data: CreateCouponInput) {
     const existing = await Coupon.findOne({ code: data.code.toUpperCase().trim() });
-    if (existing) throw new AppError('Mã giảm giá đã tồn tại', 409);
+    if (existing) throw duplicateResource('coupon');
     return Coupon.create({ ...data, code: data.code.toUpperCase().trim() });
   }
 
   async update(id: string, data: UpdateCouponInput) {
     const coupon = await Coupon.findById(id);
-    if (!coupon) throw new AppError('Không tìm thấy mã giảm giá', 404);
+    if (!coupon) throw resourceNotFound('coupon');
 
     if (data.code && data.code.toUpperCase().trim() !== coupon.code) {
       const existing = await Coupon.findOne({ code: data.code.toUpperCase().trim() });
-      if (existing) throw new AppError('Mã giảm giá đã tồn tại', 409);
+      if (existing) throw duplicateResource('coupon');
     }
 
     const updated = await Coupon.findByIdAndUpdate(
@@ -85,7 +85,7 @@ export class CouponService {
 
   async remove(id: string) {
     const deleted = await Coupon.findByIdAndDelete(id);
-    if (!deleted) throw new AppError('Không tìm thấy mã giảm giá', 404);
+    if (!deleted) throw resourceNotFound('coupon');
     return deleted;
   }
 
@@ -129,7 +129,9 @@ export class CouponService {
       }
     }
 
-    throw new AppError('Mã giảm giá không tồn tại', 400);
+    // GAP-13: an unknown code is a missing resource (404), same as the admin
+    // path — exhausted/expired/minOrder coupons stay 400 business rules above.
+    throw resourceNotFound('coupon');
   }
 
   /** DB product-price lookup backing the trusted preview — prices never come from the request. */

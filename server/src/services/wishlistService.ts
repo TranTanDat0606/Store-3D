@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Wishlist, Product } from '../models';
-import { AppError } from '../utils/AppError';
+import { resourceNotFound } from '../utils/AppError';
 
 export class WishlistService {
   private async ensureWishlist(userId: string) {
@@ -19,7 +19,7 @@ export class WishlistService {
 
   async add(userId: string, productId: string) {
     const product = await Product.findById(productId);
-    if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
+    if (!product) throw resourceNotFound('product');
 
     const wishlist = await this.ensureWishlist(userId);
     const exists = wishlist.products.some((id: Types.ObjectId) => String(id) === productId);
@@ -41,7 +41,7 @@ export class WishlistService {
 
   async moveToCart(userId: string, productId: string) {
     const product = await Product.findById(productId);
-    if (!product) throw new AppError('Không tìm thấy sản phẩm', 404);
+    if (!product) throw resourceNotFound('product');
 
     const wishlist = await this.ensureWishlist(userId);
     wishlist.products = wishlist.products.filter((id: Types.ObjectId) => String(id) !== productId);

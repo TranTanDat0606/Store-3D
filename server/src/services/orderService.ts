@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, Product, UserCoupon, Address } from '../models';
-import { AppError } from '../utils/AppError';
+import { AppError, assertOwnership, resourceNotFound } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
 import { computeDiscount } from './discountMath';
@@ -216,17 +216,18 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
     }
   }
 
-  throw new AppError('Mã giảm giá không tồn tại', 400);
+  // GAP-13: an unknown code is a missing resource, not a business-rule break.
+  throw resourceNotFound('coupon');
 }
 
 export class OrderService {
   async create(userId: string, data: CreateOrderInput) {
     // Validate address ownership if addressId is provided
     if (data.customer.addressId) {
-      const address = await Address.findOne({ _id: data.customer.addressId, userId });
-      if (!address) {
-        throw new AppError('Địa chỉ không hợp lệ hoặc không thuộc về bạn', 400);
-      }
+      const address = await Address.findOne({ _id: data.customer.addressId });
+      // GAP-13: unknown address → 404, someone else's address → 403.
+      if (!address) throw resourceNotFound('address');
+      assertOwnership(address.userId, userId);
       // Use the address from the Address model as source of truth
       data.customer.address = [address.street, address.ward, address.district, address.province].filter(Boolean).join(', ');
       data.customer.name = address.recipientName;
@@ -248,7 +249,7 @@ export class OrderService {
 
     for (const item of data.items) {
       const product = productMap.get(item.product);
-      if (!product) throw new AppError('Sản phẩm không tồn tại', 400);
+      if (!product) throw resourceNotFound('product');
       if (product.stock < item.quantity) {
         throw new AppError(`Sản phẩm "${product.name}" không đủ hàng`, 400);
       }
@@ -438,13 +439,13 @@ export class OrderService {
       path: 'items',
       populate: { path: 'product', select: 'name slug images salePrice' },
     });
-    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+    if (!order) throw resourceNotFound('order');
     return order;
   }
 
   async updateStatus(id: string, data: UpdateOrderStatusInput) {
     const order = await Order.findById(id);
-    if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
+    if (!order) throw resourceNotFound('order');
 
     const fromStatus = order.status as OrderStatus;
 
@@ -522,8 +523,9 @@ export class OrderService {
     if (!updated) {
       // Distinguish between not-found and wrong-status
       const order = await Order.findById(orderId);
-      if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
-      if (String(order.user) !== userId) throw new AppError('Không có quyền hủy đơn hàng này', 403);
+      if (!order) throw resourceNotFound('order');
+      // GAP-13: the order exists but is not this user's → 403, never a 404.
+      assertOwnership(order.user, userId);
       throw new AppError('Không thể hủy đơn hàng ở trạng thái này', 400);
     }
 
