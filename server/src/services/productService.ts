@@ -4,7 +4,7 @@ import { Product, ProductStatus, Category } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import slugify from '../utils/slugify';
-import { buildPublicProductFilter } from './productQuery';
+import { buildPublicProductFilter, buildProductListFilter, type ProductListContext } from './productQuery';
 import type { CreateProductInput, UpdateProductInput } from '../validators/product';
 
 // toObjectId moved to productQuery.ts (pure builders need it); re-exported here
@@ -28,31 +28,32 @@ async function ensureUniqueSlug(name: string, slug: string | undefined, excludeI
 
 export class ProductService {
   /**
-   * Public product listing filter — only active products are ever listed.
-   * Admin parameter pass-through lives in `buildAdminProductFilter` (productQuery.ts)
-   * for the dedicated admin routes that will serve it (news `/admin/*` pattern).
+   * List filter (GAP-1 + Task 1b): admins — resolved by optional auth on
+   * `GET /api/products` — get the pass-through builder so the admin products
+   * page can list/count every status; everyone else keeps the forced-active
+   * public builder.
    */
-  private buildFilter(params: Record<string, unknown>): ProductFilter {
-    return buildPublicProductFilter(params) as ProductFilter;
+  private buildFilter(params: Record<string, unknown>, context: ProductListContext = {}): ProductFilter {
+    return buildProductListFilter(params, context) as ProductFilter;
   }
 
-  async list(params: Record<string, unknown>) {
+  async list(params: Record<string, unknown>, context: ProductListContext = {}) {
     if (params.sort === 'best-selling') {
-      return this.listBestSelling(params);
+      return this.listBestSelling(params, context);
     }
     if (params.sort === 'discount') {
-      return this.listDiscounted(params);
+      return this.listDiscounted(params, context);
     }
     const options = { ...parsePagination(params), searchFields: ['name'] };
-    const filter = this.buildFilter(params);
+    const filter = this.buildFilter(params, context);
 
     return apiFeatures(Product.find().populate('category', 'name slug image'), filter, options);
   }
 
   /** Sorts by total quantity sold across all orders (products with no sales included last). */
-  private async listBestSelling(params: Record<string, unknown>) {
+  private async listBestSelling(params: Record<string, unknown>, context: ProductListContext = {}) {
     const { page, limit, search } = parsePagination(params);
-    const matchStage: Record<string, unknown> = { ...this.buildFilter(params) };
+    const matchStage: Record<string, unknown> = { ...this.buildFilter(params, context) };
     if (search) {
       matchStage.$and = [
         {
@@ -100,10 +101,10 @@ export class ProductService {
   }
 
   /** Sorts by discount ratio (salePrice/originalPrice) ascending — biggest discount first. */
-  private async listDiscounted(params: Record<string, unknown>) {
+  private async listDiscounted(params: Record<string, unknown>, context: ProductListContext = {}) {
     const { page, limit, search } = parsePagination(params);
     const matchStage: Record<string, unknown> = {
-      ...this.buildFilter(params),
+      ...this.buildFilter(params, context),
       originalPrice: { $gt: 0 },
     };
     if (search) {
@@ -152,10 +153,10 @@ export class ProductService {
   }
 
   /** Resolves a category slug into a product filter (used by GET /products?categorySlug=...). */
-  async listByCategorySlug(categorySlug: string, params: Record<string, unknown>) {
+  async listByCategorySlug(categorySlug: string, params: Record<string, unknown>, context: ProductListContext = {}) {
     const category = await Category.findOne({ slug: categorySlug });
     if (!category) throw new AppError('Không tìm thấy danh mục', 404);
-    return this.list({ ...params, category: String(category._id) });
+    return this.list({ ...params, category: String(category._id) }, context);
   }
 
   async getBySlug(slug: string) {

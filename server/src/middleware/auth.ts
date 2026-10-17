@@ -32,6 +32,31 @@ export async function requireAuth(req: AuthRequest, _res: Response, next: NextFu
   next();
 }
 
+/**
+ * Optional auth (Task 1b): attaches the user ONLY when a valid token is
+ * present; on a missing/invalid/expired token or a failed lookup it simply
+ * leaves `req.user` unset. It never calls `next(err)`, so it can never turn a
+ * public route into a 401 — read-only decoration for `GET /api/products`.
+ */
+export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
+  try {
+    const token = req.cookies?.[TOKEN_COOKIE_NAME] || req.headers.authorization?.replace('Bearer ', '');
+    if (!token) return next();
+
+    const payload = verifyToken(token);
+    if (!payload) return next();
+
+    const user = await User.findById(payload.sub).select('_id role');
+    if (!user) return next();
+
+    req.user = { _id: String(user._id), role: user.role };
+  } catch {
+    // Never fail a public route because of auth decoration.
+    req.user = undefined;
+  }
+  next();
+}
+
 /** Requires an admin role. Must run after requireAuth. */
 export function requireAdmin(req: AuthRequest, _res: Response, next: NextFunction) {
   if (req.user?.role !== UserRole.Admin) {

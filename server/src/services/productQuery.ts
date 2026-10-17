@@ -45,6 +45,22 @@ export function buildPublicProductFilter(query: Query): Query {
   return { ...buildAdminProductFilter(query), status: ProductStatus.Active };
 }
 
+/** Caller context resolved by optional auth on `GET /api/products` (Task 1b). */
+export interface ProductListContext {
+  /** True only when a valid token resolved `req.user.role === 'admin'`. */
+  isAdmin?: boolean;
+}
+
+/**
+ * Picks the filter for a product list request: admins get full pass-through
+ * (so the admin products page can list/count inactive + out-of-stock items),
+ * everything else — anonymous, customer, or no context at all — keeps the
+ * forced-active public filter.
+ */
+export function buildProductListFilter(query: Query, context: ProductListContext = {}): Query {
+  return context.isAdmin ? buildAdminProductFilter(query) : buildPublicProductFilter(query);
+}
+
 /**
  * Order-creation guard (GAP-1): every requested item must resolve to an
  * existing product (404) and that product must still be sellable (400).

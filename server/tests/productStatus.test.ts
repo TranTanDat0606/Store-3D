@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildAdminProductFilter, buildPublicProductFilter, assertItemsActive } from '../src/services/productQuery';
+import { buildAdminProductFilter, buildPublicProductFilter, buildProductListFilter, assertItemsActive } from '../src/services/productQuery';
 import { AppError } from '../src/utils/AppError';
 
 function isAppError(err: unknown, statusCode: number, message: string): boolean {
@@ -21,6 +21,35 @@ test('admin product filter passes status through untouched', () => {
   assert.equal(buildAdminProductFilter({ status: 'inactive' }).status, 'inactive');
   assert.equal(buildAdminProductFilter({ status: 'out-of-stock' }).status, 'out-of-stock');
   assert.equal(buildAdminProductFilter({}).status, undefined);
+});
+
+test('admin context passes requested status through to the product query', () => {
+  const admin = { isAdmin: true };
+
+  assert.equal(buildProductListFilter({ status: 'inactive' }, admin).status, 'inactive');
+  assert.equal(buildProductListFilter({ status: 'out-of-stock' }, admin).status, 'out-of-stock');
+
+  assert.deepEqual(buildProductListFilter({ status: 'inactive', material: 'PLA', minPrice: '1000' }, admin), {
+    material: 'PLA',
+    status: 'inactive',
+    salePrice: { $gte: 1000 },
+  });
+
+  // No status requested → no status constraint (admin sees every status).
+  assert.equal(buildProductListFilter({}, admin).status, undefined);
+});
+
+test('anonymous or customer context forces active products regardless of requested status', () => {
+  const anonymous = { isAdmin: false }; // no token / invalid token: req.user stays unset
+  const customer = { isAdmin: false }; // valid token, role !== 'admin'
+  const omitted = {}; // context not passed at all (internal callers)
+
+  for (const context of [anonymous, customer, omitted]) {
+    assert.equal(buildProductListFilter({ status: 'inactive' }, context).status, 'active');
+    assert.equal(buildProductListFilter({ status: 'out-of-stock' }, context).status, 'active');
+    assert.equal(buildProductListFilter({}, context).status, 'active');
+    assert.equal(buildProductListFilter({ status: 'out-of-stock', material: 'PLA' }, context).material, 'PLA');
+  }
 });
 
 test('assertItemsActive throws 404 when a requested product does not exist', () => {

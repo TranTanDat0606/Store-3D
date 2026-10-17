@@ -5,11 +5,12 @@ import { successResponse } from '../utils/apiResponse';
 import type { AuthRequest } from '../middleware/auth';
 
 export const productController = {
-  list: asyncHandler(async (req, res: Response) => {
+  list: asyncHandler(async (req: AuthRequest, res: Response) => {
     const { categorySlug, ...rest } = req.query as Record<string, unknown>;
+    const context = { isAdmin: req.user?.role === 'admin' };
     const result = categorySlug
-      ? await productService.listByCategorySlug(String(categorySlug), rest)
-      : await productService.list(req.query as Record<string, unknown>);
+      ? await productService.listByCategorySlug(String(categorySlug), rest, context)
+      : await productService.list(req.query as Record<string, unknown>, context);
     return successResponse(res, result.data, { pagination: result.pagination });
   }),
 
