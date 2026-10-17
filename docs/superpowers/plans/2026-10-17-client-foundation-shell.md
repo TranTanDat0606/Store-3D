@@ -123,7 +123,7 @@
 
 **Steps:**
 - [ ] **Step 1:** Study `overlays-spec.html`: dialog radius/border/surface, button styles, toast style, confirm-destructive pattern (red), empty/loading states.
-- [ ] **Step 2:** Align Toaster config (dark, position, richColors off per design) + any ui overrides needed; create missing primitives. No feature-page dialogs (Plans 3–6).
+- [ ] **Step 2:** Align Toaster config (dark, position top-right, duration 4000, closeButton; **richColors ON** — T10 review verified overlays-spec shows 3 type-colored toasts emerald/rose/amber :434/:458/:482, not neutral; the earlier "richColors off" wording was wrong) + any ui overrides needed; create missing primitives. No feature-page dialogs (Plans 3–6).
 - [ ] **Step 3:** build + tsc clean. Commit `feat(client): overlay/toast foundation to design (Plan 2 T10)`.
 
 ### Task 11: Docs sync (spec §C-series truth)

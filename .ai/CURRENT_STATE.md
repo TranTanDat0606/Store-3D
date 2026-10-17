@@ -1,6 +1,6 @@
 # Store3D — Current State
 
-> Last updated: 2026-10-17
+> Last updated: 2026-10-18
 
 ## Current Project Status
 
@@ -21,9 +21,12 @@ Plan `docs/superpowers/plans/2026-10-17-backend-trust-track.md` (13 tasks + 3 re
 
 Owner decision 4 (necessary refactor BEFORE Plan 2 touches orderService). 3 commits `2ede062`, `38eed22`, `d59cec9` — behavior-preserving consolidation only: `restoreStockForItems` single seam (3 sites), `runCouponReleaseActions` single release executor (cancel + compensation), dead product-404 removed, `BANK_TRANSFER_MIN_VND=1000` single-sourced (`config/payment.ts`), `COUPON_EXHAUSTED_MESSAGE` single message across guard + both pre-checks. Tests unchanged: `server/tests/` diff EMPTY, **83/83 green**, tsc clean; independent review walked all 5 items + union exhaustiveness + ordering invariants → **APPROVED**. Out-of-scope (deferred to backend pass 2, own plan+review): splitting `orderService.ts` god-module (564 lines), moving `create()`.
 
-## FULL REBUILD — Plan 2 "Client Foundation & Shell" (2026-10-17, PLANNED — execution starting)
+## FULL REBUILD — Plan 2 "Client Foundation & Shell" (2026-10-17→18, T1–T11 COMPLETE on `dev` — T12 Playwright gate PENDING)
 
-Plan `docs/superpowers/plans/2026-10-17-client-foundation-shell.md` (12 tasks: tokens → logo → color sweep → dark-only → navbar → footer+settings → error mapping → 404 → admin shell → overlays → docs → **Playwright UI gate (owner decision 7)**). Survey `docs/superpowers/specs/2026-10-17-client-foundation-survey.md` corrected assumptions: **no TanStack Query / no hey-api** (data layer = axios services + Contexts), fonts already Be Vietnam Pro + Orbitron, logo SVG extractable from `.stitch/designs/logo-system.html`, no test frameworks (C3 + zero-new-dep rule; new deps = owner approval item). Series: Plan 3 (storefront) → 4 (auth/checkout) → 5 (content) → 6 (admin).
+Plan `docs/superpowers/plans/2026-10-17-client-foundation-shell.md` via subagent-driven development. **T1–T10 landed, each task independently reviewed:** T1 tokens `e1821e8` · T2 logo `fdef731` · T3 color sweep `bc2824e` (+fix `c0884d4`) · T4 dark-only `2d05e69` · T5 navbar `0dbf9c5` · T6 footer+settings `e90cfef` · T7 error mapping `a46cd2c` · T8 404 `25679c6` · T9 admin shell `31cd749` · T10 overlays `4974b09` (+fix `57c4ba1`); T11 docs = this commit. T3 and T10 each needed one review-fix cycle, both APPROVED after.
+
+- **Scope amendments / deviations (logged per task):** T3 sweep extended from layout/ui/admin-layout to ALL of `client/src` including elimination of Tailwind `dark:` variants (0 hits remaining); T5 hamburger breakpoint `xl` vs screen's `lg`, category dropdown single-column; T6 hours render as own footer row, social links FB/ZL/IG only, no policy routes; T8 "Tư vấn trực tuyến" chat entry omitted; T9 decorative dashboard widgets deferred to Plan 6. T10 Step-2 plan wording corrected in place: **richColors ON** (overlays-spec shows type-colored toasts).
+- **Known items for Plans 3–6:** 409 conflict can double-toast (global mapping + page-level handler — page handlers to drop when pages are rebuilt); skeleton default `bg-muted-foreground/20` advisory resolved at T10-fix. **Zero new dependencies** throughout (`client/package.json` byte-identical). AC1–AC7 evidenced by per-task build/tsc + reviews; **AC8/AC9 = T12 gate (Playwright + frontend-quality-checklist-store3d) still pending**. Series: Plan 3 (storefront) → 4 (auth/checkout) → 5 (content) → 6 (admin).
 
 ## FULL REBUILD — Design Track v2 "Obsidian Gold" (2026-10-16, GATE 1 v2 APPROVED 2026-10-17)
 
