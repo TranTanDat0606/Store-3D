@@ -4,8 +4,6 @@ import {
   Search,
   ShoppingBag,
   Heart,
-  Moon,
-  Sun,
   LogOut,
   User,
   Menu,
@@ -17,7 +15,6 @@ import {
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useCart } from '@/contexts/CartContext'
-import { useTheme } from '@/contexts/ThemeContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -85,7 +82,6 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
   const { totalItems, openCart } = useCart()
   const { products: wishlist } = useWishlist()
-  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const { pathname, search: locationSearch } = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -205,10 +201,6 @@ export function Navbar() {
         </form>
 
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Đổi giao diện">
-            {theme === 'dark' ? <Sun className="size-5" /> : <Moon className="size-5" />}
-          </Button>
-
           <Link to={isAuthenticated ? '/tai-khoan/yeu-thich' : '/dang-nhap'} className="relative">
             <Button variant="ghost" size="icon" aria-label="Danh sách yêu thích">
               <Heart className="size-5" />
