@@ -30,8 +30,10 @@ export function toSafeUser(user: mongoose.HydratedDocument<IUser>): SafeUser {
  * request). Pure function exported from this auth-adjacent module so both
  * the service and the middleware share one rule and one Vietnamese message.
  *
- * Falsy `active` (`false`, or a legacy document without the field) counts as
- * inactive — fail closed on the security flag.
+ * Falsy `active` (explicit `false`) counts as inactive. Legacy documents
+ * missing the field are NOT locked out: Mongoose applies the schema default
+ * (`User.active` default `true`) on hydration, so they read back as active —
+ * deactivation always writes an explicit boolean.
  */
 export function assertUserActive(user: { active?: boolean }): void {
   if (!user.active) {

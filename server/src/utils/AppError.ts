@@ -30,7 +30,8 @@ const RESOURCE_LABELS: Record<ResourceKind, string> = {
 
 /**
  * The single forbidden copy for ownership (non-owner) rejections — GAP-13:
- * review / order / wishlist / address all answer 403 with this message.
+ * review / order / address ownership checks all answer 403 with this message
+ * (wishlist is user-keyed — it has no ownership rejection path).
  */
 export const FORBIDDEN_MESSAGE = 'Bạn không có quyền thực hiện thao tác này';
 
