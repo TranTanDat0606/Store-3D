@@ -24,6 +24,7 @@ import aiChatRoutes from './routes/ai-chat';
 import rewardRoutes from './routes/reward';
 import geminiRoutes from './routes/gemini';
 import addressRoutes from './routes/address';
+import settingsRoutes from './routes/settings';
 import debugRoutes from './routes/debug';
 
 export function createApp() {
@@ -70,6 +71,7 @@ export function createApp() {
   app.use('/api/rewards', rewardRoutes);
   app.use('/api/gemini', geminiRoutes);
   app.use('/api/addresses', addressRoutes);
+  app.use('/api/settings', settingsRoutes);
   app.use('/api/debug', debugRoutes);
 
   app.use(notFoundHandler);
