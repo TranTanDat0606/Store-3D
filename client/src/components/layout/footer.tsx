@@ -1,157 +1,258 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Box, Mail, Phone, MapPin } from 'lucide-react'
+import { BadgeCheck, Clock, Mail, MapPin, Phone, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib'
+import { Logo } from '@/components/brand/logo'
+import { categoryApi } from '@/services/productApi'
+import { usePublicSettings } from '@/hooks/usePublicSettings'
+import type { Category } from '@/types'
 
-function SocialIcon({ children, className }: { children: React.ReactNode; className?: string }) {
+/**
+ * Footer per approved screen `.stitch/designs/navbar-footer-spec.html`
+ * Section F (FOOTER_CANONICAL): 4 columns (brand / collection links /
+ * support links / showroom contact) + bottom copyright sub-bar.
+ *
+ * Owner mandate (Cross-plan §5): EVERY contact row (address, hotline,
+ * support hours, email, social icons) renders only when its key exists
+ * non-empty in `GET /api/settings/public`. Absent ⇒ row omitted entirely.
+ * ZERO hardcoded contact values anywhere in this file.
+ */
+
+const hasText = (value?: string): value is string =>
+  typeof value === 'string' && value.trim().length > 0
+
+function ColumnHeading({ children }: { children: React.ReactNode }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      className={cn('inline-block size-4 shrink-0', className)}
-    >
+    <h4 className="border-l-2 border-primary pl-2.5 text-sm font-bold tracking-wider text-foreground uppercase">
       {children}
-    </svg>
+    </h4>
   )
 }
 
-const facebookPath =
-  'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z'
-const tiktokPath =
-  'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z'
-const instagramPath =
-  'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z'
-
+const SOCIALS = [
+  { key: 'facebook', label: 'Facebook', short: 'FB' },
+  { key: 'zalo', label: 'Zalo', short: 'ZL' },
+  { key: 'instagram', label: 'Instagram', short: 'IG' },
+] as const
 
 export function Footer() {
+  const { settings } = usePublicSettings()
+  const [categories, setCategories] = useState<Category[]>([])
+
+  // Same dynamic category source as the navbar (approved design: lấy từ DB).
+  useEffect(() => {
+    let cancelled = false
+    categoryApi
+      .all()
+      .then((data) => {
+        if (!cancelled) setCategories(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Hide-on-absent (owner mandate): a row exists only with a non-empty value.
+  const address = hasText(settings.address) ? settings.address.trim() : undefined
+  const hotline = hasText(settings.hotline) ? settings.hotline.trim() : undefined
+  const supportHours = hasText(settings.supportHours) ? settings.supportHours.trim() : undefined
+  const email = hasText(settings.email) ? settings.email.trim() : undefined
+  const socialLinks = SOCIALS.filter((s) => hasText(settings.socialLinks?.[s.key])).map((s) => ({
+    ...s,
+    href: settings.socialLinks![s.key]!.trim(),
+  }))
+
+  const hasContact = Boolean(address || hotline || supportHours || email)
+
   return (
-    <footer className="border-t bg-muted/30">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-4">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl">
-                <Box className="size-5" />
-              </span>
-              <span className="text-lg font-bold tracking-tight">
-                Store<span className="text-primary">3D</span>
-              </span>
-            </Link>
-            <p className="text-muted-foreground max-w-xs text-sm">
-              Cửa hàng mô hình in 3D chất lượng cao. Figurine, đồ trang trí, mô hình kiến trúc và
-              nhiều sản phẩm độc đáo khác.
-            </p>
-            <div className="flex items-center gap-2">
-              <a
-                href="https://facebook.com/store3d"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
-              >
-                <SocialIcon className="text-foreground">
-                  <path fill="currentColor" d={facebookPath} />
-                </SocialIcon>
-              </a>
-              <a
-                href="https://www.tiktok.com/@store3d"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
-              >
-                <SocialIcon className="text-foreground">
-                  <path fill="currentColor" d={tiktokPath} />
-                </SocialIcon>
-              </a>
-              <a
-                href="https://instagram.com/store3d"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
-              >
-                <SocialIcon className="text-foreground">
-                  <path fill="currentColor" d={instagramPath} />
-                </SocialIcon>
-              </a>
+    <footer className="border-t border-border bg-card text-sm leading-relaxed text-muted-foreground">
+      <div
+        className={cn(
+          'mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-12 md:grid-cols-2 md:px-8 lg:py-16',
+          hasContact ? 'lg:grid-cols-4' : 'lg:grid-cols-3',
+        )}
+      >
+        {/* Cột 1: Thương hiệu STORE 3D & Sứ mệnh */}
+        <div className="space-y-4">
+          <Link to="/" className="inline-flex" aria-label="STORE 3D — Trang chủ">
+            <Logo variant="lockup" alt="" />
+          </Link>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Đam mê kiến tạo mô hình in 3D hoàn mỹ tại Việt Nam. Tiên phong ứng dụng công nghệ in
+            quang hóa Resin SLA 8K và FDM công nghiệp chính xác từng micromet.
+          </p>
+          <div>
+            <span className="inline-flex items-center gap-2 rounded border border-border bg-secondary px-2.5 py-1 text-[11px] font-semibold text-primary">
+              <BadgeCheck className="size-3.5" aria-hidden="true" />
+              Chứng nhận SLA/FDM 8K Master
+            </span>
+          </div>
+          {/* Social links: icons render IFF the settings payload carries a URL. */}
+          {socialLinks.length > 0 && (
+            <div className="flex items-center gap-3 pt-2">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.key}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={social.label}
+                  aria-label={social.label}
+                  className="inline-flex size-9 items-center justify-center rounded-lg border border-border bg-secondary text-xs font-bold text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+                >
+                  {social.short}
+                </a>
+              ))}
             </div>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Liên kết</h3>
-            <ul className="text-muted-foreground space-y-2 text-sm">
-              <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
-                  Trang chủ
-                </Link>
-              </li>
-              <li>
-                <Link to="/san-pham" className="hover:text-foreground transition-colors">
-                  Sản phẩm
-                </Link>
-              </li>
-              <li>
-                <Link to="/san-pham?sort=best-selling" className="hover:text-foreground transition-colors">
-                  Sản phẩm bán chạy
-                </Link>
-              </li>
-              <li>
-                <Link to="/lien-he" className="hover:text-foreground transition-colors">
-                  Liên hệ
-                </Link>
-              </li>
-              <li>
-                <Link to="/tai-khoan/yeu-thich" className="hover:text-foreground transition-colors">
-                  Danh sách yêu thích
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Hỗ trợ</h3>
-            <ul className="text-muted-foreground space-y-2 text-sm">
-              <li>
-                <Link to="/tai-khoan" className="hover:text-foreground transition-colors">
-                  Tài khoản
-                </Link>
-              </li>
-              <li>
-                <Link to="/tai-khoan/don-hang" className="hover:text-foreground transition-colors">
-                  Đơn hàng của tôi
-                </Link>
-              </li>
-              <li>
-                <Link to="/dang-ky" className="hover:text-foreground transition-colors">
-                  Đăng ký tài khoản
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold">Liên hệ</h3>
-            <ul className="text-muted-foreground space-y-3 text-sm">
-              <li className="flex items-center gap-3">
-                <MapPin className="size-4 shrink-0" />
-                123 Nguyễn Trãi, Thanh Xuân, Hà Nội
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="size-4 shrink-0" />
-                0901 234 567
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="size-4 shrink-0" />
-                lienhe@store3d.com
-              </li>
-            </ul>
-          </div>
+          )}
         </div>
 
-        <div className="text-muted-foreground mt-10 flex flex-col items-center justify-between gap-3 border-t pt-6 text-sm sm:flex-row">
-          <p>© {new Date().getFullYear()} Store 3D. Bảo lưu mọi quyền.</p>
-          <p>Sản phẩm in 3D chất lượng cao, giao hàng toàn quốc.</p>
+        {/* Cột 2: Bộ sưu tập & Dịch vụ (dynamic — existing categories API) */}
+        <div className="space-y-3">
+          <ColumnHeading>Bộ Sưu Tập &amp; Dịch Vụ</ColumnHeading>
+          <ul className="space-y-2 text-xs">
+            <li>
+              <Link
+                to="/san-pham"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Tất cả sản phẩm
+              </Link>
+            </li>
+            {categories.map((cat) => (
+              <li key={cat._id}>
+                <Link
+                  to={`/san-pham?categorySlug=${cat.slug}`}
+                  className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+                >
+                  {cat.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Cột 3: Hỗ trợ khách hàng (existing routes only — no invented slugs) */}
+        <div className="space-y-3">
+          <ColumnHeading>Hỗ Trợ Khách Hàng</ColumnHeading>
+          <ul className="space-y-2 text-xs">
+            <li>
+              <Link
+                to="/tin-tuc"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Tin tức
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/lien-he"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Liên hệ
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/tai-khoan/don-hang"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Đơn hàng của tôi
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/tai-khoan/yeu-thich"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Danh sách yêu thích
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/tai-khoan/ma-giam-gia"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Mã giảm giá
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/tai-khoan"
+                className="block text-muted-foreground transition-colors duration-150 hover:text-primary"
+              >
+                Tài khoản
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Cột 4: Hệ thống Showroom — settings-driven ONLY, absent ⇒ column omitted */}
+        {hasContact && (
+          <div className="space-y-3">
+            <ColumnHeading>Hệ Thống Showroom</ColumnHeading>
+            <ul className="space-y-3 text-xs">
+              {address && (
+                <li className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{address}</span>
+                </li>
+              )}
+              {hotline && (
+                <li className="flex items-center gap-2">
+                  <Phone className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>
+                    Hotline:{' '}
+                    <a
+                      href={`tel:${hotline}`}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      {hotline}
+                    </a>
+                  </span>
+                </li>
+              )}
+              {supportHours && (
+                <li className="flex items-center gap-2">
+                  <Clock className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>{supportHours}</span>
+                </li>
+              )}
+              {email && (
+                <li className="flex items-center gap-2">
+                  <Mail className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <span>
+                    Email:{' '}
+                    <a
+                      href={`mailto:${email}`}
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      {email}
+                    </a>
+                  </span>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom sub-bar (Copyright & Trust Badges) */}
+      <div className="border-t border-border/60 py-5">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-xs text-muted-foreground md:flex-row md:px-8">
+          <p className="text-center md:text-left">
+            © {new Date().getFullYear()} STORE 3D Việt Nam. Bảo lưu mọi quyền. Đam mê kiến tạo mô
+            hình in 3D hoàn mỹ.
+          </p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="flex items-center gap-1 text-success">
+              <ShieldCheck className="size-3.5" aria-hidden="true" />
+              Thanh toán an toàn
+            </span>
+            <span aria-hidden="true">·</span>
+            <span className="text-primary">Obsidian Gold UI v2.4</span>
+          </div>
         </div>
       </div>
     </footer>
