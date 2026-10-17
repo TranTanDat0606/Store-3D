@@ -8,6 +8,29 @@ import {
 } from './discountMath';
 import type { CreateCouponInput, UpdateCouponInput, ApplyCouponInput } from '../validators/coupon';
 
+/**
+ * Pure seam (GAP-8): the conditional atomic consumption of one coupon usage.
+ * The filter only matches while `usedCount < quantity` ($expr compares the two
+ * fields inside MongoDB), and the $inc rides in the SAME findOneAndUpdate —
+ * there is no separate check-then-increment window. A null result means the
+ * last unit went to a concurrent order.
+ */
+export function couponQuantityGuardQuery(couponId: unknown): {
+  filter: Record<string, unknown>;
+  update: Record<string, unknown>;
+} {
+  return {
+    filter: { _id: couponId, $expr: { $lt: ['$usedCount', '$quantity'] } },
+    update: { $inc: { usedCount: 1 } },
+  };
+}
+
+/** Pure seam (GAP-8): a missed quantity guard is a sold-out coupon, never a missing one. */
+export function assertCouponQuantityApplied<T>(consumed: T): NonNullable<T> {
+  if (consumed == null) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
+  return consumed;
+}
+
 export interface PreviewRequest {
   code?: string;
   items?: PreviewItem[];

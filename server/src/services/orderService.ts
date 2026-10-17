@@ -4,6 +4,7 @@ import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
 import { computeDiscount } from './discountMath';
+import { couponQuantityGuardQuery, assertCouponQuantityApplied } from './couponService';
 import { compensationPlanFor, runCompensation } from './orderCreation';
 import type { CompensationAction, CompensationContext, OrderCreationStep } from './orderCreation';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
@@ -12,6 +13,8 @@ interface CouponApplication {
   code: string;
   discount: number;
   isAdminCoupon: boolean;
+  /** Admin coupon document id — target of the atomic quantity guard (GAP-8). */
+  couponId?: unknown;
   /** For reward (game) coupons: the UserCoupon to atomically claim after validation. */
   userCouponId?: unknown;
 }
@@ -55,6 +58,40 @@ export function redemptionPlan(
   }
   if (coupon) plan.push('mark-used');
   return plan;
+}
+
+/**
+ * Pure seam (GAP-7): the filter that makes an admin status transition atomic.
+ * The update only applies while the order is still in the `from` status that
+ * was read — a null result means a concurrent admin moved it first.
+ */
+export function transitionGuardQuery(orderId: unknown, from: string): { _id: unknown; status: string } {
+  return { _id: orderId, status: from };
+}
+
+/**
+ * Pure seam (GAP-7): interpret a guarded-transition result. A miss is a
+ * concurrent edit by another admin (the order was found first, so the write
+ * losing the race is the only remaining cause) — never a missing order.
+ */
+export function assertTransitionApplied<T>(updated: T): NonNullable<T> {
+  if (updated == null) {
+    throw new AppError('Đơn hàng vừa được thay đổi trạng thái bởi quản trị viên khác', 409);
+  }
+  return updated;
+}
+
+/**
+ * Carry-over (Task 3 review): the atomic reward-coupon claim filter. Expiry is
+ * enforced at CLAIM time, not only at the earlier peek — the pre-GAP-5 code
+ * required `expiresAt > now` in its findOneAndUpdate, and the Task 3 split into
+ * peek + claim must not drop it.
+ */
+export function rewardCouponClaimQuery(
+  userCouponId: unknown,
+  now: Date = new Date(),
+): { _id: unknown; usedAt: null; expiresAt: { $gt: Date } } {
+  return { _id: userCouponId, usedAt: null, expiresAt: { $gt: now } };
 }
 
 /**
@@ -157,7 +194,7 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
       subtotal,
     );
 
-    return { code: coupon.code, discount, isAdminCoupon: true };
+    return { code: coupon.code, discount, isAdminCoupon: true, couponId: coupon._id };
   }
 
   // Fallback: peek at per-user reward coupons (GAP-5 — do NOT mark usedAt here;
@@ -247,10 +284,11 @@ export class OrderService {
           throw new AppError('Đơn hàng dưới 1.000đ không hỗ trợ thanh toán chuyển khoản. Vui lòng chọn phương thức khác.', 400);
         }
       } else if (redemptionStep === 'mark-used') {
-        // Claim the reward coupon atomically (guards against concurrent redemption).
+        // Claim the reward coupon atomically (guards against concurrent
+        // redemption AND expiry — the filter carries expiresAt > now).
         if (coupon && !coupon.isAdminCoupon) {
           const claimed = await UserCoupon.findOneAndUpdate(
-            { _id: coupon.userCouponId, usedAt: null },
+            rewardCouponClaimQuery(coupon.userCouponId),
             { $set: { usedAt: new Date() } },
             { new: true },
           );
@@ -316,12 +354,14 @@ export class OrderService {
         ctx.items.push({ product: lt.productId, quantity: lt.quantity });
       }
 
-      // Increment admin coupon usage (UserCoupons are already claimed via redemptionPlan)
+      // Increment admin coupon usage atomically (GAP-8: the conditional update
+      // itself enforces the quantity limit — no separate check-then-increment).
+      // UserCoupons are already claimed via redemptionPlan above.
       step = 'coupon-marked';
       if (coupon?.isAdminCoupon) {
-        await Coupon.updateOne(
-          { code: coupon.code },
-          { $inc: { usedCount: 1 } },
+        const { filter, update } = couponQuantityGuardQuery(coupon.couponId);
+        assertCouponQuantityApplied(
+          await Coupon.findOneAndUpdate(filter, update, { new: true }),
         );
         ctx.couponActions.push(...releaseOrderCoupon({ coupon: coupon.code }));
       }
@@ -406,32 +446,15 @@ export class OrderService {
     const order = await Order.findById(id);
     if (!order) throw new AppError('Không tìm thấy đơn hàng', 404);
 
+    const fromStatus = order.status as OrderStatus;
+
     // One-way workflow: only the next valid status is allowed. Same-status
     // no-op updates are permitted (e.g. admin only marking a payment).
-    if (data.status !== order.status) {
-      const allowed = ALLOWED_NEXT_STATUS[order.status as OrderStatus] ?? [];
+    if (data.status !== fromStatus) {
+      const allowed = ALLOWED_NEXT_STATUS[fromStatus] ?? [];
       if (!allowed.includes(data.status as OrderStatus)) {
         throw new AppError('Không thể chuyển trạng thái đơn hàng ngược hoặc bỏ qua các bước', 400);
       }
-    }
-
-    // Restore stock when an order is cancelled (only pending orders can be
-    // cancelled, and they had their stock decremented at creation time).
-    if (data.status === OrderStatus.Cancelled && order.status !== OrderStatus.Cancelled) {
-      const items = await OrderItem.find({ order: order._id }).select('product quantity');
-      if (items.length > 0) {
-        await Product.bulkWrite(
-          items.map((item) => ({
-            updateOne: {
-              filter: { _id: item.product },
-              update: { $inc: { stock: item.quantity } },
-            },
-          })),
-        );
-      }
-      // GAP-3: admin cancel restores coupon usage too — same implementation as
-      // cancelByUser (executeCouponRelease → releaseOrderCoupon).
-      await executeCouponRelease(order);
     }
 
     const updates: Record<string, unknown> = { status: data.status };
@@ -452,23 +475,46 @@ export class OrderService {
       }
     }
 
-    const updated = await Order.findByIdAndUpdate(id, { $set: updates }, { new: true })
-      .populate('items')
-      .populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
+    // GAP-7: ONE atomic guarded write — the filter requires the status that
+    // was read, so of two simultaneous admins exactly one wins; the loser's
+    // write matches nothing and gets the 409 below. Side effects (stock and
+    // coupon restore) run only AFTER winning, so they happen exactly once.
+    const updated = assertTransitionApplied(
+      await Order.findOneAndUpdate(transitionGuardQuery(id, fromStatus), { $set: updates }, { new: true }),
+    );
+
+    // Restore stock when an order is cancelled (only pending/confirmed orders
+    // can be cancelled, and they had their stock decremented at creation time).
+    if (data.status === OrderStatus.Cancelled && fromStatus !== OrderStatus.Cancelled) {
+      const items = await OrderItem.find({ order: updated._id }).select('product quantity');
+      if (items.length > 0) {
+        await Product.bulkWrite(
+          items.map((item) => ({
+            updateOne: {
+              filter: { _id: item.product },
+              update: { $inc: { stock: item.quantity } },
+            },
+          })),
+        );
+      }
+      // GAP-3: admin cancel restores coupon usage too — same implementation as
+      // cancelByUser (executeCouponRelease → releaseOrderCoupon).
+      await executeCouponRelease(updated);
+    }
+
+    await updated.populate('items');
+    await updated.populate({ path: 'items', populate: { path: 'product', select: 'name slug images salePrice' } });
     return updated;
   }
 
   /** Customer: cancel their own order (pending only). */
   async cancelByUser(userId: string, orderId: string, reason?: string) {
-    // Atomic conditional update: only cancel if status is still pending and
-    // belongs to this user. This prevents race conditions where admin
-    // confirms the order at the same time user tries to cancel.
+    // Atomic conditional update (GAP-7 seam): only cancel if status is still
+    // pending and belongs to this user. Two simultaneous cancels (user vs
+    // admin, or user vs user) → exactly one matches the filter and wins; the
+    // restore side effects below therefore run exactly once.
     const updated = await Order.findOneAndUpdate(
-      {
-        _id: orderId,
-        user: userId,
-        status: OrderStatus.Pending,
-      },
+      { ...transitionGuardQuery(orderId, OrderStatus.Pending), user: userId },
       { $set: { status: OrderStatus.Cancelled } },
       { new: true },
     );
