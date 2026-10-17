@@ -1,8 +1,9 @@
 import { Types } from 'mongoose';
-import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, CouponType, Product, UserCoupon, Address } from '../models';
+import { Order, OrderItem, OrderStatus, PaymentMethod, PaymentStatus, Coupon, Product, UserCoupon, Address } from '../models';
 import { AppError } from '../utils/AppError';
 import { apiFeatures, parsePagination } from '../utils/apiFeatures';
 import { assertItemsActive } from './productQuery';
+import { computeDiscount } from './discountMath';
 import type { CreateOrderInput, UpdateOrderStatusInput } from '../validators/order';
 
 interface CouponApplication {
@@ -37,16 +38,12 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
   if (coupon) {
     if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
     if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
-    if (coupon.minOrder > 0 && subtotal < coupon.minOrder) {
-      throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
-    }
 
-    let discount = 0;
-    if (coupon.type === CouponType.Percent) {
-      discount = Math.round((subtotal * coupon.discount) / 100);
-    } else {
-      discount = Math.min(coupon.discount, subtotal);
-    }
+    // Single-source discount math — identical to the coupon preview path.
+    const { discountVnd: discount } = computeDiscount(
+      { type: coupon.type, value: coupon.discount, minOrder: coupon.minOrder, source: 'admin' },
+      subtotal,
+    );
 
     return { code: coupon.code, discount, isAdminCoupon: true };
   }
@@ -59,7 +56,11 @@ async function resolveCoupon(code: string | undefined, subtotal: number, userId?
       { new: true },
     );
     if (userCoupon) {
-      const discount = Math.round((subtotal * userCoupon.discount) / 100);
+      // Game reward coupons are capped at MAX_DISCOUNT_VND at order time (GAP-2).
+      const { discountVnd: discount } = computeDiscount(
+        { type: userCoupon.type, value: userCoupon.discount, minOrder: 0, source: 'game' },
+        subtotal,
+      );
       return { code: userCoupon.code, discount, isAdminCoupon: false };
     }
   }
@@ -89,6 +90,7 @@ export class OrderService {
 
     const productMap = new Map(products.map((p) => [String(p._id), p]));
 
+    // authoritative: prices from DB, never from request/preview
     // Validate stock and calculate line totals
     const lineTotals: { productId: string; price: number; quantity: number; name: string; image: string }[] = [];
     let subtotal = 0;

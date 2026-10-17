@@ -6,11 +6,12 @@ import { createCouponSchema, updateCouponSchema, applyCouponSchema } from '../va
 
 const router = Router();
 
-// Public
+// Public — trusted preview contract: optional `subtotal` (legacy estimate) and/or a URL-encoded
+// JSON `items` query param (server-priced). Invalid/missing `items` is ignored → subtotal fallback.
 router.get('/available', couponController.available);
 router.post('/apply', requireAuth, validateRequest(applyCouponSchema), couponController.apply);
 
-// Authenticated: eligible coupons for checkout
+// Authenticated: eligible coupons for checkout (same preview contract as /available)
 router.get('/eligible', requireAuth, couponController.eligible);
 
 // Admin CRUD

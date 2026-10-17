@@ -1,19 +1,26 @@
-import { Coupon, CouponType, UserCoupon } from '../models';
+import { Coupon, UserCoupon, Product } from '../models';
 import { AppError } from '../utils/AppError';
-import { MAX_DISCOUNT_VND } from '../config/rewards';
+import {
+  computeDiscount,
+  computePreviewSubtotal,
+  type PreviewBasis,
+  type PreviewItem,
+} from './discountMath';
 import type { CreateCouponInput, UpdateCouponInput, ApplyCouponInput } from '../validators/coupon';
 
-/** Compute estimated discount for a coupon against a subtotal. */
-function computeEstimatedDiscount(coupon: { type: string; discount: number }, subtotal: number): number {
-  if (coupon.type === CouponType.Percent) {
-    return Math.round((subtotal * coupon.discount) / 100);
-  }
-  return Math.min(coupon.discount, subtotal);
+export interface PreviewRequest {
+  code?: string;
+  items?: PreviewItem[];
+  subtotal?: number;
+  userId?: string;
 }
 
-/** Cap a game coupon's discount by MAX_DISCOUNT_VND. */
-function capGameDiscount(discount: number): number {
-  return Math.min(discount, MAX_DISCOUNT_VND);
+export interface PreviewResult {
+  subtotalVnd: number;
+  basis: PreviewBasis;
+  discountVnd: number;
+  capped: boolean;
+  coupon: unknown;
 }
 
 export class CouponService {
@@ -62,24 +69,20 @@ export class CouponService {
   /** Public: validate a coupon and compute the discount for a given subtotal. */
   async apply(data: ApplyCouponInput, userId?: string) {
     const normalizedCode = data.code.toUpperCase().trim();
+    const subtotalVnd = data.subtotal ?? 0;
 
     // Try admin Coupon first
     const coupon = await Coupon.findOne({ code: normalizedCode });
     if (coupon) {
       if (coupon.quantity <= coupon.usedCount) throw new AppError('Mã giảm giá đã hết lượt sử dụng', 400);
       if (coupon.expiredDate < new Date()) throw new AppError('Mã giảm giá đã hết hạn', 400);
-      if (coupon.minOrder > 0 && data.subtotal < coupon.minOrder) {
-        throw new AppError(`Đơn hàng tối thiểu ${coupon.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`, 400);
-      }
 
-      let discount = 0;
-      if (coupon.type === CouponType.Percent) {
-        discount = Math.round((data.subtotal * coupon.discount) / 100);
-      } else {
-        discount = Math.min(coupon.discount, data.subtotal);
-      }
+      const { discountVnd: discount, capped } = computeDiscount(
+        { type: coupon.type, value: coupon.discount, minOrder: coupon.minOrder, source: 'admin' },
+        subtotalVnd,
+      );
 
-      return { coupon, discount };
+      return { coupon, discount, capped };
     }
 
     // Fallback: check per-user reward coupons (game-earned)
@@ -91,13 +94,14 @@ export class CouponService {
         expiresAt: { $gt: new Date() },
       });
       if (userCoupon) {
-        const discount = Math.min(
-          Math.round((data.subtotal * userCoupon.discount) / 100),
-          MAX_DISCOUNT_VND,
+        const { discountVnd: discount, capped } = computeDiscount(
+          { type: userCoupon.type, value: userCoupon.discount, minOrder: 0, source: 'game' },
+          subtotalVnd,
         );
         return {
           coupon: { _id: userCoupon._id, code: userCoupon.code, discount: userCoupon.discount, type: userCoupon.type, expiredDate: userCoupon.expiresAt, quantity: 1, usedCount: 0, minOrder: 0 },
           discount,
+          capped,
         };
       }
     }
@@ -105,8 +109,40 @@ export class CouponService {
     throw new AppError('Mã giảm giá không tồn tại', 400);
   }
 
+  /** DB product-price lookup backing the trusted preview — prices never come from the request. */
+  private async lookupPrices(ids: string[]) {
+    const products = await Product.find({ _id: { $in: ids } });
+    return products.map((p) => ({ _id: String(p._id), price: p.salePrice }));
+  }
+
+  /**
+   * Trusted coupon preview (GAP-14): resolves the subtotal server-side (DB
+   * prices when `items` are given, otherwise the client-claimed `subtotal` as
+   * an estimate) and computes the discount through the same `computeDiscount`
+   * the order path uses — so preview math ≡ order math.
+   */
+  async resolvePreview(input: PreviewRequest): Promise<PreviewResult> {
+    const { subtotalVnd, basis } = await computePreviewSubtotal(
+      { items: input.items, subtotal: input.subtotal },
+      (ids) => this.lookupPrices(ids),
+    );
+
+    if (!input.code) {
+      return { subtotalVnd, basis, discountVnd: 0, capped: false, coupon: null };
+    }
+
+    const applied = await this.apply({ code: input.code, subtotal: subtotalVnd }, input.userId);
+    return {
+      subtotalVnd,
+      basis,
+      discountVnd: applied.discount,
+      capped: applied.capped,
+      coupon: applied.coupon,
+    };
+  }
+
   /** List all eligible coupons for a user at a given subtotal (admin + game coupons). */
-  async getEligibleCoupons(subtotal: number, userId?: string) {
+  async getEligibleCoupons(subtotal: number, userId?: string, basis?: PreviewBasis) {
     const now = new Date();
     const results: Array<{
       _id: string;
@@ -120,6 +156,7 @@ export class CouponService {
       source: 'admin' | 'game';
       estimatedDiscountAmount: number;
       isApplicable: boolean;
+      basis?: PreviewBasis;
       reason?: string;
     }> = [];
 
@@ -130,8 +167,11 @@ export class CouponService {
     });
 
     for (const c of adminCoupons) {
-      const estimated = computeEstimatedDiscount(c, subtotal);
       const isApplicable = subtotal >= (c.minOrder || 0);
+      // Single-source math; inapplicable coupons cannot have a real discount.
+      const estimated = isApplicable
+        ? computeDiscount({ type: c.type, value: c.discount, minOrder: c.minOrder, source: 'admin' }, subtotal).discountVnd
+        : 0;
       results.push({
         _id: String(c._id),
         code: c.code,
@@ -144,6 +184,7 @@ export class CouponService {
         source: 'admin',
         estimatedDiscountAmount: estimated,
         isApplicable,
+        ...(basis ? { basis } : {}),
         reason: !isApplicable && c.minOrder > 0
           ? `Đơn tối thiểu ${c.minOrder.toLocaleString('vi-VN')}đ`
           : undefined,
@@ -159,8 +200,8 @@ export class CouponService {
       });
 
       for (const uc of userCoupons) {
-        const rawEstimated = computeEstimatedDiscount({ type: uc.type, discount: uc.discount }, subtotal);
-        const estimated = capGameDiscount(rawEstimated);
+        // Game reward coupons are always MAX_DISCOUNT_VND-capped via computeDiscount.
+        const estimated = computeDiscount({ type: uc.type, value: uc.discount, minOrder: 0, source: 'game' }, subtotal).discountVnd;
         results.push({
           _id: String(uc._id),
           code: uc.code,
@@ -173,6 +214,7 @@ export class CouponService {
           source: 'game',
           estimatedDiscountAmount: estimated,
           isApplicable: true,
+          ...(basis ? { basis } : {}),
         });
       }
     }
@@ -184,20 +226,27 @@ export class CouponService {
   }
 
   /** List coupons available for a given subtotal. */
-  async listAvailable(subtotal: number) {
+  async listAvailable(subtotal: number, basis?: PreviewBasis) {
     const now = new Date();
     const coupons = await Coupon.find({
       expiredDate: { $gt: now },
       $expr: { $or: [{ $eq: ['$quantity', 0] }, { $lt: ['$usedCount', '$quantity'] }] },
     }).sort({ createdAt: -1 });
 
-    return coupons.map((c) => ({
-      ...c.toObject(),
-      isApplicable: subtotal >= (c.minOrder || 0),
-      reason: subtotal < (c.minOrder || 0)
-        ? `Đơn tối thiểu ${c.minOrder.toLocaleString('vi-VN')}đ`
-        : undefined,
-    }));
+    return coupons.map((c) => {
+      const isApplicable = subtotal >= (c.minOrder || 0);
+      return {
+        ...c.toObject(),
+        isApplicable,
+        estimatedDiscountAmount: isApplicable
+          ? computeDiscount({ type: c.type, value: c.discount, minOrder: c.minOrder, source: 'admin' }, subtotal).discountVnd
+          : 0,
+        ...(basis ? { basis } : {}),
+        reason: !isApplicable
+          ? `Đơn tối thiểu ${c.minOrder.toLocaleString('vi-VN')}đ`
+          : undefined,
+      };
+    });
   }
 }
 
