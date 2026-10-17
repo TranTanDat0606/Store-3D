@@ -6,7 +6,18 @@
 
 **Stable and working.** Fully functional Vietnamese e-commerce store for 3D-printed models. Client + API on Vercel, server on Render.
 
-## FULL REBUILD — Design Track v2 "Obsidian Gold" (2026-10-16, awaiting GATE 1)
+## FULL REBUILD — Backend Trust Track (2026-10-17, COMPLETE on `dev`, demo sync awaiting owner approval)
+
+Plan `docs/superpowers/plans/2026-10-17-backend-trust-track.md` (13 tasks + 3 review-fix subtasks) executed via subagent-driven development; every task implementer + independent review, all APPROVED (Task 10 required one review-fix cycle: idempotent rating refresh).
+
+- **Branch `dev` @ `4b65a4f`+docs** (15 commits `53eb80e..HEAD`), 46 files, +3227/-298; `origin/dev` NOT pushed beyond initial branch creation; **`demo` untouched (owner approval gate)**.
+- **All 15 verified gaps fixed:** GAP-1 public product status (public forced `active`, admin via `optionalAuth` passthrough) · GAP-2 + GAP-14 single `computeDiscount` over all 4 coupon sites + trusted preview (`items` optional → DB-priced `basis:'server-priced'`, legacy `subtotal` = estimate; cap 200.000₫ now at order time) · GAP-3/5 coupon restore shared `executeCouponRelease` + mark-after-validation + failure release · GAP-4 step-tagged compensating rollback (reverse-order, best-effort, original error preserved) · GAP-7/8 atomic `findOneAndUpdate` transition guard (single-winner 409) + conditional quantity increment · GAP-9/10 webhook: production boot-fails without `PAYMENT_WEBHOOK_SECRET`, simulate route unregistered in prod, `canMarkPaid` pending|confirmed only (+ atomic `$in` filter) · GAP-11 `User.active` at login + every `requireAuth` (optionalAuth degrades to anonymous) · GAP-12 news drafts 404 by slug · GAP-13 unified 404/403/409 factories in `AppError.ts` (business rules stay 400) · GAP-15 user deletion cascade (5 collections deleted, Orders kept; idempotent rating refresh) · GAP-6 game sessions validated server-side (ownership/expiry/status/range; documented residual: score client-chosen within verified session).
+- **Site settings API:** `GET /api/settings/public` (only configured keys; unconfigured ⇒ `{}`, NO placeholders ever), `PUT /api/settings` admin-only (Zod ≤200); optional `SITE_*` env fallbacks documented in `.env.example`.
+- **Tests:** `server npm test` = **83/83 pass** (3 original suites untouched + 12 new files), `npm run build` (tsc) clean; zero new dependencies; AC1–AC10 gate walked.
+- **Contract for Plan 2:** plan §Cross-plan contract (coupon `items`/`basis`, authoritative totals, error-code handling, settings §7 socialLinks full-object PUT rule).
+- **Known residuals (non-blocking):** webhook signature compare not timing-safe (follow-up); `rewardService`/`paymentService` keep bespoke 403 copy (outside Task 9 file list); reward happy-path coupon creation unpinned by test (pre-existing); `quantity:0` coupon = sold-out in guard vs unlimited in list filter (pre-existing); create-compensation vs admin-cancel race window (narrow, no transactions on standalone Mongo); AppError.ts comment lists wishlist 403 that doesn't exist (comment drift).
+
+## FULL REBUILD — Design Track v2 "Obsidian Gold" (2026-10-16, GATE 1 v2 APPROVED 2026-10-17)
 
 - **Scope change (owner directive 2026-10-16):** FULL REBUILD of storefront + admin, **dark-only** premium futuristic collectibles, palette **Black/Gold/Blue/White**, new logo, AO BING hero ≈3 s cinematic (NO scroll-driven). This **supersedes** both the "Precision Showroom" light-first delivery below and CANONICAL_CONTEXT §6 (light+dark toggle, Ocean Blue) — `.ai/` docs to be rewritten after design approval. Workflow: workflow-router → **A**; skills used: web-design-director → enhance-prompt → generate-design → manage-design-system.
 - **Workflow evidence:** config comparison (nova-cms-test vs store3D) proved no missing config; behavior difference = project AGENTS.md small-task bias + legacy in-flight work. Full-rebuild classified LARGE/ARCHITECTURAL → full workflow.

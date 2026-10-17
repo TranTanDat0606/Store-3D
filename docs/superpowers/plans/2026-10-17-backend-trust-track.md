@@ -42,6 +42,7 @@
 4. **Error codes** — Plan 2 distinguishes 404/403/409/400 (Task 9): notably 409 → "Dữ liệu đã thay đổi bởi người khác, vui lòng tải lại" (admin transition conflict, duplicate), 403 → forbidden copy, 404 → empty-state copy.
 5. **Settings** — Plan 2 contact page/footer reads `GET /api/settings/public` and hides unset keys (no placeholders).
 6. **Test seam** — preview-vs-order consistency is asserted pure-level in Plan 1 (Task 2) and end-to-end in Plan 2's Playwright suite: apply coupon in preview → create order → order.discount === preview.discount.
+7. **Settings consumption** — `GET /api/settings/public` returns only configured keys (unconfigured ⇒ `data:{}`); Plan 2 UI hides each row when its key is absent. **Admin settings UI must send ALL three socialLinks (facebook/zalo/instagram) on PUT** — the server replaces the whole sub-document (omitted keys are erased; a set `SITE_*` env var can mask the loss). Clearing a DB field re-exposes its `SITE_*` env fallback — ops must unset the env var to fully hide a value.
 
 ---
 
