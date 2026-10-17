@@ -58,7 +58,7 @@ export function ProductGalleryMobile({ product }: ProductGalleryMobileProps) {
             draggable={false}
           />
           {discountPercent > 0 && (
-            <Badge className="bg-destructive absolute top-4 left-4 z-10 text-white">
+            <Badge className="bg-destructive absolute top-4 left-4 z-10 text-foreground">
               -{discountPercent}%
             </Badge>
           )}
@@ -73,7 +73,7 @@ export function ProductGalleryMobile({ product }: ProductGalleryMobileProps) {
                 onClick={() => setActiveImage(i)}
                 className={cn(
                   'size-2 rounded-full transition-all',
-                  i === activeImage ? 'bg-primary w-4' : 'bg-white/60'
+                  i === activeImage ? 'bg-primary w-4' : 'bg-foreground/60'
                 )}
                 aria-label={`Ảnh ${i + 1}`}
                 aria-current={i === activeImage ? 'true' : undefined}

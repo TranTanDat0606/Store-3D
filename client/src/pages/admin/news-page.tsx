@@ -193,7 +193,7 @@ export default function AdminNewsPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       {n.status === 'published' ? (
-                        <Eye className="size-4 text-emerald-500" />
+                        <Eye className="size-4 text-success" />
                       ) : (
                         <EyeOff className="size-4 text-muted-foreground" />
                       )}

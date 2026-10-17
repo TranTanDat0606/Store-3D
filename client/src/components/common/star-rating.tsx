@@ -14,7 +14,7 @@ export function StarRating({ rating, size = 'sm', className }: StarRatingProps) 
         <Star
           key={i}
           className={cn(
-            'fill-amber-400 text-amber-400',
+            'fill-warning text-warning',
             size === 'lg' ? 'size-5' : 'size-3.5',
             rating < i - 0.5 && 'fill-muted text-muted'
           )}

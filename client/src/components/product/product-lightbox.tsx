@@ -51,14 +51,14 @@ export function ProductLightbox({ images, activeIndex, onClose, onNavigate }: Pr
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/90"
       role="dialog"
       aria-label="Ảnh phóng to"
       aria-modal="true"
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+        className="absolute top-4 right-4 z-10 rounded-full bg-foreground/10 p-2 text-foreground transition-colors hover:bg-foreground/20"
         aria-label="Đóng"
       >
         <X className="size-6" />
@@ -67,7 +67,7 @@ export function ProductLightbox({ images, activeIndex, onClose, onNavigate }: Pr
       {activeIndex > 0 && (
         <button
           onClick={goPrev}
-          className="absolute left-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+          className="absolute left-4 z-10 rounded-full bg-foreground/10 p-2 text-foreground transition-colors hover:bg-foreground/20"
           aria-label="Ảnh trước"
         >
           <ChevronLeft className="size-6" />
@@ -77,20 +77,20 @@ export function ProductLightbox({ images, activeIndex, onClose, onNavigate }: Pr
       {activeIndex < images.length - 1 && (
         <button
           onClick={goNext}
-          className="absolute right-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+          className="absolute right-4 z-10 rounded-full bg-foreground/10 p-2 text-foreground transition-colors hover:bg-foreground/20"
           aria-label="Ảnh tiếp"
         >
           <ChevronRight className="size-6" />
         </button>
       )}
 
-      <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 text-white/70 text-sm">
+      <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 text-foreground/70 text-sm">
         {activeIndex + 1} / {images.length}
       </div>
 
       <button
         onClick={toggleZoom}
-        className="absolute bottom-20 right-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+        className="absolute bottom-20 right-4 z-10 rounded-full bg-foreground/10 p-2 text-foreground transition-colors hover:bg-foreground/20"
         aria-label={zoomed ? 'Thu nhỏ' : 'Phóng to'}
       >
         {zoomed ? <ZoomOut className="size-5" /> : <ZoomIn className="size-5" />}
@@ -132,7 +132,7 @@ export function ProductLightbox({ images, activeIndex, onClose, onNavigate }: Pr
               }}
               className={cn(
                 'size-12 overflow-hidden rounded-lg border-2 transition-all',
-                i === activeIndex ? 'border-white' : 'border-white/30 opacity-60 hover:opacity-100'
+                i === activeIndex ? 'border-border' : 'border-foreground/30 opacity-60 hover:opacity-100'
               )}
               aria-label={`Ảnh ${i + 1}`}
             >

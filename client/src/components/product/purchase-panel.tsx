@@ -119,7 +119,7 @@ export function PurchasePanel({ product, purchaseState }: PurchasePanelProps) {
 
           <Button
             size="lg"
-            className="w-full bg-red-600 text-white shadow-lg shadow-red-600/25 text-base font-semibold hover:bg-red-700 active:bg-red-800"
+            className="w-full bg-destructive text-foreground shadow-lg shadow-destructive/25 text-base font-semibold hover:bg-destructive active:bg-destructive"
             onClick={handleBuyNow}
             disabled={isOutOfStock}
           >

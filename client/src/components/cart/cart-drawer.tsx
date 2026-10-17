@@ -37,7 +37,7 @@ export function CartDrawer() {
         <>
           <motion.div
             key="cart-overlay"
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-background/60 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -50,7 +50,7 @@ export function CartDrawer() {
             key="cart-panel"
             role="dialog"
             aria-label="Giỏ hàng"
-            className="bg-background fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-hidden border-l border-border/60 shadow-2xl shadow-primary/10 sm:max-w-md dark:border-white/10"
+            className="bg-background fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-hidden border-l shadow-2xl shadow-primary/10 sm:max-w-md border-foreground/10"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -59,12 +59,12 @@ export function CartDrawer() {
             {/* ambient background */}
             <div className="pointer-events-none absolute inset-0">
               <div className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-primary/10 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-28 -left-24 size-64 rounded-full bg-cyan-500/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-28 -left-24 size-64 rounded-full bg-accent/10 blur-3xl" />
               <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
             </div>
 
             {/* Header */}
-            <div className="relative flex items-center justify-between border-b border-border/60 px-5 py-4 dark:border-white/10">
+            <div className="relative flex items-center justify-between border-b px-5 py-4 border-foreground/10">
               <div className="flex items-center gap-3">
                 <div className="bg-primary/10 border-primary/20 text-primary flex size-10 items-center justify-center rounded-xl border">
                   <ShoppingBag className="size-5" />
@@ -120,7 +120,7 @@ export function CartDrawer() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, x: 40, scale: 0.96 }}
                         transition={{ duration: 0.25, ease: 'easeOut' }}
-                        className="relative flex gap-3 rounded-2xl border border-border/60 bg-card/60 p-3 shadow-sm backdrop-blur-sm dark:border-white/10"
+                        className="relative flex gap-3 rounded-2xl border bg-card/60 p-3 shadow-sm backdrop-blur-sm border-foreground/10"
                       >
                         {/* thumbnail glow */}
                         <div className="pointer-events-none absolute -inset-x-1 top-0 h-px rounded-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -130,7 +130,7 @@ export function CartDrawer() {
                           onClick={closeCart}
                           className="bg-muted relative size-20 shrink-0 overflow-hidden rounded-xl"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-primary/10" />
+                          <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-primary/10" />
                           <img
                             src={resolveImageUrl(item.image)}
                             alt={item.name}
@@ -161,7 +161,7 @@ export function CartDrawer() {
                           </div>
                           <p className="text-muted-foreground mt-0.5 text-xs">{formatCurrency(item.price)} / cái</p>
                           <div className="mt-auto flex items-center justify-between pt-2">
-                            <div className="flex items-center gap-0.5 rounded-lg border border-border/60 bg-background/70 p-0.5 dark:border-white/10">
+                            <div className="flex items-center gap-0.5 rounded-lg border bg-background/70 p-0.5 border-foreground/10">
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -195,7 +195,7 @@ export function CartDrawer() {
                 </div>
 
                 {/* Summary */}
-                <div className="relative border-t border-border/60 px-5 py-4 dark:border-white/10">
+                <div className="relative border-t px-5 py-4 border-foreground/10">
                   <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground text-sm">Tạm tính</span>
@@ -212,7 +212,7 @@ export function CartDrawer() {
                     <Button variant="outline" className="flex-1" onClick={closeCart} asChild>
                       <Link to="/san-pham">Tiếp tục mua</Link>
                     </Button>
-                    <Button className="bg-primary hover:bg-primary/90 flex-1 text-white shadow-lg shadow-primary/25" onClick={goToCheckout}>
+                    <Button className="bg-primary hover:bg-primary/90 flex-1 text-foreground shadow-lg shadow-primary/25" onClick={goToCheckout}>
                       <Sparkles className="size-4" />
                       Thanh toán
                     </Button>

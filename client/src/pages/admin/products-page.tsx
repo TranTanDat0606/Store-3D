@@ -42,9 +42,9 @@ import { cn } from '@/lib/utils'
 import type { Category, PaginationMeta, Product, ProductStatus } from '@/types'
 
 export const PRODUCT_STATUS_META: Record<ProductStatus, { label: string; className: string }> = {
-  active: { label: 'Đang bán', className: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
+  active: { label: 'Đang bán', className: 'border-success/30 bg-success/10 text-success' },
   inactive: { label: 'Ẩn', className: 'border-border bg-muted text-muted-foreground' },
-  'out-of-stock': { label: 'Hết hàng', className: 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+  'out-of-stock': { label: 'Hết hàng', className: 'border-warning/30 bg-warning/10 text-warning' },
 }
 
 const PRICE_RANGES = [
@@ -252,10 +252,10 @@ export default function AdminProductsPage() {
           </>
         ) : (
           <>
-            <StatCard label="Tổng sản phẩm" value={stats.total} icon={Package} accentClass="bg-cyan-500/10 text-cyan-300" />
-            <StatCard label="Đang bán" value={stats.active} icon={CheckCircle2} accentClass="bg-emerald-500/10 text-emerald-300" />
-            <StatCard label="Sắp hết" value={stats.lowStock} icon={AlertTriangle} accentClass="bg-amber-500/10 text-amber-300" />
-            <StatCard label="Hết hàng" value={stats.outOfStock} icon={XCircle} accentClass="bg-rose-500/10 text-rose-300" />
+            <StatCard label="Tổng sản phẩm" value={stats.total} icon={Package} accentClass="bg-accent/10 text-accent" />
+            <StatCard label="Đang bán" value={stats.active} icon={CheckCircle2} accentClass="bg-success/10 text-success" />
+            <StatCard label="Sắp hết" value={stats.lowStock} icon={AlertTriangle} accentClass="bg-warning/10 text-warning" />
+            <StatCard label="Hết hàng" value={stats.outOfStock} icon={XCircle} accentClass="bg-destructive/10 text-destructive" />
           </>
         )}
       </div>
@@ -350,7 +350,7 @@ export default function AdminProductsPage() {
                 const statusMeta = PRODUCT_STATUS_META[product.status]
                 const categoryName = typeof product.category === 'object' ? product.category.name : ''
                 const stockColor =
-                  product.stock <= 0 ? 'text-destructive' : product.stock <= 10 ? 'text-amber-500' : 'text-emerald-500'
+                  product.stock <= 0 ? 'text-destructive' : product.stock <= 10 ? 'text-warning' : 'text-success'
                 return (
                   <TableRow key={product._id} className="group border-border transition-colors duration-150 hover:bg-accent/50">
                     <TableCell className="min-w-64">
@@ -466,7 +466,7 @@ export default function AdminProductsPage() {
                   </p>
                 )}
                 <p className="text-muted-foreground">
-                  Đánh giá: <span className="text-amber-500">★ {preview.rating}</span> ({preview.reviewCount})
+                  Đánh giá: <span className="text-warning">★ {preview.rating}</span> ({preview.reviewCount})
                 </p>
                 <Button onClick={() => navigate(`/admin/san-pham/${preview._id}`)} className="w-full">
                   <Pencil className="size-4" />

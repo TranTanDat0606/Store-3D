@@ -9,15 +9,15 @@ export default function NotFoundPage() {
         <SearchX className="text-primary size-10" />
       </div>
 
-      <h1 className="mb-2 text-6xl font-bold tracking-tight text-slate-900 dark:text-white">
+      <h1 className="mb-2 text-6xl font-bold tracking-tight text-foreground">
         404
       </h1>
 
-      <h2 className="mb-3 text-xl font-semibold text-slate-700 dark:text-slate-200">
+      <h2 className="mb-3 text-xl font-semibold text-foreground">
         Không tìm thấy trang
       </h2>
 
-      <p className="mb-8 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+      <p className="mb-8 max-w-md text-sm leading-relaxed text-foreground">
         Trang bạn đang tìm kiếm có thể đã bị xóa, đổi tên hoặc tạm thời không khả dụng.
       </p>
 

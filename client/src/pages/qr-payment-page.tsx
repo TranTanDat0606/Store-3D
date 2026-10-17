@@ -128,7 +128,7 @@ export default function QrPaymentPage() {
 
       {state === 'paid' && (
         <div className="w-full rounded-2xl border bg-card p-8 text-center shadow-sm">
-          <CheckCircle2 className="mx-auto size-12 text-emerald-500" />
+          <CheckCircle2 className="mx-auto size-12 text-success" />
           <h1 className="mt-4 text-lg font-bold">Thanh toán thành công!</h1>
           <p className="text-muted-foreground mt-1 text-sm">Đơn hàng của bạn đã được xác nhận.</p>
           <div className="mt-6 grid gap-2">
@@ -167,17 +167,13 @@ export default function QrPaymentPage() {
           </div>
 
           <div
-            className={`mx-auto w-fit rounded-xl border px-4 py-1.5 text-sm font-semibold tabular-nums ${
-              remainingMs <= 60000
-                ? 'border-destructive/40 bg-destructive/10 text-destructive'
-                : 'border-primary/30 bg-primary/5 text-primary'
-            }`}
+            className={`mx-auto w-fit rounded-xl border px-4 py-1.5 text-sm font-semibold tabular-nums ${ remainingMs <= 60000 ? 'border-destructive/40 bg-destructive/10 text-destructive' : 'border-primary/30 bg-primary/5 text-primary' }`}
           >
             Mã QR sẽ hết hạn sau: {formatCountdown(remainingMs)}
           </div>
 
           <div className="my-5 flex justify-center">
-            <div className="rounded-2xl border bg-white p-3">
+            <div className="rounded-2xl border bg-card p-3">
               <img src={qr.qrUrl} alt="Mã thanh toán VietQR" className="size-56" />
             </div>
           </div>
@@ -196,7 +192,7 @@ export default function QrPaymentPage() {
                 <button onClick={() => void copyCode()} className="text-primary hover:text-primary/80" aria-label="Sao chép mã chuyển khoản">
                   <Copy className="size-4" />
                 </button>
-                {copied && <span className="text-emerald-600">Đã chép</span>}
+                {copied && <span className="text-success">Đã chép</span>}
               </span>
             </div>
           </div>

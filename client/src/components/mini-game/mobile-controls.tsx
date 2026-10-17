@@ -58,11 +58,11 @@ function TouchButton({
       onMouseUp={handleEnd}
       onMouseLeave={handleEnd}
       className={cn(
-        'flex items-center justify-center rounded-2xl border-2 border-white/20',
-        'bg-white/10 backdrop-blur-sm text-white',
-        'active:bg-white/25 active:scale-95 active:border-white/40',
+        'flex items-center justify-center rounded-2xl border-2 border-foreground/20',
+        'bg-foreground/10 backdrop-blur-sm text-foreground',
+        'active:bg-foreground/25 active:scale-95 active:border-foreground/40',
         'transition-all duration-75 select-none touch-none',
-        'shadow-lg shadow-black/20',
+        'shadow-lg shadow-background/20',
         className,
       )}
       aria-label={label}
@@ -111,7 +111,7 @@ export function MobileControls({ onAction, className }: MobileControlsProps) {
       <div className="flex items-center pb-2">
         <TouchButton
           onPress={() => onAction('shoot')}
-          className="size-20 border-cyan-400/40 bg-cyan-500/20 text-cyan-300 active:bg-cyan-500/40"
+          className="size-20 border-accent/40 bg-accent/20 text-accent active:bg-accent/40"
           label="Bắn"
         >
           <div className="flex flex-col items-center">

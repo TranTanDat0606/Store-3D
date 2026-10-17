@@ -62,8 +62,8 @@ export default function OrderSuccessPage() {
   return (
     <div className="mx-auto max-w-xl px-4 py-16 sm:px-6">
       <div className="text-center">
-        <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
-          <CheckCircle2 className="size-10 text-emerald-600" />
+        <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-success">
+          <CheckCircle2 className="size-10 text-success" />
         </div>
         <h1 className="mt-6 text-2xl font-bold sm:text-3xl">Đặt hàng thành công!</h1>
         <p className="text-muted-foreground mt-2">

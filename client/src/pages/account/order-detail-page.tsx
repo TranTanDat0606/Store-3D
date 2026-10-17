@@ -218,7 +218,7 @@ export default function OrderDetailPage() {
               <span>{formatCurrency(order.subtotal)}</span>
             </div>
             {order.discount > 0 && (
-              <div className="flex justify-between text-emerald-600">
+              <div className="flex justify-between text-success">
                 <span className="text-muted-foreground">Giảm giá</span>
                 <span>-{formatCurrency(order.discount)}</span>
               </div>
@@ -268,7 +268,7 @@ export default function OrderDetailPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Giữ đơn hàng</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="bg-destructive text-foreground hover:bg-destructive/90"
               onClick={handleCancelOrder}
               disabled={cancelling}
             >

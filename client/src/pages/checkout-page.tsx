@@ -550,7 +550,7 @@ export default function CheckoutPage() {
                         type="checkbox"
                         checked={addressEditIsDefault}
                         onChange={(e) => setAddressEditIsDefault(e.target.checked)}
-                        className="rounded border-gray-300"
+                        className="rounded border-border"
                       />
                       Đặt làm địa chỉ mặc định
                     </label>
@@ -713,7 +713,7 @@ export default function CheckoutPage() {
                   <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
                 {discount > 0 && (
-                  <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                  <div className="flex justify-between text-success">
                     <span>Giảm giá</span>
                     <span className="font-medium">-{formatCurrency(discount)}</span>
                   </div>
@@ -740,7 +740,7 @@ export default function CheckoutPage() {
             >
               {submitting ? (
                 <span className="flex items-center gap-2">
-                  <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
                   Đang đặt hàng...
                 </span>
               ) : (

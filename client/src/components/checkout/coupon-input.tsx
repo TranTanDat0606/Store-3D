@@ -99,14 +99,14 @@ export function CouponInput({
   // ── Applied state ──
   if (appliedCoupon) {
     return (
-      <div className="flex items-center justify-between gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 dark:border-emerald-800 dark:bg-emerald-950/50">
+      <div className="flex items-center justify-between gap-2 rounded-lg border px-3 py-2.5 border-success/20 bg-success/50">
         <div className="flex items-center gap-2 min-w-0">
-          <Check className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          <span className="truncate text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+          <Check className="size-4 shrink-0 text-success" />
+          <span className="truncate text-sm font-semibold text-success">
             {appliedCoupon.code}
           </span>
           {appliedCoupon && 'source' in appliedCoupon && appliedCoupon.source === 'game' && (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-100 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/50 dark:text-purple-400">
+            <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-accent/50 text-accent">
               <Gamepad2 className="size-2.5" />
               Game
             </span>
@@ -115,7 +115,7 @@ export function CouponInput({
         <button
           onClick={onRemove}
           aria-label="Bỏ mã giảm giá"
-          className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-emerald-100 hover:text-red-600 dark:hover:bg-emerald-900"
+          className="ml-2 shrink-0 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-destructive hover:bg-success"
         >
           Bỏ mã
         </button>
@@ -152,7 +152,7 @@ export function CouponInput({
           disabled={applying || !query.trim()}
         >
           {applying ? (
-            <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
           ) : (
             'Áp dụng'
           )}
@@ -193,7 +193,7 @@ export function CouponInput({
                         {c.code}
                       </span>
                       {c.source === 'game' && (
-                        <span className="inline-flex items-center gap-0.5 rounded-full bg-purple-100 px-1.5 py-0.5 text-[10px] font-medium text-purple-700 dark:bg-purple-900/50 dark:text-purple-400">
+                        <span className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium bg-accent/50 text-accent">
                           <Gamepad2 className="size-2.5" />
                           Game
                         </span>
@@ -204,7 +204,7 @@ export function CouponInput({
                         ? `Giảm ${c.discount}%`
                         : `Giảm ${formatCurrency(c.discount)}`}
                       {c.estimatedDiscountAmount > 0 && (
-                        <span className="ml-1 text-emerald-600 dark:text-emerald-400">
+                        <span className="ml-1 text-success">
                           (≈ -{formatCurrency(c.estimatedDiscountAmount)})
                         </span>
                       )}

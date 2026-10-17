@@ -47,7 +47,7 @@ function SearchResultRow({ product }: { product: Product }) {
           <span className="text-muted-foreground text-xs">No image</span>
         )}
         {discountPercent > 0 && (
-          <span className="bg-destructive absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-bold text-white">
+          <span className="bg-destructive absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-bold text-foreground">
             -{discountPercent}%
           </span>
         )}
@@ -189,9 +189,7 @@ export default function ProductListPage() {
         <div className="space-y-1.5">
           <button
             onClick={() => updateParams({ categorySlug: null })}
-            className={`block w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
-              !categorySlug ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-muted'
-            }`}
+            className={`block w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${ !categorySlug ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-muted' }`}
           >
             Tất cả
           </button>
@@ -199,11 +197,7 @@ export default function ProductListPage() {
             <button
               key={cat._id}
               onClick={() => updateParams({ categorySlug: cat.slug })}
-              className={`block w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                categorySlug === cat.slug
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-muted-foreground hover:bg-muted'
-              }`}
+              className={`block w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${ categorySlug === cat.slug ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground hover:bg-muted' }`}
             >
               {cat.name}
             </button>
@@ -218,11 +212,7 @@ export default function ProductListPage() {
             <button
               key={m}
               onClick={() => updateParams({ material: material === m ? null : m })}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                material === m
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'hover:border-primary/50 hover:text-primary'
-              }`}
+              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${ material === m ? 'border-primary bg-primary text-primary-foreground' : 'hover:border-primary/50 hover:text-primary' }`}
             >
               {m}
             </button>
@@ -237,11 +227,7 @@ export default function ProductListPage() {
             <button
               key={p}
               onClick={() => updateParams({ printerType: printerType === p ? null : p })}
-              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                printerType === p
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'hover:border-primary/50 hover:text-primary'
-              }`}
+              className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${ printerType === p ? 'border-primary bg-primary text-primary-foreground' : 'hover:border-primary/50 hover:text-primary' }`}
             >
               {p}
             </button>

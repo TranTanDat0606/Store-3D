@@ -49,7 +49,7 @@ export function Footer() {
                 aria-label="Facebook"
                 className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
               >
-                <SocialIcon className="text-slate-600 dark:text-slate-300">
+                <SocialIcon className="text-foreground">
                   <path fill="currentColor" d={facebookPath} />
                 </SocialIcon>
               </a>
@@ -60,7 +60,7 @@ export function Footer() {
                 aria-label="TikTok"
                 className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
               >
-                <SocialIcon className="text-slate-600 dark:text-slate-300">
+                <SocialIcon className="text-foreground">
                   <path fill="currentColor" d={tiktokPath} />
                 </SocialIcon>
               </a>
@@ -71,7 +71,7 @@ export function Footer() {
                 aria-label="Instagram"
                 className="bg-muted flex size-9 items-center justify-center rounded-full transition-all hover:scale-110 hover:bg-foreground/10"
               >
-                <SocialIcon className="text-slate-600 dark:text-slate-300">
+                <SocialIcon className="text-foreground">
                   <path fill="currentColor" d={instagramPath} />
                 </SocialIcon>
               </a>

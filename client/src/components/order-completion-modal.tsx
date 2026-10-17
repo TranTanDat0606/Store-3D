@@ -98,21 +98,21 @@ export function OrderCompletionModal() {
   return (
     <>
       <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
-        <DialogContent className="sm:max-w-md overflow-hidden border-0 bg-white p-0 shadow-2xl dark:bg-slate-900">
+        <DialogContent className="sm:max-w-md overflow-hidden border-0 p-0 shadow-2xl bg-muted">
           <div className="relative">
             <button
               onClick={handleClose}
-              className="absolute right-3 top-3 z-10 rounded-full bg-white/80 p-1.5 text-slate-500 backdrop-blur-sm transition-colors hover:bg-white hover:text-slate-700 dark:bg-slate-800/80 dark:text-slate-400 dark:hover:bg-slate-800"
+              className="absolute right-3 top-3 z-10 rounded-full p-1.5 backdrop-blur-sm transition-colors hover:text-foreground bg-muted/80 text-foreground hover:bg-muted"
             >
               <X className="size-4" />
             </button>
 
-            <div className="relative bg-gradient-to-br from-emerald-500 to-teal-600 px-6 pt-8 pb-12 text-center text-white">
-              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+            <div className="relative bg-gradient-to-br from-success to-success px-6 pt-8 pb-12 text-center text-foreground">
+              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-foreground/20 backdrop-blur-sm">
                 <CheckCircle2 className="size-8" />
               </div>
               <h2 className="mt-4 text-xl font-bold">Đơn hàng hoàn tất!</h2>
-              <p className="mt-1 text-sm text-emerald-100">Đơn hàng của bạn đã được giao thành công</p>
+              <p className="mt-1 text-sm text-success">Đơn hàng của bạn đã được giao thành công</p>
             </div>
 
             <div className="-mt-6 relative z-10 px-6">
@@ -139,7 +139,7 @@ export function OrderCompletionModal() {
             </div>
 
             <div className="space-y-2 px-6 pb-6 pt-4">
-              <Button onClick={handleViewOrder} className="w-full bg-primary text-white shadow-md shadow-primary/20 hover:bg-primary/90">
+              <Button onClick={handleViewOrder} className="w-full bg-primary text-foreground shadow-md shadow-primary/20 hover:bg-primary/90">
                 Xem đơn hàng
               </Button>
               <Button onClick={handleReview} variant="outline" className="w-full">

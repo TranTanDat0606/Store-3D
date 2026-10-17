@@ -46,7 +46,7 @@ export function RatingSummary({
             <span className="w-3 text-right font-medium">{d.stars}</span>
             <div className="bg-muted h-2 flex-1 overflow-hidden rounded-full">
               <div
-                className="bg-amber-400 h-full rounded-full transition-all"
+                className="bg-warning h-full rounded-full transition-all"
                 style={{ width: `${d.percent}%` }}
               />
             </div>
@@ -66,7 +66,7 @@ export function RatingSummary({
             <Link to={`/danh-gia/${productSlug}`}>Viết đánh giá</Link>
           </Button>
         ) : eligibility?.hasReviewed ? (
-          <div className="text-emerald-600 dark:text-emerald-400 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm font-medium">
+          <div className="text-success flex w-full items-center justify-center gap-2 rounded-xl border border-success/30 bg-success/10 px-3 py-2.5 text-sm font-medium">
             <CheckCircle2 className="size-4" />
             Đã đánh giá
           </div>

@@ -55,7 +55,7 @@ function RatingInput({
           <Star
             className={cn(
               'size-7',
-              (hover || value) >= i ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted'
+              (hover || value) >= i ? 'fill-warning text-warning' : 'fill-muted text-muted'
             )}
           />
         </button>
@@ -196,7 +196,7 @@ export default function ReviewFormPage() {
               </AlertDescription>
             </Alert>
           ) : eligibility && eligibility.hasReviewed ? (
-            <Alert className="mb-6 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
+            <Alert className="mb-6 border-success/30 bg-success/10 text-success">
               <CheckCircle2 className="size-4" />
               <AlertDescription>
                 Bạn đã đánh giá sản phẩm này rồi.{' '}
@@ -251,7 +251,7 @@ export default function ReviewFormPage() {
               <Button type="submit" disabled={submitting}>
                 {submitting ? (
                   <span className="flex items-center gap-2">
-                    <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
                     Đang gửi...
                   </span>
                 ) : (

@@ -149,7 +149,7 @@ export default function AdminOrdersPage() {
                         </div>
                       ))}
                       {order.discount > 0 && (
-                        <p className="flex justify-between text-sm text-emerald-600 dark:text-emerald-400">
+                        <p className="flex justify-between text-sm text-success">
                           <span>Giảm giá</span>
                           <span>-{formatCurrency(order.discount)}</span>
                         </p>

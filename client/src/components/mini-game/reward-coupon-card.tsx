@@ -21,19 +21,19 @@ export function RewardCouponCard({ reward }: RewardCouponCardProps) {
   }
 
   return (
-    <div className="rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 text-center dark:border-emerald-700 dark:bg-emerald-950/50">
-      <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900">
-        <Gift className="size-6 text-emerald-600" />
+    <div className="rounded-xl border-2 border-dashed p-6 text-center border-success/20 bg-success/50">
+      <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-success">
+        <Gift className="size-6 text-success" />
       </div>
       <p className="text-sm text-muted-foreground">Bạn nhận được</p>
-      <p className="mt-1 text-3xl font-bold text-emerald-600">{reward.discount}% GIẢM</p>
+      <p className="mt-1 text-3xl font-bold text-success">{reward.discount}% GIẢM</p>
       <p className="mt-1 text-xs text-muted-foreground">
         HSD: {formatDateTime(reward.expiresAt)}
       </p>
       <button
         type="button"
         onClick={handleCopy}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+        className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-success px-4 py-2 text-sm font-medium text-foreground hover:bg-success transition-colors"
       >
         {copied ? (
           <>

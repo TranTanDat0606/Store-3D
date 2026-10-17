@@ -56,10 +56,10 @@ export function ImageUpload({ images, onChange, max = 5 }: ImageUploadProps) {
             <button
               type="button"
               onClick={() => onChange(images.filter((_, idx) => idx !== i))}
-              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+              className="absolute inset-0 flex items-center justify-center bg-background/50 opacity-0 transition-opacity group-hover:opacity-100"
               aria-label="Xóa ảnh"
             >
-              <X className="size-5 text-white" />
+              <X className="size-5 text-foreground" />
             </button>
           </div>
         ))}

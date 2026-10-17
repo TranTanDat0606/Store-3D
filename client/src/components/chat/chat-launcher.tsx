@@ -46,7 +46,7 @@ export function ChatLauncher({ isOpen, onToggle, cartOpen }: ChatLauncherProps) 
       onClick={onToggle}
       aria-label={isOpen ? 'Đóng chat' : 'Mở chat'}
       className={
-        "group fixed z-50 size-14 rounded-full shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105 " +
+        "group fixed z-50 size-14 rounded-full shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-105" +
         (cartOpen
           ? "bottom-6 left-6 sm:bottom-8 sm:left-8"
           : "bottom-6 right-6 sm:bottom-8 sm:right-8")

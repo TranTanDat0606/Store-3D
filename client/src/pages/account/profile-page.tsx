@@ -134,7 +134,7 @@ export default function ProfilePage() {
             <Button type="submit" disabled={submitting}>
               {submitting ? (
                 <span className="flex items-center gap-2">
-                  <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
                   Đang lưu...
                 </span>
               ) : (

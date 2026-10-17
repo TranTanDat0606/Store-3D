@@ -15,11 +15,11 @@ import { API_URL } from '@/services/apiClient'
 import type { BestSellingProduct, Order, OrdersByStatus, RevenuePeriod, RevenuePoint, StatsOverview } from '@/types'
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: '#f59e0b',
-  confirmed: '#38bdf8',
-  shipping: '#818cf8',
-  completed: '#34d399',
-  cancelled: '#f43f5e',
+  pending: 'var(--warning)',
+  confirmed: 'var(--accent)',
+  shipping: 'var(--chart-5)',
+  completed: 'var(--success)',
+  cancelled: 'var(--destructive)',
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -112,9 +112,9 @@ export default function AdminDashboardPage() {
     icon: LucideIcon
     accent: string
   }[] = [
-    { label: 'Tổng đơn hàng', value: String(stats?.totalOrders ?? 0), icon: ShoppingCart, accent: 'from-cyan-400 to-blue-500' },
-    { label: 'Tổng sản phẩm', value: String(stats?.totalProducts ?? 0), icon: Package, accent: 'from-violet-400 to-purple-500' },
-    { label: 'Khách hàng', value: String(stats?.totalCustomers ?? 0), icon: Users, accent: 'from-amber-400 to-orange-500' },
+    { label: 'Tổng đơn hàng', value: String(stats?.totalOrders ?? 0), icon: ShoppingCart, accent: 'from-accent to-accent' },
+    { label: 'Tổng sản phẩm', value: String(stats?.totalProducts ?? 0), icon: Package, accent: 'from-accent to-accent' },
+    { label: 'Khách hàng', value: String(stats?.totalCustomers ?? 0), icon: Users, accent: 'from-warning to-warning' },
   ]
 
   return (
@@ -145,7 +145,7 @@ export default function AdminDashboardPage() {
                 {periodOrders} đơn trong kỳ · Tổng cộng: {formatCurrency(stats?.totalRevenue ?? 0)}
               </p>
             </div>
-            <div className={cn('flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg', 'from-emerald-400 to-teal-500')}>
+            <div className={cn('flex size-12 items-center justify-center rounded-xl bg-gradient-to-br shadow-lg', 'from-success to-success')}>
               <DollarSign className="size-6 text-foreground" />
             </div>
           </CardContent>
@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="border-border bg-card/50">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-warning to-warning shadow-lg">
               <Clock className="size-6 text-foreground" />
             </div>
             <div>
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
         </Card>
         <Card className="border-border bg-card/50">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/20">
+            <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-success to-success shadow-lg shadow-success/20">
               <CheckCircle2 className="size-6 text-foreground" />
             </div>
             <div>
@@ -207,15 +207,15 @@ export default function AdminDashboardPage() {
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22d3ee" stopOpacity={0.5} />
-                    <stop offset="95%" stopColor="#22d3ee" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--chart-3)" stopOpacity={0.5} />
+                    <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff14" />
-                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
-                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#f1f5f9' }} formatter={(v) => formatCurrency(Number(v))} />
-                <Area type="monotone" dataKey="revenue" stroke="#22d3ee" strokeWidth={2} fill="url(#rev)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                <XAxis dataKey="date" stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
+                <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: 'var(--popover-foreground)' }} formatter={(v) => formatCurrency(Number(v))} />
+                <Area type="monotone" dataKey="revenue" stroke="var(--chart-3)" strokeWidth={2} fill="url(#rev)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -230,16 +230,16 @@ export default function AdminDashboardPage() {
               <PieChart>
                 <Pie data={byStatus} dataKey="count" nameKey="status" innerRadius={70} outerRadius={100} paddingAngle={3} stroke="none">
                   {byStatus.map((s) => (
-                    <Cell key={s.status} fill={STATUS_COLORS[s.status] ?? '#64748b'} />
+                    <Cell key={s.status} fill={STATUS_COLORS[s.status] ?? 'var(--muted-foreground)'} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: '#f1f5f9' }} formatter={(v, n) => [`${v} đơn`, STATUS_LABELS[String(n)] ?? String(n)]} />
+                <Tooltip contentStyle={{ background: 'var(--popover)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, color: 'var(--popover-foreground)' }} formatter={(v, n) => [`${v} đơn`, STATUS_LABELS[String(n)] ?? String(n)]} />
               </PieChart>
             </ResponsiveContainer>
             <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
               {byStatus.map((s) => (
                 <span key={s.status} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span className="size-2.5 rounded-full" style={{ background: STATUS_COLORS[s.status] ?? '#64748b' }} />
+                  <span className="size-2.5 rounded-full" style={{ background: STATUS_COLORS[s.status] ?? 'var(--muted-foreground)' }} />
                   {STATUS_LABELS[s.status] ?? s.status} · {s.count}
                 </span>
               ))}

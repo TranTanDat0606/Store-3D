@@ -48,7 +48,7 @@ export function ChatPanel({ isOpen, onClose }: ChatPanelProps) {
         <>
           <motion.div
             key="chat-overlay"
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm sm:hidden"
+            className="fixed inset-0 z-40 bg-background/40 backdrop-blur-sm sm:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

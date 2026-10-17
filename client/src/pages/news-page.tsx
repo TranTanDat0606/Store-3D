@@ -76,7 +76,7 @@ export default function NewsPage() {
   return (
     <div className="relative min-h-screen">
       {/* Background grid - same style as Cart */}
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 dark:opacity-[0.04]" />
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 opacity-[0.04]" />
 
       <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <Breadcrumb className="mb-6" items={[{ label: 'Tin tức' }]} />

@@ -46,7 +46,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
           role="button"
           aria-label="Phóng to ảnh sản phẩm"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/10" />
           <img
             src={resolveImageUrl(images[activeImage])}
             alt={product.name}
@@ -55,7 +55,7 @@ export function ProductGallery({ product }: ProductGalleryProps) {
             draggable={false}
           />
           {discountPercent > 0 && (
-            <Badge className="bg-destructive absolute top-4 left-4 z-10 text-white">
+            <Badge className="bg-destructive absolute top-4 left-4 z-10 text-foreground">
               -{discountPercent}%
             </Badge>
           )}

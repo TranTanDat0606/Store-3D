@@ -69,7 +69,7 @@ export function ProductTabs({
           <div>
             {isLongDescription && !descriptionExpanded ? (
               <>
-                <div className="prose prose-neutral dark:prose-invert max-w-none overflow-hidden [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">
+                <div className="prose prose-invert max-w-none overflow-hidden [mask-image:linear-gradient(to_bottom,black_60%,transparent)]">
                   <p className="text-muted-foreground whitespace-pre-line">{product.description}</p>
                 </div>
                 <Button
@@ -82,7 +82,7 @@ export function ProductTabs({
                 </Button>
               </>
             ) : (
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <div className="prose prose-invert max-w-none">
                 <p className="text-muted-foreground whitespace-pre-line">{product.description}</p>
                 {isLongDescription && (
                   <Button

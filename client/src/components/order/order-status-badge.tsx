@@ -2,11 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import type { OrderStatus, PaymentStatus } from '@/types'
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  confirmed: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
-  shipping: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
-  completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-  cancelled: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
+  pending: 'bg-warning text-warning',
+  confirmed: 'bg-accent text-accent',
+  shipping: 'bg-accent text-accent',
+  completed: 'bg-success text-success',
+  cancelled: 'bg-destructive text-destructive',
 }
 
 const STATUS_LABELS: Record<OrderStatus, string> = {
@@ -24,9 +24,9 @@ const PAYMENT_LABELS: Record<PaymentStatus, string> = {
 }
 
 const PAYMENT_STYLES: Record<PaymentStatus, string> = {
-  paid: 'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-  unpaid: 'border-transparent bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300',
-  pending_payment: 'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  paid: 'border-transparent bg-success text-success',
+  unpaid: 'border-transparent bg-muted text-foreground',
+  pending_payment: 'border-transparent bg-warning text-warning',
 }
 
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {

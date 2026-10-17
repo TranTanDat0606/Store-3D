@@ -159,7 +159,7 @@ html.theme-transition *::after {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: oklch(0.58 0.165 250);
+  background: var(--primary);
   border-radius: 1px;
 }
 

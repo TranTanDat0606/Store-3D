@@ -75,12 +75,12 @@ export const ProductCard = memo(function ProductCard({
     >
       <Link
         to={`/san-pham/${product.slug}`}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 dark:border-white/10"
+        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 border-foreground/10"
       >
         {/* Image: digital showroom */}
         <div className="relative aspect-square overflow-hidden">
           {/* glow + grid backdrop */}
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/15 via-transparent to-primary/20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/15 via-transparent to-primary/20" />
           <div className="bg-grid absolute inset-0 opacity-40" />
           {/* soft radial glow following hover */}
           <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
@@ -96,8 +96,8 @@ export const ProductCard = memo(function ProductCard({
           />
 
           {/* light reflection */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/40" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent to-transparent via-foreground/40" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/25 via-transparent to-transparent" />
 
           {/* badges */}
           <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
@@ -107,7 +107,7 @@ export const ProductCard = memo(function ProductCard({
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.08 }}
               >
-                <Badge className="bg-destructive text-white shadow-md shadow-destructive/30">
+                <Badge className="bg-destructive text-foreground shadow-md shadow-destructive/30">
                   -{discountPercent}%
                 </Badge>
               </motion.span>
@@ -121,9 +121,9 @@ export const ProductCard = memo(function ProductCard({
                 <Badge
                   className={cn(
                     'shadow-md',
-                    rank === 1 && 'bg-amber-500 text-white shadow-amber-500/30',
-                    rank === 2 && 'bg-slate-400 text-white shadow-slate-400/30',
-                    rank === 3 && 'bg-orange-600 text-white shadow-orange-600/30',
+                    rank === 1 && 'bg-warning text-foreground shadow-warning/30',
+                    rank === 2 && 'bg-muted text-foreground shadow-shadow',
+                    rank === 3 && 'bg-warning text-foreground shadow-warning/30',
                   )}
                 >
                   <Trophy className="mr-1 size-3" />
@@ -146,7 +146,7 @@ export const ProductCard = memo(function ProductCard({
         {/* Info */}
         <div className={cn("flex flex-1 flex-col gap-1 p-3.5", hideAddToCart && "pb-12")}>
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Star className="size-3.5 fill-amber-400 text-amber-400" />
+            <Star className="size-3.5 fill-warning text-warning" />
             <span>{product.rating > 0 ? product.rating.toFixed(1) : 'Mới'}</span>
             {categoryName && (
               <>
@@ -181,7 +181,7 @@ export const ProductCard = memo(function ProductCard({
                     variant="outline"
                     size="icon"
                     className={cn(
-                      'size-8 shrink-0 rounded-full border-border/60 bg-background/60 backdrop-blur-sm dark:border-white/10',
+                      'size-8 shrink-0 rounded-full bg-background/60 backdrop-blur-sm border-foreground/10',
                       wishlisted && 'border-destructive/50 text-destructive'
                     )}
                     onClick={handleWishlist}

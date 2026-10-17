@@ -12,10 +12,10 @@ import { cn, formatDate } from '@/lib'
 import type { ContactRequest, PaginationMeta } from '@/types'
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  new: { label: 'Mới', color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400', icon: Clock },
-  in_progress: { label: 'Đang xử lý', color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400', icon: MessageSquare },
-  resolved: { label: 'Đã xử lý', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400', icon: CheckCircle2 },
-  rejected: { label: 'Từ chối xử lý', color: 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400', icon: Ban },
+  new: { label: 'Mới', color: 'bg-accent/15 text-accent', icon: Clock },
+  in_progress: { label: 'Đang xử lý', color: 'bg-warning/15 text-warning', icon: MessageSquare },
+  resolved: { label: 'Đã xử lý', color: 'bg-success/15 text-success', icon: CheckCircle2 },
+  rejected: { label: 'Từ chối xử lý', color: 'bg-destructive/15 text-destructive', icon: Ban },
 }
 
 const ALLOWED_NEXT_STATUS: Record<string, string[]> = {
@@ -213,9 +213,9 @@ export default function AdminSupportPage() {
       </Card>
 
       {smtpStatus && smtpStatus.status !== 'connection_ok' && (
-        <Card className={smtpStatus.status === 'not_configured' ? 'border-amber-500/30' : 'border-red-500/30'}>
+        <Card className={smtpStatus.status === 'not_configured' ? 'border-warning/30' : 'border-destructive/30'}>
           <CardContent className="flex items-center gap-3 py-3">
-            <Wifi className="size-4 text-amber-400" />
+            <Wifi className="size-4 text-warning" />
             <div className="flex-1">
               <p className="text-sm font-medium text-foreground">
                 {smtpStatus.status === 'not_configured' ? 'SMTP chưa được cấu hình' : 'SMTP connection issue'}
@@ -354,7 +354,7 @@ export default function AdminSupportPage() {
                           if (allowed.length === 0) {
                             return (
                               <div className="space-y-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5 text-xs font-medium text-success">
                                   <CheckCircle2 className="size-3" />
                                   Trạng thái cuối — không thể thay đổi
                                 </span>
@@ -451,19 +451,19 @@ export default function AdminSupportPage() {
                           )}
                         </Button>
                         {resolutionStatus === 'success' && (
-                          <p className="mt-2 flex items-center gap-1 text-xs text-emerald-400">
+                          <p className="mt-2 flex items-center gap-1 text-xs text-success">
                             <MailCheck className="size-3" />
                             Đã gửi email cho khách hàng
                           </p>
                         )}
                         {resolutionStatus === 'not_configured' && (
-                          <p className="mt-2 flex items-center gap-1 text-xs text-amber-400">
+                          <p className="mt-2 flex items-center gap-1 text-xs text-warning">
                             <MailX className="size-3" />
                             {resolutionErrorMsg || 'Email chưa được cấu hình. Nội dung xử lý đã được lưu.'}
                           </p>
                         )}
                         {resolutionStatus === 'error' && (
-                          <p className="mt-2 flex items-center gap-1 text-xs text-red-400">
+                          <p className="mt-2 flex items-center gap-1 text-xs text-destructive">
                             <MailX className="size-3" />
                             {resolutionErrorMsg || 'Không thể gửi email. Vui lòng thử lại.'}
                           </p>

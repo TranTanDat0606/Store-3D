@@ -19,7 +19,7 @@ export function ReviewProductAction({
 
   if (eligibility.hasReviewed) {
     return (
-      <span className="text-emerald-600 dark:text-emerald-400 inline-flex items-center gap-1.5 text-sm font-medium">
+      <span className="text-success inline-flex items-center gap-1.5 text-sm font-medium">
         <CheckCircle2 className="size-4" />
         Đã đánh giá
       </span>
@@ -31,7 +31,7 @@ export function ReviewProductAction({
   return (
     <Button size="sm" variant="outline" asChild>
       <Link to={`/danh-gia/${slug}`}>
-        <Star className="fill-amber-400 text-amber-400 size-4" />
+        <Star className="fill-warning text-warning size-4" />
         Đánh giá sản phẩm
       </Link>
     </Button>

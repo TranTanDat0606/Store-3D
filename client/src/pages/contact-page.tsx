@@ -170,7 +170,7 @@ export default function ContactPage() {
                   <Button type="submit" disabled={submitting} className="min-w-36">
                     {submitting ? (
                       <span className="flex items-center gap-2">
-                        <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
                         Đang gửi...
                       </span>
                     ) : (
@@ -181,7 +181,7 @@ export default function ContactPage() {
                     )}
                   </Button>
                   {sent && (
-                    <span className="text-emerald-600 dark:text-emerald-400 text-sm">
+                    <span className="text-success text-sm">
                       Đã gửi. Cảm ơn bạn đã liên hệ!
                     </span>
                   )}

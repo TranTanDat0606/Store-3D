@@ -236,9 +236,9 @@ export default function AdminCategoriesPage() {
           </>
         ) : (
           <>
-            <StatCard label="Tổng danh mục" value={stats.total} icon={Layers} accentClass="bg-cyan-500/10 text-cyan-300" />
-            <StatCard label="Có sản phẩm" value={stats.hasProducts} icon={Package} accentClass="bg-emerald-500/10 text-emerald-300" />
-            <StatCard label="Trống" value={stats.empty} icon={Inbox} accentClass="bg-rose-500/10 text-rose-300" />
+            <StatCard label="Tổng danh mục" value={stats.total} icon={Layers} accentClass="bg-accent/10 text-accent" />
+            <StatCard label="Có sản phẩm" value={stats.hasProducts} icon={Package} accentClass="bg-success/10 text-success" />
+            <StatCard label="Trống" value={stats.empty} icon={Inbox} accentClass="bg-destructive/10 text-destructive" />
           </>
         )}
       </div>
@@ -341,7 +341,7 @@ export default function AdminCategoriesPage() {
                         {cat.description || 'Chưa có mô tả'}
                       </p>
                     </TableCell>
-                    <TableCell className={cn('whitespace-nowrap text-center font-medium', productCount > 0 ? 'text-emerald-500 dark:text-emerald-400' : 'text-muted-foreground')}>
+                    <TableCell className={cn('whitespace-nowrap text-center font-medium', productCount > 0 ? 'text-success' : 'text-muted-foreground')}>
                       {productCount.toLocaleString('vi-VN')}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">

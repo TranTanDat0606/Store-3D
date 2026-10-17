@@ -84,7 +84,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
               </Button>
 
               <Button
-                className="flex-1 bg-red-600 text-white shadow-lg shadow-red-600/25 text-sm font-semibold hover:bg-red-700 active:bg-red-800"
+                className="flex-1 bg-destructive text-foreground shadow-lg shadow-destructive/25 text-sm font-semibold hover:bg-destructive active:bg-destructive"
                 onClick={() => {
                   handleBuyNow()
                   setExpanded(false)
@@ -149,7 +149,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
           <Button
             onClick={handleBuyNow}
             disabled={isOutOfStock}
-            className="flex-1 bg-red-600 text-white shadow-lg shadow-red-600/25 text-sm font-semibold hover:bg-red-700 active:bg-red-800"
+            className="flex-1 bg-destructive text-foreground shadow-lg shadow-destructive/25 text-sm font-semibold hover:bg-destructive active:bg-destructive"
           >
             <Zap className="size-4" />
             Mua ngay

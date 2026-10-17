@@ -31,12 +31,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  '3d-printing': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20',
-  fdm: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  resin: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  filament: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-  tips: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-  general: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
+  '3d-printing': 'bg-accent/10 text-accent border-accent/20',
+  fdm: 'bg-accent/10 text-accent border-accent/20',
+  resin: 'bg-accent/10 text-accent border-accent/20',
+  filament: 'bg-warning/10 text-warning border-warning/20',
+  tips: 'bg-success/10 text-success border-success/20',
+  general: 'bg-muted/10 text-foreground border-border/20',
 }
 
 const HEADER_OFFSET = 100
@@ -69,7 +69,7 @@ function ReadingProgress() {
   return (
     <div className="pointer-events-none fixed top-0 left-0 z-50 h-[2px] w-full">
       <div
-        className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 transition-[width] duration-150"
+        className="h-full bg-gradient-to-r from-accent via-accent to-accent transition-[width] duration-150"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -104,14 +104,14 @@ function TocDesktop({ headings }: { headings: HeadingItem[] }) {
 
   return (
     <nav
-      className="rounded-2xl border border-slate-200/70 bg-white p-5 shadow-sm dark:border-white/[0.07] dark:bg-white/[0.03]"
+      className="rounded-2xl border p-5 shadow-sm border-border bg-foreground/[0.03]"
       style={{ width: TOC_WIDTH }}
     >
-      <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+      <p className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-foreground">
         <List className="size-3.5" />
         Nội dung bài viết
       </p>
-      <ul className="space-y-0.5 border-l border-slate-200/50 dark:border-white/[0.06]">
+      <ul className="space-y-0.5 border-l border-border">
         {headings.map((h, i) => {
           const active = activeId === h.id
           return (
@@ -122,14 +122,14 @@ function TocDesktop({ headings }: { headings: HeadingItem[] }) {
                   'flex w-full items-center gap-2 border-l-2 py-[5px] text-left text-[13px] leading-snug transition-all duration-150',
                   h.level === 3 && 'ml-6',
                   active
-                    ? 'border-l-cyan-500 pl-3 font-semibold text-cyan-600 dark:text-cyan-400'
-                    : 'border-l-transparent pl-3 text-slate-500 hover:border-l-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:border-l-slate-600 dark:hover:text-slate-200'
+                    ? 'border-l-accent/20 pl-3 font-semibold text-accent'
+                    : 'border-l-transparent pl-3 hover:border-l-border text-foreground hover:text-foreground'
                 )}
               >
                 <span
                   className={cn(
                     'size-1.5 shrink-0 rounded-full transition-colors',
-                    active ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-600'
+                    active ? 'bg-accent' : 'bg-muted'
                   )}
                 />
                 <span className="truncate">{h.text}</span>
@@ -173,16 +173,16 @@ function TocMobile({ headings }: { headings: HeadingItem[] }) {
     <div className="mb-6 lg:hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between rounded-xl border border-slate-200/70 bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm dark:border-white/[0.07] dark:bg-white/[0.03] dark:text-slate-300"
+        className="flex w-full items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium shadow-sm border-border bg-foreground/[0.03] text-foreground"
       >
         <span className="flex items-center gap-2">
-          <List className="size-4 text-cyan-500" />
+          <List className="size-4 text-accent" />
           Mục lục bài viết
         </span>
         <ChevronDown className={cn('size-4 transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
-        <div className="mt-2 rounded-xl border border-slate-200/70 bg-white p-3 shadow-sm dark:border-white/[0.07] dark:bg-white/[0.03]">
+        <div className="mt-2 rounded-xl border p-3 shadow-sm border-border bg-foreground/[0.03]">
           <ul className="space-y-0.5">
             {headings.map((h, i) => {
               const active = activeId === h.id
@@ -197,14 +197,14 @@ function TocMobile({ headings }: { headings: HeadingItem[] }) {
                       'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
                       h.level === 3 && 'ml-4',
                       active
-                        ? 'bg-cyan-500/10 font-semibold text-cyan-600 dark:text-cyan-400'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/[0.05] dark:hover:text-slate-200'
+                        ? 'bg-accent/10 font-semibold text-accent'
+                        : 'text-foreground hover:bg-foreground/[0.05] hover:text-foreground'
                     )}
                   >
                     <span
                       className={cn(
                         'size-1.5 shrink-0 rounded-full',
-                        active ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-600'
+                        active ? 'bg-accent' : 'bg-muted'
                       )}
                     />
                     {h.text}
@@ -262,7 +262,7 @@ export default function NewsDetailPage() {
   if (loading) {
     return (
       <div className="relative min-h-screen">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 dark:opacity-[0.04]" />
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 opacity-[0.04]" />
         <div className="relative mx-auto max-w-4xl px-4 py-8 sm:px-6">
           <Skeleton className="mb-4 h-6 w-48" />
           <Skeleton className="mb-4 h-10 w-3/4" />
@@ -278,7 +278,7 @@ export default function NewsDetailPage() {
   if (notFound || !news) {
     return (
       <div className="relative min-h-screen">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 dark:opacity-[0.04]" />
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 opacity-[0.04]" />
         <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6">
           <h1 className="text-2xl font-bold">Không tìm thấy bài viết</h1>
           <p className="text-muted-foreground mt-2">Bài viết có thể đã bị xóa hoặc không tồn tại.</p>
@@ -295,7 +295,7 @@ export default function NewsDetailPage() {
   return (
     <div className="relative min-h-screen">
       <ReadingProgress />
-      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 dark:opacity-[0.04]" />
+      <div className="bg-grid pointer-events-none absolute inset-0 opacity-30 opacity-[0.04]" />
 
       {/* Breadcrumb — centered in narrow container */}
       <div className="relative mx-auto max-w-6xl px-6 py-6 sm:px-8">
@@ -336,7 +336,7 @@ export default function NewsDetailPage() {
         <main style={{ flex: '1 1 0%', minWidth: 0, paddingRight: 24 }}>
           {/* Article Card — max-width 1200px */}
           <article
-            className="border border-slate-200/60 bg-white shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03]"
+            className="border shadow-sm border-border bg-foreground/[0.03]"
             style={{ borderRadius: 20, maxWidth: 1200, margin: '0 auto' }}
           >
             {/* Card inner padding */}
@@ -357,7 +357,7 @@ export default function NewsDetailPage() {
                   </span>
                 </div>
 
-                <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl text-foreground">
                   {news.title}
                 </h1>
 
@@ -367,21 +367,21 @@ export default function NewsDetailPage() {
                   </p>
                 )}
 
-                <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-white/[0.06]">
+                <div className="mt-4 flex items-center justify-between border-t pt-4 border-border">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-xs font-bold text-white shadow-sm">
+                    <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent text-xs font-bold text-foreground shadow-sm">
                       {news.author.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{news.author}</p>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500">Store 3D Team</p>
+                      <p className="text-sm font-medium text-foreground">{news.author}</p>
+                      <p className="text-[11px] text-foreground">Store 3D Team</p>
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="size-8 text-slate-400 hover:text-cyan-500 dark:text-slate-500 dark:hover:text-cyan-400">
+                    <Button variant="ghost" size="icon" className="size-8 text-foreground hover:text-accent">
                       <Share2 className="size-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="size-8 text-slate-400 hover:text-cyan-500 dark:text-slate-500 dark:hover:text-cyan-400">
+                    <Button variant="ghost" size="icon" className="size-8 text-foreground hover:text-accent">
                       <Bookmark className="size-3.5" />
                     </Button>
                   </div>
@@ -390,7 +390,7 @@ export default function NewsDetailPage() {
 
               {/* Thumbnail — full width of card */}
               {news.thumbnail && (
-                <div className="mb-8 overflow-hidden rounded-xl border border-slate-100 dark:border-white/[0.06]">
+                <div className="mb-8 overflow-hidden rounded-xl border border-border">
                   <img
                     src={resolveImageUrl(news.thumbnail)}
                     alt={news.title}
@@ -406,21 +406,21 @@ export default function NewsDetailPage() {
               {parsed && (
                 <div
                   className={cn(
-                    'news-article prose prose-slate dark:prose-invert mx-auto',
+                    'news-article prose prose-invert mx-auto',
                     'prose-headings:scroll-mt-[100px]',
-                    'prose-h2:text-xl prose-h2:font-bold prose-h2:text-slate-900 prose-h2:dark:text-white',
-                    'prose-h2:mt-14 prose-h2:mb-4 prose-h2:pb-2.5 prose-h2:border-b prose-h2:border-slate-100 prose-h2:dark:border-white/[0.06]',
-                    'prose-h3:text-lg prose-h3:font-semibold prose-h3:text-slate-800 prose-h3:dark:text-slate-100',
+                    'prose-h2:text-xl prose-h2:font-bold prose-h2:text-foreground',
+                    'prose-h2:mt-14 prose-h2:mb-4 prose-h2:pb-2.5 prose-h2:border-b prose-h2:border-border',
+                    'prose-h3:text-lg prose-h3:font-semibold prose-h3:text-foreground',
                     'prose-h3:mt-8 prose-h3:mb-3',
-                    'prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-slate-600 prose-p:dark:text-slate-300',
+                    'prose-p:text-[15px] prose-p:leading-[1.85] prose-p:text-foreground',
                     'prose-p:mb-5',
-                    'prose-a:text-cyan-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:dark:text-cyan-400',
-                    'prose-strong:text-slate-800 prose-strong:dark:text-slate-100 prose-strong:font-semibold',
-                    'prose-li:text-slate-600 prose-li:dark:text-slate-300 prose-li:my-1.5 prose-li:marker:text-cyan-500',
+                    'prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:text-accent',
+                    'prose-strong:text-foreground prose-strong:font-semibold',
+                    'prose-li:text-foreground prose-li:my-1.5 prose-li:marker:text-accent',
                     'prose-ul:my-4 prose-ol:my-4',
-                    'prose-blockquote:border-l-cyan-500 prose-blockquote:bg-slate-50/80 prose-blockquote:dark:bg-white/[0.02]',
+                    'prose-blockquote:border-l-accent/20 prose-blockquote:bg-foreground/[0.02]',
                     'prose-blockquote:rounded-r-xl prose-blockquote:py-2.5 prose-blockquote:pr-6 prose-blockquote:pl-5 prose-blockquote:my-8',
-                    'prose-blockquote:text-slate-600 prose-blockquote:dark:text-slate-400',
+                    'prose-blockquote:text-foreground',
                     'prose-img:rounded-xl prose-img:shadow-md',
                   )}
                   style={{ maxWidth: 820 }}
@@ -445,12 +445,12 @@ export default function NewsDetailPage() {
       {/* Related Articles — centered container */}
       {related.length > 0 && (
         <div className="mx-auto max-w-6xl px-6 sm:px-8">
-          <section className="mt-14 border-t border-slate-100 pt-10 dark:border-white/[0.06]">
-            <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Bài viết liên quan</h2>
+          <section className="mt-14 border-t pt-10 border-border">
+            <h2 className="mb-5 text-lg font-bold text-foreground">Bài viết liên quan</h2>
             <div className="grid gap-5 sm:grid-cols-3">
               {related.map((item) => (
                 <Link key={item._id} to={`/tin-tuc/${item.slug}`} className="group">
-                  <div className="bg-muted relative aspect-video overflow-hidden rounded-xl border border-slate-100 transition-all group-hover:shadow-lg dark:border-white/[0.06]">
+                  <div className="bg-muted relative aspect-video overflow-hidden rounded-xl border transition-all group-hover:shadow-lg border-border">
                     {item.thumbnail ? (
                       <img
                         src={resolveImageUrl(item.thumbnail)}
@@ -465,7 +465,7 @@ export default function NewsDetailPage() {
                       </div>
                     )}
                   </div>
-                  <p className="mt-2.5 line-clamp-2 text-sm font-semibold text-slate-900 group-hover:text-cyan-600 dark:text-white dark:group-hover:text-cyan-400">
+                  <p className="mt-2.5 line-clamp-2 text-sm font-semibold text-foreground group-hover:text-accent">
                     {item.title}
                   </p>
                   <p className="text-muted-foreground mt-1 text-xs">
@@ -480,7 +480,7 @@ export default function NewsDetailPage() {
 
       {/* Back button */}
       <div className="mx-auto max-w-6xl px-6 pb-10 sm:px-8">
-        <Button variant="ghost" size="sm" asChild className="gap-1.5 text-slate-500">
+        <Button variant="ghost" size="sm" asChild className="gap-1.5 text-foreground">
           <Link to="/tin-tuc">
             <ArrowLeft className="size-4" />
             Quay lại tin tức

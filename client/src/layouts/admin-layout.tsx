@@ -146,7 +146,7 @@ export function AdminLayout() {
           {mobileNavOpen && (
             <>
               <div
-                className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                className="fixed inset-0 z-40 bg-background/50 backdrop-blur-sm lg:hidden"
                 onClick={() => setMobileNavOpen(false)}
               />
               <div className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-card shadow-xl lg:hidden">

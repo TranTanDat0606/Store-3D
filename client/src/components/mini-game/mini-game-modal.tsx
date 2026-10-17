@@ -53,10 +53,10 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden border-cyan-500/20 bg-[#0A0E1F] p-0 [&_[data-slot='dialog-close']]:bg-white/10 [&_[data-slot='dialog-close']]:text-white [&_[data-slot='dialog-close']]:hover:bg-white/20 [&_[data-slot='dialog-close']]:hover:text-cyan-300 [&_[data-slot='dialog-close']]:focus-visible:ring-cyan-400 [&_[data-slot='dialog-close']]:opacity-100">
-        <div className="flex items-center justify-between border-b border-cyan-500/10 px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-white">
-            <Gamepad2 className="size-5 text-cyan-400" />
+      <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden border-accent/20 bg-background p-0 [&_[data-slot='dialog-close']]:bg-foreground/10 [&_[data-slot='dialog-close']]:text-foreground [&_[data-slot='dialog-close']]:hover:bg-foreground/20 [&_[data-slot='dialog-close']]:hover:text-accent [&_[data-slot='dialog-close']]:focus-visible:ring-accent [&_[data-slot='dialog-close']]:opacity-100">
+        <div className="flex items-center justify-between border-b border-accent/10 px-6 py-4">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Gamepad2 className="size-5 text-accent" />
             MIU-9 Future Run
           </DialogTitle>
         </div>
@@ -64,15 +64,15 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
         <div className="overflow-y-auto px-6 pb-6">
           {isStarting && (
             <div className="flex flex-col items-center gap-3 py-8">
-              <Loader2 className="size-8 animate-spin text-cyan-400" />
-              <p className="text-sm text-cyan-300/60">Đang tải trò chơi...</p>
+              <Loader2 className="size-8 animate-spin text-accent" />
+              <p className="text-sm text-accent/60">Đang tải trò chơi...</p>
             </div>
           )}
 
           {error && (
-            <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-center">
-              <p className="text-sm text-red-400">{error}</p>
-              <Button variant="outline" size="sm" className="mt-3 border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={handleStart}>
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-center">
+              <p className="text-sm text-destructive">{error}</p>
+              <Button variant="outline" size="sm" className="mt-3 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={handleStart}>
                 Thử lại
               </Button>
             </div>
@@ -81,8 +81,8 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {!isStarting && !error && !started && !isDone && (
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="text-center">
-                <p className="text-lg font-semibold text-white">Sẵn sàng chạy?</p>
-                <p className="mt-1 text-sm text-cyan-300/60">
+                <p className="text-lg font-semibold text-foreground">Sẵn sàng chạy?</p>
+                <p className="mt-1 text-sm text-accent/60">
                   Bắn hạ kẻ thù để tích điểm và nhận quà!
                 </p>
               </div>
@@ -108,15 +108,15 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
           {isDone && result && (
             <div className="space-y-4">
               <div className="text-center">
-                <p className="text-sm text-cyan-300/60">Điểm của bạn</p>
-                <p className="text-4xl font-bold text-white">{result.score}</p>
+                <p className="text-sm text-accent/60">Điểm của bạn</p>
+                <p className="text-4xl font-bold text-foreground">{result.score}</p>
               </div>
               {result.reward ? (
                 <RewardCouponCard reward={result.reward} />
               ) : (
-                <div className="rounded-lg border border-cyan-500/10 bg-cyan-500/5 p-4 text-center">
-                  <p className="text-sm text-white">Bạn chưa đạt đủ điểm để nhận quà.</p>
-                  <p className="mt-1 text-xs text-cyan-300/50">Cần tối thiểu 50 điểm. Thử lại lần sau nhé!</p>
+                <div className="rounded-lg border border-accent/10 bg-accent/5 p-4 text-center">
+                  <p className="text-sm text-foreground">Bạn chưa đạt đủ điểm để nhận quà.</p>
+                  <p className="mt-1 text-xs text-accent/50">Cần tối thiểu 50 điểm. Thử lại lần sau nhé!</p>
                 </div>
               )}
             </div>
