@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { SlidersHorizontal, Search, X, Loader2, ChevronDown } from 'lucide-react'
+import { SlidersHorizontal, Search, X, Loader2, ChevronDown, SearchX, FilterX } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
@@ -47,6 +47,25 @@ const MATERIALS = [
 const PRINTER_TYPES = [
   { value: 'Resin Printer', label: 'SLA/DLP Siêu Chi Tiết (Resin)' },
   { value: 'FDM', label: 'FDM Đa Màu Sắc' },
+] as const
+
+/* Plan 3 T5 — empty/search-state copy verbatim from
+   `.stitch/designs/plp-search-states.html`: empty panel (l.560–561, 565, 578),
+   search heading (l.179–182), result summary (l.201). The panel's annotation
+   label "Ví dụ kịch bản tham chiếu" (l.559) is a design note, not UI copy. */
+const EMPTY_TITLE = 'Không tìm thấy sản phẩm nào'
+const EMPTY_DESC =
+  'Thử từ khóa khác hoặc xóa bớt bộ lọc đang áp dụng để xem thêm sản phẩm.'
+const SUGGESTIONS_LABEL = 'Gợi ý tìm kiếm phổ biến:'
+const CLEAR_ALL_LABEL = 'Xóa bộ lọc & Xem tất cả sản phẩm'
+/* Screen suggestion chips (l.567–571) — wired as `?search=` routes (existing
+   endpoint), never as links to products that may not exist. */
+const SEARCH_SUGGESTIONS = [
+  'Tượng Thần Long',
+  'Gundam RX-78-2',
+  'Chùa Một Cột',
+  'Kê tay bàn phím Voronoi',
+  'Đèn mặt trăng',
 ] as const
 
 /** Display bound for the dual range slider (UI clamp only, not business data). */
@@ -501,18 +520,40 @@ export default function ProductListPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold sm:text-3xl">
-          {/* Plan 3 T3: `featured` = cờ admin-curated (không phải đơn hàng thật) →
+          {/* Plan 3 T5 — search heading verbatim per plp-search-states l.179–182;
+              Plan 3 T3: `featured` = cờ admin-curated (không phải đơn hàng thật) →
               không được ghi nhãn "bán chạy"; best-selling mới là bán chạy. */}
-          {currentCategory
-            ? currentCategory.name
-            : featured
-              ? 'Sản phẩm nổi bật'
-              : bestSelling
-                ? 'Sản phẩm bán chạy'
-                : 'Tất cả sản phẩm'}
+          {search ? (
+            <>
+              Kết quả tìm kiếm cho <span className="text-primary">&quot;{search}&quot;</span>
+              {meta && (
+                <span className="ml-2 text-base font-normal text-muted-foreground">
+                  ({meta.total} sản phẩm)
+                </span>
+              )}
+            </>
+          ) : currentCategory ? (
+            currentCategory.name
+          ) : featured ? (
+            'Sản phẩm nổi bật'
+          ) : bestSelling ? (
+            'Sản phẩm bán chạy'
+          ) : (
+            'Tất cả sản phẩm'
+          )}
         </h1>
         <p className="text-muted-foreground mt-1">
-          {meta ? `${meta.total} sản phẩm` : 'Đang tải...'}
+          {search && meta ? (
+            /* Screen toolbar l.201: "Hiển thị <n> trên <n> kết quả phù hợp". */
+            <>
+              Hiển thị <span className="text-foreground font-semibold">{products.length}</span> trên{' '}
+              <span className="text-foreground font-semibold">{meta.total}</span> kết quả phù hợp
+            </>
+          ) : meta ? (
+            `${meta.total} sản phẩm`
+          ) : (
+            'Đang tải...'
+          )}
         </p>
       </div>
 
@@ -645,13 +686,38 @@ export default function ProductListPage() {
           {loading ? (
             <ProductGridSkeleton count={12} />
           ) : products.length === 0 ? (
+            /* Plan 3 T5 — screen empty panel (l.552–582). Search vs filtered
+               mismatch share the screen's single copy variant; the suggestion
+               chips + "Xóa bộ lọc & Xem tất cả sản phẩm" action come verbatim
+               from the panel, the clear action is omitted only when no filter
+               is active (nothing to clear). */
             <EmptyState
-              title="Không tìm thấy sản phẩm"
-              description="Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác."
+              title={EMPTY_TITLE}
+              description={EMPTY_DESC}
+              icon={<SearchX className="size-7" />}
               action={
-                <Button variant="outline" onClick={clearAll}>
-                  Xóa bộ lọc
-                </Button>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="space-y-2">
+                    <p className="text-muted-foreground text-[11px]">{SUGGESTIONS_LABEL}</p>
+                    <div className="flex flex-wrap items-center justify-center gap-1.5">
+                      {SEARCH_SUGGESTIONS.map((term) => (
+                        <Link
+                          key={term}
+                          to={`/san-pham?search=${encodeURIComponent(term)}`}
+                          className="border-border hover:border-primary hover:text-primary rounded-full border px-2.5 py-1 text-xs transition-colors"
+                        >
+                          {term}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                  {activeFilters > 0 && (
+                    <Button variant="outline" onClick={clearAll} className="border-primary text-primary hover:bg-primary/10">
+                      <FilterX className="size-4" />
+                      {CLEAR_ALL_LABEL}
+                    </Button>
+                  )}
+                </div>
               }
             />
           ) : (
