@@ -93,10 +93,10 @@ export function PurchasePanel({ product, purchaseState, variant = 'desktop' }: P
       </div>
 
       {isMobile ? (
-        /* AC9 (#10): desktop variant owns the page's single <h1>; this duplicate
-           (mutually exclusive with it via lg:hidden / hidden lg:block) is a
-           non-heading div with identical styling — ONE h1 in the PDP DOM. */
-        <div className="mt-2 text-xl leading-snug font-bold">{product.name}</div>
+        /* Mutually exclusive per breakpoint (hidden lg:block on desktop panel /
+           lg:hidden on mobile) → exactly one exposed h1 per viewport — intentional,
+           do not 'dedupe' into a hidden panel. */
+        <h1 className="mt-2 text-xl leading-snug font-bold">{product.name}</h1>
       ) : (
         <h1 className="mt-2 text-3xl font-bold">{product.name}</h1>
       )}
