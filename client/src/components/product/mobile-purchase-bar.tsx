@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, Minus, Plus, ShoppingBag, Zap } from 'lucide-react'
+import { ChevronUp, Heart, Minus, Plus, ShoppingBag, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { cn, formatCurrency } from '@/lib'
@@ -11,6 +11,18 @@ interface MobilePurchaseBarProps {
   purchaseState: PurchasePanelState
 }
 
+/*
+ * Plan 3 T6 — IS the `mobile-pdp` sticky bar component (T3-edited
+ * MobilePurchaseBar được restyle theo screen, KHÔNG tạo component trùng):
+ * - Screen: fixed bottom-0, backdrop-blur, 1 hàng: [Tư vấn hotline][Thêm vào
+ *   giỏ][Mua ngay]. Nút "Tư vấn" (tel:1900 1234) bị BỎ — hotline là thông tin
+ *   doanh nghiệp bịa (owner mandate; không có settings/API hotline).
+ * - Theo task: bar = giá (thật từ API) + primary actions, labels verbatim
+ *   "Thêm vào giỏ" / "Mua ngay", gọi thẳng handler có sẵn.
+ * - Sheet "Số lượng" (qty stepper + wishlist) giữ nguyên behavior hiện có —
+ *   mở bằng chip giá; wishlist dùng handleWishlist cũ nguyên vẹn.
+ * - safe-area-inset-bottom + trang PDP có pb-32 mobile để không che footer.
+ */
 export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarProps) {
   const {
     quantity,
@@ -68,7 +80,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Actions — handlers unchanged */}
             <div className="flex gap-2">
               <Button
                 className="flex-1"
@@ -109,44 +121,41 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
         )}
       </AnimatePresence>
 
-      {/* Bottom bar */}
-      <div className="bg-background border-t px-4 pb-[env(safe-area-inset-bottom)] pt-3">
-        {/* Row 1: Price + stock info */}
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className="text-xl font-bold text-primary">{formatCurrency(displayPrice)}</span>
-            {product.originalPrice > product.salePrice && (
-              <span className="text-muted-foreground text-sm line-through">
-                {formatCurrency(product.originalPrice)}
-              </span>
-            )}
-          </div>
-          <span className="text-muted-foreground text-xs">
-            {isOutOfStock ? (
-              <span className="text-destructive font-medium">Hết hàng</span>
-            ) : (
-              <>Còn <span className="font-semibold text-foreground">{product.stock}</span></>
-            )}
-          </span>
-        </div>
-
-        {/* Row 2: action buttons
-            Plan 3 T3 (data-honesty sweep): dòng "Giao toàn quốc 2-5 ngày" bị BỎ —
-            không có settings/API nào chứa ETA giao hàng (không bịa số liệu). */}
-        <div className="flex gap-2">
-          <Button
+      {/* Bottom bar — single compact row per mobile-pdp screen */}
+      <div className="bg-background/95 border-t px-3.5 pt-2.5 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl">
+        <div className="flex items-center gap-2.5">
+          {/* Price chip (thật từ API) — bấm để mở sheet Số lượng/wishlist */}
+          <button
             onClick={() => setExpanded(!expanded)}
+            className="flex min-w-0 shrink-0 flex-col items-start rounded-xl border px-2.5 py-1.5 text-left transition-colors hover:border-primary/60"
+            aria-expanded={expanded}
+            aria-label={`Giá ${formatCurrency(displayPrice)} — chỉnh số lượng`}
+          >
+            <span className="text-primary truncate text-base font-black tracking-tight">
+              {formatCurrency(displayPrice)}
+            </span>
+            <span className="text-muted-foreground flex items-center gap-0.5 text-[10px] font-medium">
+              Số lượng: {quantity}
+              <ChevronUp className={cn('size-3 transition-transform', expanded && 'rotate-180')} />
+            </span>
+          </button>
+
+          {/* Secondary CTA — label verbatim "Thêm vào giỏ" (screen: handleAddToCart) */}
+          <Button
+            onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className="flex-1"
+            className="border-primary/80 bg-primary/10 text-primary hover:bg-primary/20 h-11 flex-1 border text-xs font-bold"
             variant="outline"
           >
             <ShoppingBag className="size-4" />
             {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
           </Button>
+
+          {/* Primary CTA — label verbatim "Mua ngay" (screen: handleBuyNow) */}
           <Button
             onClick={handleBuyNow}
             disabled={isOutOfStock}
-            className="flex-1 bg-destructive text-foreground shadow-lg shadow-destructive/25 text-sm font-semibold hover:bg-destructive active:bg-destructive"
+            className="bg-primary text-primary-foreground h-11 flex-1 text-xs font-bold shadow-[0_0_18px_rgba(244,190,81,0.35)]"
           >
             <Zap className="size-4" />
             Mua ngay

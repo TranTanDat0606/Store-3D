@@ -21,6 +21,11 @@ function ScrollToTop() {
 export function MainLayout() {
   const [chatOpen, setChatOpen] = useState(false)
   const { isOpen: isCartOpen } = useCart()
+  const { pathname } = useLocation()
+
+  // Plan 3 T6: PDP có sticky buy bar fixed bottom trên mobile — chừa chỗ cho footer
+  // để bar không che nội dung footer (per mobile-pdp screen). Chỉ áp dụng trên PDP.
+  const isPdpRoute = /^\/san-pham\/.+/.test(pathname)
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -29,7 +34,9 @@ export function MainLayout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <Footer />
+      <div className={isPdpRoute ? 'pb-20 sm:pb-24 lg:pb-0' : undefined}>
+        <Footer />
+      </div>
       <Suspense fallback={null}>
         <CartDrawer />
         <ChatLauncher isOpen={chatOpen} onToggle={() => setChatOpen(v => !v)} cartOpen={isCartOpen} />

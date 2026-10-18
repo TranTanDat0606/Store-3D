@@ -202,8 +202,9 @@ export default function ProductDetailPage() {
 
   if (!product) return null
 
+  // pb-32 (mobile): tránh sticky buy bar che nội dung/foot — per mobile-pdp screen
   return (
-    <div className="mx-auto max-w-7xl px-4 lg:pb-6 sm:pb-2 pt-8 sm:px-6 lg:pb-0">
+    <div className="mx-auto max-w-7xl px-4 pt-8 pb-32 sm:px-6 lg:pb-6">
       <Breadcrumb
         className="mb-6"
         items={[
@@ -221,9 +222,11 @@ export default function ProductDetailPage() {
           <ProductGallery product={product} />
         </div>
 
-        {/* Mobile gallery — hidden on desktop */}
-        <div className="block lg:hidden">
+        {/* Mobile gallery + info panel — hidden on desktop */}
+        <div className="block space-y-6 lg:hidden">
           <ProductGalleryMobile product={product} />
+          {/* Info theo mobile-pdp: rating/giá/kho/thông số thật — CTA nằm ở sticky bar */}
+          <PurchasePanel product={product} purchaseState={purchaseState} variant="mobile" />
         </div>
 
         {/* Desktop purchase panel — hidden on mobile */}
@@ -255,9 +258,17 @@ export default function ProductDetailPage() {
 
       {/* Related products */}
       {related.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-6 text-2xl font-bold">Sản phẩm liên quan</h2>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:mb-8 sm:mb-4">
+        <section className="mt-12">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-bold sm:text-2xl">Sản phẩm liên quan bạn có thể thích</h2>
+            <Link
+              to={category ? `/san-pham?categorySlug=${category.slug}` : '/san-pham'}
+              className="text-primary hover:text-primary/80 shrink-0 text-sm font-medium"
+            >
+              Xem tất cả →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:mb-8 sm:mb-4 lg:grid-cols-4">
             {related.map((p, i) => (
               <ProductCard key={p._id} product={p} index={i} />
             ))}

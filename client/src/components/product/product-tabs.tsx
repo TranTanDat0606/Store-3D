@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, MessageSquare } from 'lucide-react'
+import { ChevronDown, FileText, MessageSquareText, MessageSquare, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib'
 import { RatingSummary } from '@/components/review/rating-summary'
@@ -19,6 +19,17 @@ interface ProductTabsProps {
 
 type TabId = 'description' | 'specs' | 'reviews'
 
+/*
+ * Plan 3 T6 — tab labels verbatim từ screen pdp.html: "Mô tả chi tiết",
+ * "Thông số kỹ thuật", "Đánh giá (N)" (N = reviewCount thật từ API).
+ * Spec rows = real Product fields only. Omitted screen spec rows (không có
+ * field backing, không bịa): "Trọng lượng tượng", "Thời gian in & xử lý tia
+ * UV", "Quy trình sơn hoàn thiện", "Nơi sản xuất (Xưởng chế tác ...)".
+ * Reviews tab = READ list (existing reviewApi.listByProduct pagination kept);
+ * WRITE form = Plan 4 (route /danh-gia/:slug, untouched here).
+ * Deviation: screen mobile-pdp dùng accordion cho 3 mục; giữ tabs hiện có trên
+ * mobile (behavior preserved, tabs cuộn ngang được) — logged.
+ */
 export function ProductTabs({
   product,
   reviews,
@@ -32,30 +43,31 @@ export function ProductTabs({
   const [activeTab, setActiveTab] = useState<TabId>(defaultTab)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: 'description', label: 'Mô tả' },
-    { id: 'specs', label: 'Thông số' },
-    { id: 'reviews', label: `Đánh giá (${product.reviewCount})` },
+  const tabs: { id: TabId; label: string; icon: typeof FileText }[] = [
+    { id: 'description', label: 'Mô tả chi tiết', icon: FileText },
+    { id: 'specs', label: 'Thông số kỹ thuật', icon: SlidersHorizontal },
+    { id: 'reviews', label: `Đánh giá (${product.reviewCount})`, icon: MessageSquareText },
   ]
 
   const isLongDescription = (product.description?.length ?? 0) > 300
 
   return (
-    <div className="mt-12">
-      {/* Tab bar */}
-      <div className="border-b">
-        <div className="flex gap-1 overflow-x-auto">
+    <div className="mt-12 overflow-hidden rounded-xl border bg-card shadow-sm">
+      {/* Tab bar — per pdp screen: card container, active = primary underline */}
+      <div className="border-b bg-muted/30">
+        <div className="flex gap-2 overflow-x-auto px-4 pt-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
+                'flex items-center gap-2 whitespace-nowrap border-b-2 px-6 py-3.5 text-sm font-medium transition-colors',
                 activeTab === tab.id
-                  ? 'text-foreground after:bg-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'border-primary text-primary font-bold'
+                  : 'text-muted-foreground border-transparent hover:text-foreground'
               )}
             >
+              <tab.icon className="size-4" />
               {tab.label}
             </button>
           ))}
@@ -63,7 +75,7 @@ export function ProductTabs({
       </div>
 
       {/* Tab content */}
-      <div className="py-8">
+      <div className="p-6 lg:p-8">
         {/* Description */}
         {activeTab === 'description' && (
           <div>
@@ -98,21 +110,24 @@ export function ProductTabs({
           </div>
         )}
 
-        {/* Specs */}
+        {/* Specs — heading verbatim từ screen; rows = real API fields only */}
         {activeTab === 'specs' && (
           <div className="max-w-2xl overflow-hidden rounded-xl border">
+            <h3 className="text-muted-foreground border-b bg-muted/30 px-5 py-3 text-sm">
+              Thông số kỹ thuật sản phẩm chế tác
+            </h3>
             <table className="w-full text-sm">
               <tbody>
                 {[
-                  ['Chất liệu', product.material],
-                  ['Loại máy in', product.printerType],
+                  ['Vật liệu', product.material],
+                  ['Công nghệ in', product.printerType],
                   ['Kích thước', product.size || '—'],
                   ['Trạng thái', product.stock > 0 ? 'Còn hàng' : 'Hết hàng'],
                   ['Mã sản phẩm', product.slug],
                 ].map(([label, value], i) => (
                   <tr key={label} className={i % 2 ? 'bg-muted/40' : ''}>
-                    <td className="text-muted-foreground w-40 px-4 py-3">{label}</td>
-                    <td className="px-4 py-3 font-medium">{value}</td>
+                    <td className="text-muted-foreground w-40 px-5 py-3 font-medium">{label}</td>
+                    <td className="px-5 py-3 font-semibold">{value}</td>
                   </tr>
                 ))}
               </tbody>
@@ -120,7 +135,7 @@ export function ProductTabs({
           </div>
         )}
 
-        {/* Reviews */}
+        {/* Reviews — READ only from existing API; write CTA in RatingSummary = existing Plan-4-route link */}
         {activeTab === 'reviews' && (
           <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
             <RatingSummary
