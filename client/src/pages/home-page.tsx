@@ -1,131 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Layers, Sparkles } from 'lucide-react'
+import { ArrowRight, Layers } from 'lucide-react'
 import { productApi, categoryApi } from '@/services'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductGridSkeleton } from '@/components/product/product-card-skeleton'
 import { HotSaleSection } from '@/components/home/hot-sale-section'
+import { AobingHero } from '@/components/home/aobing-hero'
 import { Button } from '@/components/ui/button'
 import type { Category, Product } from '@/types'
-import { useAuth } from '@/contexts/AuthContext'
-import { formatCurrency, resolveImageUrl } from '@/lib'
-import { motion } from 'framer-motion'
+import { resolveImageUrl } from '@/lib'
 
-function HeroShowcase({ products }: { products: Product[] }) {
-  const showcase = products.slice(0, 3)
-  return (
-    <div className="relative mx-auto mt-14 hidden h-[420px] w-full max-w-lg md:block lg:mt-0">
-      {/* Ambient glow */}
-      <div className="absolute top-1/2 left-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/25 blur-[100px]" />
-      <div className="absolute top-1/3 left-1/4 h-40 w-40 rounded-full bg-accent/20 blur-[60px]" />
-      <div className="absolute bottom-1/3 right-1/4 h-32 w-32 rounded-full bg-accent/15 blur-[50px]" />
-
-      {/* Floating grid lines */}
-      <div className="pointer-events-none absolute inset-0 rounded-3xl border border-foreground/5 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-
-      {/* Main product - centered */}
-      {showcase[0] && (
-        <motion.div
-          className="absolute top-[18%] left-1/2 z-30 w-52 -translate-x-1/2"
-          initial={{ opacity: 0, y: 30, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          whileHover={{ scale: 1.05, y: -4 }}
-        >
-          <Link
-            to={`/san-pham/${showcase[0].slug}`}
-            className="block overflow-hidden rounded-2xl border border-foreground/10 bg-muted/60 shadow-2xl shadow-accent/20 backdrop-blur-xl transition-shadow duration-300 hover:shadow-accent/30 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
-            tabIndex={0}
-          >
-            <div className="bg-gradient-to-br from-accent/20 to-accent/10 aspect-square">
-              <img
-                src={resolveImageUrl(showcase[0].images?.[0] ?? '')}
-                alt={showcase[0].name}
-                fetchPriority="high"
-                decoding="async"
-                className="size-full object-contain transition-transform duration-500 hover:scale-110"
-              />
-            </div>
-            <div className="p-3">
-              <p className="line-clamp-1 text-xs font-semibold text-foreground">{showcase[0].name}</p>
-              <p className="text-sm font-bold text-accent">{formatCurrency(showcase[0].salePrice)}</p>
-            </div>
-          </Link>
-        </motion.div>
-      )}
-
-      {/* Left floating card - centered vertically */}
-      {showcase[1] && (
-        <motion.div
-          className="absolute top-[40%] left-0 z-20 w-36 -translate-y-1/2 rotate-[-8deg]"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          whileHover={{ scale: 1.08, rotate: -4, y: -4 }}
-        >
-          <Link
-            to={`/san-pham/${showcase[1].slug}`}
-            className="block overflow-hidden rounded-xl border border-foreground/10 bg-muted/50 shadow-xl shadow-accent/10 backdrop-blur-md transition-shadow duration-300 hover:shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
-            tabIndex={0}
-          >
-            <div className="aspect-square bg-gradient-to-br from-accent/20 to-accent/10">
-              <img src={resolveImageUrl(showcase[1].images?.[0] ?? '')} alt={showcase[1].name} decoding="async" className="size-full object-contain transition-transform duration-500 hover:scale-110" />
-            </div>
-            <div className="p-2">
-              <p className="line-clamp-1 text-[10px] font-medium text-foreground">{showcase[1].name}</p>
-              <p className="text-xs font-bold text-accent">{formatCurrency(showcase[1].salePrice)}</p>
-            </div>
-          </Link>
-        </motion.div>
-      )}
-
-      {/* Right floating card - centered vertically */}
-      {showcase[2] && (
-        <motion.div
-          className="absolute top-[55%] right-0 z-20 w-36 -translate-y-1/2 rotate-[6deg]"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
-          whileHover={{ scale: 1.08, rotate: 3, y: -4 }}
-        >
-          <Link
-            to={`/san-pham/${showcase[2].slug}`}
-            className="block overflow-hidden rounded-xl border border-foreground/10 bg-muted/50 shadow-xl shadow-accent/10 backdrop-blur-md transition-shadow duration-300 hover:shadow-accent/20 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background"
-            tabIndex={0}
-          >
-            <div className="aspect-square bg-gradient-to-br from-accent/20 to-destructive/10">
-              <img src={resolveImageUrl(showcase[2].images?.[0] ?? '')} alt={showcase[2].name} decoding="async" className="size-full object-contain transition-transform duration-500 hover:scale-110" />
-            </div>
-            <div className="p-2">
-              <p className="line-clamp-1 text-[10px] font-medium text-foreground">{showcase[2].name}</p>
-              <p className="text-xs font-bold text-accent">{formatCurrency(showcase[2].salePrice)}</p>
-            </div>
-          </Link>
-        </motion.div>
-      )}
-
-      {/* Floating particles */}
-      <motion.div
-        className="absolute top-[15%] right-12 size-2 rounded-full bg-accent"
-        animate={{ y: [0, -12, 0], opacity: [0.4, 1, 0.4] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="absolute bottom-[20%] left-8 size-1.5 rounded-full bg-accent"
-        animate={{ y: [0, 10, 0], opacity: [0.3, 0.8, 0.3] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-      />
-      <motion.div
-        className="absolute top-1/2 left-16 size-1 rounded-full bg-accent"
-        animate={{ y: [0, -8, 0], opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-      />
-    </div>
-  )
-}
 
 export default function HomePage() {
-  const { user } = useAuth()
   const [featured, setFeatured] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [hotSale, setHotSale] = useState<Product[]>([])
@@ -155,107 +41,8 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-card via-accent/80 to-background">
-        {/* Glowing orbs - light mode */}
-        <div className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full blur-[120px] bg-accent/15" />
-        <div className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full blur-[100px] bg-accent/10" />
-        <div className="pointer-events-none absolute top-1/2 left-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px] bg-accent/8" />
-
-        {/* Grid overlay - light mode */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:60px_60px] bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]" />
-
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:py-28">
-          <div className="max-w-2xl">
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm backdrop-blur-sm border-accent/20 bg-accent/10 text-accent"
-            >
-              <Sparkles className="size-4" />
-              {user ? `Chào mừng trở lại, ${user.fullname}!` : 'Công nghệ in 3D tiên tiến'}
-            </motion.div>
-
-            {/* Title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-foreground"
-            >
-              Mô hình in 3D{' '}
-              <span className="bg-gradient-to-r bg-clip-text text-transparent from-accent via-accent to-accent">
-                độc đáo
-              </span>{' '}
-              cho mọi không gian
-            </motion.h1>
-
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground"
-            >
-              Khám phá bộ sưu tập figurine, đồ trang trí, mô hình kiến trúc và phụ kiện in 3D với
-              chi tiết tuyệt hảo. Chất lượng cao, giao hàng toàn quốc.
-            </motion.p>
-
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-8 flex flex-wrap gap-4"
-            >
-              <Button
-                size="lg"
-                className="group relative overflow-hidden bg-gradient-to-r from-accent to-accent px-8 text-base font-semibold text-foreground shadow-lg shadow-accent/25 transition-all hover:shadow-xl hover:shadow-accent/30"
-                asChild
-              >
-                <Link to="/san-pham">
-                  <span className="relative z-10 flex items-center gap-2">
-                    Mua ngay
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent to-accent opacity-0 transition-opacity group-hover:opacity-100" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="backdrop-blur-sm transition-all border-foreground/15 bg-foreground/5 text-foreground hover:border-foreground/25 hover:bg-foreground/10"
-                asChild
-              >
-                <Link to="/san-pham?sort=best-selling">Sản phẩm bán chạy</Link>
-              </Button>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="mt-10 flex gap-8 border-t pt-6 border-foreground/10"
-            >
-              {[
-                { value: '500+', label: 'Sản phẩm' },
-                { value: '10K+', label: 'Khách hàng' },
-                { value: '4.9', label: 'Đánh giá' },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </motion.div>
-          </div>
-
-          <HeroShowcase products={featured} />
-        </div>
-      </section>
+      {/* Hero - AO BING cinematic (Plan 3 T1) */}
+      <AobingHero />
 
       {/* Hot Sale */}
       <div className={hotLoading ? 'min-h-[400px]' : ''}>
