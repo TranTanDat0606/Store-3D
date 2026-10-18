@@ -19,7 +19,7 @@ export function toObjectId(id: string): mongoose.Types.ObjectId {
 /** Admin/internal filter: every parameter (incl. `status`) passes through untouched. */
 export function buildAdminProductFilter(query: Query): Query {
   const filter: Query = {};
-  const { category, material, printerType, status, featured, minPrice, maxPrice, minRating } = query;
+  const { slug, category, material, printerType, status, featured, minPrice, maxPrice, minRating } = query;
 
   if (category) filter.category = toObjectId(String(category));
   if (material) filter.material = material;
@@ -35,6 +35,9 @@ export function buildAdminProductFilter(query: Query): Query {
   }
   // Plan 3 T4: minRating (public filter) — only products rated ≥ N stars.
   if (minRating !== undefined) filter.rating = { $gte: Number(minRating) };
+  // Plan 3 T6b: exact-slug pass-through (PDP lookup by slug) — was silently
+  // dropped here, so every slug returned the first active product.
+  if (slug) filter.slug = slug;
   return filter;
 }
 
