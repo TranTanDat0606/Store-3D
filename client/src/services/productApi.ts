@@ -14,6 +14,7 @@ export interface ProductQuery {
   featured?: boolean | string
   minPrice?: number
   maxPrice?: number
+  minRating?: number
 }
 
 export interface ProductListResult {
