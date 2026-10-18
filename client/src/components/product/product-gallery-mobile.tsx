@@ -68,16 +68,21 @@ export function ProductGalleryMobile({ product }: ProductGalleryMobileProps) {
         {images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
             {images.map((_, i) => (
+              /* AC9 (#5): visual dot = inner span (unchanged size); button = 24×24 hit area. */
               <button
                 key={i}
                 onClick={() => setActiveImage(i)}
-                className={cn(
-                  'size-2 rounded-full transition-all',
-                  i === activeImage ? 'bg-primary w-4' : 'bg-foreground/60'
-                )}
+                className="flex min-h-6 min-w-6 items-center justify-center"
                 aria-label={`Ảnh ${i + 1}`}
                 aria-current={i === activeImage ? 'true' : undefined}
-              />
+              >
+                <span
+                  className={cn(
+                    'h-2 w-2 rounded-full transition-all',
+                    i === activeImage ? 'bg-primary w-4' : 'bg-foreground/60'
+                  )}
+                />
+              </button>
             ))}
           </div>
         )}

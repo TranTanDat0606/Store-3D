@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
@@ -20,6 +20,10 @@ import { resolveImageUrl } from '@/lib'
 
 /** Orbitron accents only (Latin/numeric) — per design system; Vietnamese stays in Be Vietnam Pro. */
 const ORBITRON = { fontFamily: "'Orbitron', sans-serif" }
+
+/** AC9 (#2): minimal focus-trap selector — no library, drawer-local only. */
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 /**
  * Cart drawer — restyled to the approved `cart-drawer` screen (Obsidian Gold).
@@ -48,6 +52,9 @@ const ORBITRON = { fontFamily: "'Orbitron', sans-serif" }
 export function CartDrawer() {
   const { items, totalItems, isOpen, closeCart, updateQuantity, removeItem, subtotal } = useCart()
   const navigate = useNavigate()
+  const drawerRef = useRef<HTMLElement | null>(null)
+  /** AC9 (#2): element that opened the drawer (navbar cart button) — focus returns here on close. */
+  const triggerRef = useRef<HTMLElement | null>(null)
 
   const goToCheckout = () => {
     closeCart()
@@ -58,13 +65,52 @@ export function CartDrawer() {
     if (!isOpen) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    // AC9 (#2): store the trigger (the just-clicked cart button), then focus the drawer's first focusable element.
+    // Focus synchronously (deterministic) and re-focus on the next frame (post-entrance-animation safety).
+    triggerRef.current = (document.activeElement as HTMLElement) ?? null
+    const focusFirst = () => {
+      const first = drawerRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+      first?.focus()
+    }
+    focusFirst()
+    const rafId = requestAnimationFrame(focusFirst)
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeCart()
+      if (e.key === 'Escape') {
+        closeCart()
+        return
+      }
+      // AC9 (#2): minimal focus loop (Tab / Shift+Tab cycle within the drawer; no library).
+      if (e.key !== 'Tab') return
+      const drawer = drawerRef.current
+      if (!drawer) return
+      const focusables = Array.from(drawer.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (el) => !el.hasAttribute('disabled') && el.getClientRects().length > 0
+      )
+      if (focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      if (!active || !drawer.contains(active)) {
+        e.preventDefault()
+        first.focus()
+        return
+      }
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
+      cancelAnimationFrame(rafId)
+      // AC9 (#2): return focus to the trigger that opened the drawer.
+      if (triggerRef.current?.isConnected) triggerRef.current.focus()
+      triggerRef.current = null
     }
   }, [isOpen, closeCart])
 
@@ -85,6 +131,7 @@ export function CartDrawer() {
 
           <motion.aside
             key="cart-panel"
+            ref={drawerRef}
             role="dialog"
             aria-modal="true"
             aria-label="Giỏ hàng"
@@ -116,7 +163,7 @@ export function CartDrawer() {
                   size="icon"
                   onClick={closeCart}
                   aria-label="Đóng giỏ hàng"
-                  className="border-border/50 bg-muted text-muted-foreground hover:text-foreground hover:bg-muted group size-8 rounded-full border"
+                  className="border-border/50 bg-muted text-muted-foreground hover:text-foreground hover:bg-muted group min-h-11 min-w-11 rounded-full border"
                 >
                   <X className="size-4 transition-transform duration-200 group-hover:rotate-90" />
                 </Button>
@@ -225,7 +272,7 @@ export function CartDrawer() {
                               </div>
                               <span
                                 style={ORBITRON}
-                                className="text-primary text-sm font-bold tabular-nums drop-shadow-[0_0_10px_rgba(237,184,76,0.25)]"
+                                className="text-primary text-sm font-bold tabular-nums drop-shadow-[0_0_10px] drop-shadow-primary/25"
                               >
                                 {formatCurrency(item.price * item.quantity)}
                               </span>
@@ -250,7 +297,7 @@ export function CartDrawer() {
                     </span>
                     <span
                       style={ORBITRON}
-                      className="text-primary text-2xl font-black tabular-nums drop-shadow-[0_0_10px_rgba(237,184,76,0.3)]"
+                      className="text-primary text-2xl font-black tabular-nums drop-shadow-[0_0_10px] drop-shadow-primary/30"
                     >
                       {formatCurrency(subtotal)}
                     </span>
@@ -258,7 +305,7 @@ export function CartDrawer() {
 
                   <div className="space-y-2.5">
                     <Button
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-lg text-sm font-bold shadow-[0_0_20px_rgba(237,184,76,0.35)]"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-full rounded-lg text-sm font-bold shadow-[0_0_20px] shadow-primary/35"
                       onClick={goToCheckout}
                     >
                       <Lock className="size-4" fill="currentColor" />

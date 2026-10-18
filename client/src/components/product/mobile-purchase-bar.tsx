@@ -47,7 +47,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2 }}
             className="bg-background border-t px-4 pb-4 pt-3 shadow-lg"
-            role="dialog"
+            role="region"
             aria-label="Mua hàng"
           >
             {/* Quantity */}
@@ -57,7 +57,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-9"
+                  className="min-h-11 min-w-11"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                   disabled={quantity <= 1}
                   aria-label="Giảm số lượng"
@@ -70,7 +70,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-9"
+                  className="min-h-11 min-w-11"
                   onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                   disabled={quantity >= product.stock}
                   aria-label="Tăng số lượng"
@@ -155,7 +155,7 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
           <Button
             onClick={handleBuyNow}
             disabled={isOutOfStock}
-            className="bg-primary text-primary-foreground h-11 flex-1 text-xs font-bold shadow-[0_0_18px_rgba(244,190,81,0.35)]"
+            className="bg-primary text-primary-foreground h-11 flex-1 text-xs font-bold shadow-[0_0_18px] shadow-primary/35"
           >
             <Zap className="size-4" />
             Mua ngay

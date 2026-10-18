@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronDown, FileText, MessageSquareText, MessageSquare, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib'
@@ -43,6 +43,36 @@ export function ProductTabs({
   const [activeTab, setActiveTab] = useState<TabId>(defaultTab)
   const [descriptionExpanded, setDescriptionExpanded] = useState(false)
 
+  // AC9 (#1): roving tabindex refs — arrow keys move focus AND activate (WAI-ARIA APG tabs).
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  const focusTab = (index: number) => {
+    const next = (index + tabs.length) % tabs.length // wrap around
+    setActiveTab(tabs[next].id)
+    tabRefs.current[next]?.focus()
+  }
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, index: number) => {
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault()
+        focusTab(index + 1)
+        break
+      case 'ArrowLeft':
+        e.preventDefault()
+        focusTab(index - 1)
+        break
+      case 'Home':
+        e.preventDefault()
+        focusTab(0)
+        break
+      case 'End':
+        e.preventDefault()
+        focusTab(tabs.length - 1)
+        break
+    }
+  }
+
   const tabs: { id: TabId; label: string; icon: typeof FileText }[] = [
     { id: 'description', label: 'Mô tả chi tiết', icon: FileText },
     { id: 'specs', label: 'Thông số kỹ thuật', icon: SlidersHorizontal },
@@ -53,13 +83,24 @@ export function ProductTabs({
 
   return (
     <div className="mt-12 overflow-hidden rounded-xl border bg-card shadow-sm">
-      {/* Tab bar — per pdp screen: card container, active = primary underline */}
+      {/* Tab bar — per pdp screen: card container, active = primary underline.
+          AC9 (#1): proper ARIA tabs — tablist/tab/tabpanel + roving tabindex + arrow keys. */}
       <div className="border-b bg-muted/30">
-        <div className="flex gap-2 overflow-x-auto px-4 pt-2">
-          {tabs.map((tab) => (
+        <div role="tablist" aria-label="Thông tin sản phẩm" className="flex gap-2 overflow-x-auto px-4 pt-2">
+          {tabs.map((tab, index) => (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              id={`product-tab-${tab.id}`}
+              aria-selected={activeTab === tab.id}
+              aria-controls={`product-tabpanel-${tab.id}`}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              ref={(el) => {
+                tabRefs.current[index] = el
+              }}
               onClick={() => setActiveTab(tab.id)}
+              onKeyDown={(e) => handleTabKeyDown(e, index)}
               className={cn(
                 'flex items-center gap-2 whitespace-nowrap border-b-2 px-6 py-3.5 text-sm font-medium transition-colors',
                 activeTab === tab.id
@@ -75,7 +116,12 @@ export function ProductTabs({
       </div>
 
       {/* Tab content */}
-      <div className="p-6 lg:p-8">
+      <div
+        className="p-6 lg:p-8"
+        role="tabpanel"
+        id={`product-tabpanel-${activeTab}`}
+        aria-labelledby={`product-tab-${activeTab}`}
+      >
         {/* Description */}
         {activeTab === 'description' && (
           <div>
@@ -113,9 +159,10 @@ export function ProductTabs({
         {/* Specs — heading verbatim từ screen; rows = real API fields only */}
         {activeTab === 'specs' && (
           <div className="max-w-2xl overflow-hidden rounded-xl border">
-            <h3 className="text-muted-foreground border-b bg-muted/30 px-5 py-3 text-sm">
+            {/* AC9 (#15): h3 → h2 (h1 is the PDP product title; no level skip). Visual style unchanged. */}
+            <h2 className="text-muted-foreground border-b bg-muted/30 px-5 py-3 text-sm">
               Thông số kỹ thuật sản phẩm chế tác
-            </h3>
+            </h2>
             <table className="w-full text-sm">
               <tbody>
                 {[

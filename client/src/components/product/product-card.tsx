@@ -65,6 +65,15 @@ export const ProductCard = memo(function ProductCard({
   const categoryName =
     typeof product.category === 'object' && product.category ? product.category.name : undefined
 
+  /*
+   * AC9 (#3, Plan-2 residual now fixed): NO nested interactive elements — the
+   * card is a div; ONE Link wraps media + title (title/image area navigates to
+   * PDP); wishlist + add-to-cart Buttons are siblings OUTSIDE the link. All
+   * visual styling (card look, hover via `group` on the card, badges, price
+   * rows) is preserved. Note: the price row now sits outside the link, so
+   * clicking the price no longer navigates (title/image still do — inherent
+   * to de-nesting per the prescribed pattern).
+   */
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -73,10 +82,13 @@ export const ProductCard = memo(function ProductCard({
       transition={{ duration: 0.3, delay: (index % 4) * 0.05 }}
       className="h-full"
     >
-      <Link
-        to={`/san-pham/${product.slug}`}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 border-foreground/10"
-      >
+      <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 border-foreground/10">
+        {/* Media + title — the ONE link (navigates to PDP) */}
+        <Link
+          to={`/san-pham/${product.slug}`}
+          className="flex min-w-0 flex-1 flex-col"
+          aria-label={product.name}
+        >
         {/* Image: digital showroom */}
         <div className="relative aspect-square overflow-hidden">
           {/* glow + grid backdrop */}
@@ -143,8 +155,8 @@ export const ProductCard = memo(function ProductCard({
 
         </div>
 
-        {/* Info */}
-        <div className={cn("flex flex-1 flex-col gap-1 p-3.5", hideAddToCart && "pb-12")}>
+        {/* Info (inside link): rating + title */}
+        <div className="flex flex-1 flex-col gap-1 p-3.5 pb-0">
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Star className="size-3.5 fill-warning text-warning" />
             <span>{product.rating > 0 ? product.rating.toFixed(1) : 'Mới'}</span>
@@ -156,45 +168,48 @@ export const ProductCard = memo(function ProductCard({
             )}
           </div>
           <h3 className="line-clamp-2 text-sm leading-snug font-medium">{product.name}</h3>
-          <div className="mt-auto pt-2">
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-end gap-2">
-                <p className="font-bold text-primary">{formatCurrency(product.salePrice)}</p>
-                {discountPercent > 0 && (
-                  <p className="text-muted-foreground text-xs line-through">
-                    {formatCurrency(product.originalPrice)}
-                  </p>
-                )}
-              </div>
-              {!hideAddToCart && (
-                <div className="flex gap-1.5">
-                  <Button
-                    size="sm"
-                    className="flex-1 h-8 text-xs font-medium"
-                    onClick={handleAddToCart}
-                    disabled={isOutOfStock}
-                  >
-                    <ShoppingBag className="size-3.5" />
-                    {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={cn(
-                      'size-8 shrink-0 rounded-full bg-background/60 backdrop-blur-sm border-foreground/10',
-                      wishlisted && 'border-destructive/50 text-destructive'
-                    )}
-                    onClick={handleWishlist}
-                    aria-label={wishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
-                  >
-                    <Heart className={cn('size-3.5', wishlisted && 'fill-current')} />
-                  </Button>
-                </div>
+        </div>
+        </Link>
+
+        {/* Action row (OUTSIDE the link — AC9 #3): price + wishlist + add-to-cart */}
+        <div className={cn('px-3.5 pt-2', hideAddToCart ? 'pb-12' : 'pb-3.5')}>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-end gap-2">
+              <p className="font-bold text-primary">{formatCurrency(product.salePrice)}</p>
+              {discountPercent > 0 && (
+                <p className="text-muted-foreground text-xs line-through">
+                  {formatCurrency(product.originalPrice)}
+                </p>
               )}
             </div>
+            {!hideAddToCart && (
+              <div className="flex gap-1.5">
+                <Button
+                  size="sm"
+                  className="flex-1 h-8 text-xs font-medium"
+                  onClick={handleAddToCart}
+                  disabled={isOutOfStock}
+                >
+                  <ShoppingBag className="size-3.5" />
+                  {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    'size-8 shrink-0 rounded-full bg-background/60 backdrop-blur-sm border-foreground/10',
+                    wishlisted && 'border-destructive/50 text-destructive'
+                  )}
+                  onClick={handleWishlist}
+                  aria-label={wishlisted ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}
+                >
+                  <Heart className={cn('size-3.5', wishlisted && 'fill-current')} />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
-      </Link>
+      </div>
       <Suspense fallback={null}>
         <LoginPromptDialog open={loginOpen} onOpenChange={setLoginOpen} />
       </Suspense>

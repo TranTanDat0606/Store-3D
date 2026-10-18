@@ -82,7 +82,14 @@ function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-medium text-primary">
       {label}
-      <button type="button" onClick={onRemove} aria-label={`Bỏ lọc: ${label}`}>
+      {/* AC9 (#4): 12px X keeps its visual size; negative margins keep the chip's
+          outer size identical while the hit area grows to 24×24 (WCAG 2.5.8). */}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Bỏ lọc: ${label}`}
+        className="-my-1 -mr-1.5 inline-flex size-6 items-center justify-center"
+      >
         <X className="size-3" />
       </button>
     </span>
@@ -344,8 +351,9 @@ export default function ProductListPage() {
               key={m.value}
               type="button"
               onClick={() => updateParams({ material: material === m.value ? null : m.value })}
+              aria-pressed={material === m.value}
               className={cn(
-                'rounded-lg border px-2.5 py-1.5 text-xs transition-colors',
+                'rounded-lg border px-2.5 py-1.5 text-xs transition-colors min-h-11',
                 material === m.value
                   ? 'border-primary bg-primary font-semibold text-primary-foreground shadow-sm'
                   : 'bg-card font-medium text-muted-foreground hover:border-primary/60 hover:text-primary',
@@ -419,7 +427,7 @@ export default function ProductListPage() {
                 value={priceDraft.min || ''}
                 onChange={(e) => setPriceDraft((d) => ({ ...d, min: Number(e.target.value) || 0 }))}
                 onBlur={applyPrice}
-                className="h-8 px-2.5 text-xs font-mono"
+                className="min-h-11 px-2.5 text-xs font-mono"
               />
             </div>
             <div>
@@ -435,7 +443,7 @@ export default function ProductListPage() {
                 value={priceDraft.max || ''}
                 onChange={(e) => setPriceDraft((d) => ({ ...d, max: Number(e.target.value) || 0 }))}
                 onBlur={applyPrice}
-                className="h-8 px-2.5 text-xs font-mono"
+                className="min-h-11 px-2.5 text-xs font-mono"
               />
             </div>
           </div>
@@ -488,7 +496,7 @@ export default function ProductListPage() {
 
           <button
             type="submit"
-            className="border-primary/60 bg-card hover:bg-accent text-primary w-full rounded-lg border py-2 text-xs font-semibold transition-colors active:scale-95"
+            className="border-primary/60 bg-card hover:bg-accent text-primary w-full rounded-lg border py-2 text-xs font-semibold transition-colors active:scale-95 min-h-11"
           >
             Áp dụng mức giá
           </button>

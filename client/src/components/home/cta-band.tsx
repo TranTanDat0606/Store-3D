@@ -19,12 +19,14 @@ export function CtaBand() {
     <section className="py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-card p-8 md:p-14">
-          {/* ambient */}
+          {/* ambient — AC9 (#12): grid lines use the --primary token (screen
+              `isometric-grid-bg` = rgba(237,184,76,0.05) gold; replaces the raw
+              white rgba literal) — no new CSS vars. */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.04]"
             style={{
               backgroundImage:
-                'linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)',
+                'linear-gradient(to right, var(--primary) 1px, transparent 1px), linear-gradient(to bottom, var(--primary) 1px, transparent 1px)',
               backgroundSize: '40px 40px',
             }}
           />
@@ -40,6 +42,12 @@ export function CtaBand() {
               <h2 className="text-2xl font-extrabold tracking-tight text-foreground md:text-4xl">
                 Sẵn sàng tạo mô hình của riêng bạn?
               </h2>
+              {/* AC9 (#14, adjudicated): "bảo hành chi tiết sắc nét và giao hàng toàn
+                  quốc" is VERBATIM approved screen copy — verified against
+                  .stitch/designs/home-desktop.html:1036 and home-tablet.html:690.
+                  It is marketing copy from the screen, NOT settings-backed business
+                  data (the owner mandate targeted hotline/hours → those stay
+                  settings-driven above). Kept as approved. */}
               <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
                 Bạn có file 3D độc quyền hoặc ý tưởng riêng? STORE 3D nhận in theo yêu cầu với vật
                 liệu cao cấp, bảo hành chi tiết sắc nét và giao hàng toàn quốc.

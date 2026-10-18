@@ -131,8 +131,10 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        'shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors',
+        // AC9 (#6): min-h-11 → 44px touch target; #7: aria-pressed — chip toggles section state.
+        'shrink-0 rounded-full px-4 py-1.5 text-xs font-medium transition-colors min-h-11',
         active
           ? 'bg-primary/15 text-primary ring-1 ring-primary/40'
           : 'border border-foreground/10 text-muted-foreground hover:border-primary/40 hover:text-foreground',

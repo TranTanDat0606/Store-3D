@@ -92,9 +92,14 @@ export function PurchasePanel({ product, purchaseState, variant = 'desktop' }: P
         )}
       </div>
 
-      <h1 className={cn('mt-2 font-bold', isMobile ? 'text-xl leading-snug' : 'text-3xl')}>
-        {product.name}
-      </h1>
+      {isMobile ? (
+        /* AC9 (#10): desktop variant owns the page's single <h1>; this duplicate
+           (mutually exclusive with it via lg:hidden / hidden lg:block) is a
+           non-heading div with identical styling — ONE h1 in the PDP DOM. */
+        <div className="mt-2 text-xl leading-snug font-bold">{product.name}</div>
+      ) : (
+        <h1 className="mt-2 text-3xl font-bold">{product.name}</h1>
+      )}
 
       {/* Price block — salePrice + originalPrice strike + real computed savings badge */}
       <div
@@ -157,7 +162,7 @@ export function PurchasePanel({ product, purchaseState, variant = 'desktop' }: P
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="min-h-11 min-w-11"
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             disabled={quantity <= 1}
             aria-label="Giảm số lượng"
@@ -168,7 +173,7 @@ export function PurchasePanel({ product, purchaseState, variant = 'desktop' }: P
           <Button
             variant="ghost"
             size="icon"
-            className="size-8"
+            className="min-h-11 min-w-11"
             onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
             disabled={quantity >= product.stock}
             aria-label="Tăng số lượng"

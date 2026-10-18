@@ -84,6 +84,8 @@ export default function NotFoundPage() {
             style={ORBITRON}
           >
             404
+            {/* AC9 (#13): sr-only context so screen readers don't announce a bare "404" */}
+            <span className="sr-only"> Lỗi 404 — Không tìm thấy trang</span>
           </h1>
         </div>
 
