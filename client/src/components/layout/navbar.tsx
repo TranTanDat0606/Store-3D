@@ -230,7 +230,7 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 shadow-sm backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-3 md:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-1 px-3 sm:gap-3 sm:px-4 md:px-8">
           <Button
             variant="ghost"
             size="icon"
@@ -243,10 +243,10 @@ export function Navbar() {
             {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
 
-          <Link to="/" className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <Logo variant="mark" alt="" className="size-8 sm:size-9" />
+          <Link to="/" className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+            <Logo variant="mark" alt="" className="size-7 sm:size-9" />
             <span className="flex flex-col gap-1">
-              <span className="text-primary text-lg leading-tight font-black tracking-widest sm:text-xl" style={ORBITRON}>
+              <span className="text-primary text-base leading-tight font-black tracking-widest sm:text-xl" style={ORBITRON}>
                 STORE 3D
               </span>
               <span className="text-muted-foreground hidden text-[10px] font-medium tracking-wider uppercase lg:block">
@@ -333,7 +333,7 @@ export function Navbar() {
             )}
           </form>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             <Link
               to={isAuthenticated ? '/tai-khoan/yeu-thich' : '/dang-nhap'}
               aria-label="Danh sách yêu thích"
@@ -369,7 +369,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="hover:bg-secondary! hover:text-foreground! ml-1 flex items-center gap-2 rounded-full border-2 border-primary bg-secondary pr-3 pl-1 max-sm:gap-0 max-sm:pr-1.5 shadow-[0_0_12px_color-mix(in_srgb,var(--ring)_30%,transparent)]"
+                    className="hover:bg-secondary! hover:text-foreground! flex items-center gap-2 rounded-full border-2 border-primary bg-secondary pr-1 pl-1 shadow-[0_0_12px_color-mix(in_srgb,var(--ring)_30%,transparent)] max-sm:gap-0 sm:ml-1 sm:pr-3"
                   >
                     {user.avatar ? (
                       <img
@@ -377,10 +377,10 @@ export function Navbar() {
                         alt={user.fullname}
                         loading="lazy"
                         decoding="async"
-                        className="size-8 rounded-full object-cover"
+                        className="size-7 rounded-full object-cover sm:size-8"
                       />
                     ) : (
-                      <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-full">
+                      <span className="bg-muted text-muted-foreground flex size-7 items-center justify-center rounded-full sm:size-8">
                         <User className="size-4" />
                       </span>
                     )}

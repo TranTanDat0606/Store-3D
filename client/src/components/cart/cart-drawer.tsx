@@ -86,6 +86,7 @@ export function CartDrawer() {
           <motion.aside
             key="cart-panel"
             role="dialog"
+            aria-modal="true"
             aria-label="Giỏ hàng"
             className="bg-background fixed inset-y-0 right-0 z-50 flex h-screen w-full max-w-[440px] flex-col overflow-hidden border-l border-border shadow-[0_0_50px_rgba(0,0,0,0.85)]"
             initial={{ x: '100%' }}
