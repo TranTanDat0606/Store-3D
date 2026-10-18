@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { toast } from 'sonner'
+import { usePublicSettings } from '@/hooks/usePublicSettings'
 
 const contactSchema = z.object({
   fullname: z.string().trim().min(2, 'Vui lòng nhập họ và tên').max(100, 'Họ tên tối đa 100 ký tự'),
@@ -28,15 +29,24 @@ const contactSchema = z.object({
 
 type ContactValues = z.infer<typeof contactSchema>
 
-const CONTACT_INFO = [
-  { icon: MapPin, label: 'Địa chỉ', value: '123 Nguyễn Trãi, Thanh Xuân, Hà Nội' },
-  { icon: Phone, label: 'Điện thoại', value: '0901 234 567' },
-  { icon: Mail, label: 'Email', value: 'lienhe@store3d.com' },
-]
+/**
+ * Plan 3 T3 (data-honesty sweep): 3 hàng info mẫu cứng
+ * ("123 Nguyễn Trãi, Thanh Xuân, Hà Nội" / "0901 234 567" / "lienhe@store3d.com")
+ * bị XOÁ — owner mandate zero fabricated business info. Thay bằng
+ * `GET /api/settings/public` với hide-on-absent (contract §5) — cùng hook với footer.
+ */
 
 export default function ContactPage() {
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
+  const { settings } = usePublicSettings()
+
+  // Hide-on-absent: hàng không có dữ liệu settings thì không render (contract §5).
+  const contactRows = [
+    settings.address ? { icon: MapPin, label: 'Địa chỉ', value: settings.address } : null,
+    settings.hotline ? { icon: Phone, label: 'Điện thoại', value: settings.hotline } : null,
+    settings.email ? { icon: Mail, label: 'Email', value: settings.email } : null,
+  ].filter((row): row is { icon: typeof MapPin; label: string; value: string } => row !== null)
 
   const form = useForm<ContactValues>({
     resolver: zodResolver(contactSchema),
@@ -73,7 +83,7 @@ export default function ContactPage() {
 
       <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
         <div className="space-y-4">
-          {CONTACT_INFO.map((item) => (
+          {contactRows.map((item) => (
             <Card key={item.label}>
               <CardContent className="flex items-center gap-4 pt-6">
                 <div className="bg-primary/10 text-primary flex size-12 shrink-0 items-center justify-center rounded-xl">

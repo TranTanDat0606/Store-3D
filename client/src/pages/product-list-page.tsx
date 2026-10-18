@@ -264,7 +264,15 @@ export default function ProductListPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold sm:text-3xl">
-          {currentCategory ? currentCategory.name : featured || bestSelling ? 'Sản phẩm bán chạy' : 'Tất cả sản phẩm'}
+          {/* Plan 3 T3: `featured` = cờ admin-curated (không phải đơn hàng thật) →
+              không được ghi nhãn "bán chạy"; best-selling mới là bán chạy. */}
+          {currentCategory
+            ? currentCategory.name
+            : featured
+              ? 'Sản phẩm nổi bật'
+              : bestSelling
+                ? 'Sản phẩm bán chạy'
+                : 'Tất cả sản phẩm'}
         </h1>
         <p className="text-muted-foreground mt-1">
           {meta ? `${meta.total} sản phẩm` : 'Đang tải...'}

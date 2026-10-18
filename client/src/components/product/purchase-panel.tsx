@@ -3,10 +3,8 @@ import {
   Heart,
   Minus,
   Plus,
-  RefreshCw,
   ShieldCheck,
   ShoppingBag,
-  Truck,
   Zap,
 } from 'lucide-react'
 import { StarRating } from '@/components/common/star-rating'
@@ -141,8 +139,9 @@ export function PurchasePanel({ product, purchaseState }: PurchasePanelProps) {
 
       <div className="mt-8 space-y-3 border-t pt-6">
         {[
-          { icon: Truck, text: 'Giao hàng toàn quốc từ 2-5 ngày' },
-          { icon: RefreshCw, text: 'Đổi trả trong 7 ngày nếu sản phẩm lỗi' },
+          // Plan 3 T3 (data-honesty sweep): các dòng "Giao hàng toàn quốc từ 2-5 ngày"
+          // và "Đổi trả trong 7 ngày nếu sản phẩm lỗi" bị BỎ — không có settings/API
+          // nào chứa chính sách giao hàng/đổi trả (owner mandate: không bịa thông tin).
           { icon: ShieldCheck, text: 'Thanh toán an toàn, bảo mật' },
         ].map((f) => (
           <div key={f.text} className="flex items-center gap-3 text-sm">

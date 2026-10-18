@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart, Minus, Plus, ShoppingBag, Truck, Zap } from 'lucide-react'
+import { Heart, Minus, Plus, ShoppingBag, Zap } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { cn, formatCurrency } from '@/lib'
@@ -130,12 +130,9 @@ export function MobilePurchaseBar({ product, purchaseState }: MobilePurchaseBarP
           </span>
         </div>
 
-        {/* Row 2: Shipping hint + action buttons */}
-        <div className="mb-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Truck className="size-3.5 shrink-0" />
-          <span>Giao toàn quốc 2-5 ngày</span>
-        </div>
-
+        {/* Row 2: action buttons
+            Plan 3 T3 (data-honesty sweep): dòng "Giao toàn quốc 2-5 ngày" bị BỎ —
+            không có settings/API nào chứa ETA giao hàng (không bịa số liệu). */}
         <div className="flex gap-2">
           <Button
             onClick={() => setExpanded(!expanded)}

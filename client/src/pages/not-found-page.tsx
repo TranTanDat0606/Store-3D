@@ -182,7 +182,9 @@ export default function NotFoundPage() {
                 </h3>
               </div>
               <p className="text-muted-foreground text-xs sm:text-sm">
-                Khám phá các tác phẩm in 3D bán chạy nhất tại STORE 3D
+                {/* Plan 3 T3: data là hot-sale (sort=discount), không phải best-seller
+                    → đổi copy cho khớp API thay vì ghi "bán chạy nhất". */}
+                Khám phá các tác phẩm in 3D đang giảm giá tại STORE 3D
               </p>
             </div>
             <Link

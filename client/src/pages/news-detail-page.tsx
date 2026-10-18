@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   Calendar,
   Newspaper,
-
-  Clock,
   Share2,
   Bookmark,
   ChevronDown,
@@ -351,10 +349,8 @@ export default function NewsDetailPage() {
                     <Calendar className="size-3" />
                     {formatDate(news.publishedAt || news.createdAt)}
                   </span>
-                  <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <Clock className="size-3" />
-                    5 phút đọc
-                  </span>
+                  {/* Plan 3 T3 (data-honesty sweep): "5 phút đọc" bị BỎ — News model
+                      không có read-time/word-count (home news-section đã bỏ trước đó). */}
                 </div>
 
                 <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl text-foreground">

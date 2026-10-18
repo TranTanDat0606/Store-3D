@@ -38,8 +38,11 @@ export function FlashSaleSection({ products }: FlashSaleSectionProps) {
               <Bolt className="size-4 fill-destructive" />
               <span>CƠ HỘI SĂN DEAL CÓ HẠN</span>
             </div>
+            {/* Heading responsive: mobile rút gọn "FLASH SALE" (home-mobile.html:261);
+                sm+ giữ nguyên "GIẢM GIÁ SỐC — FLASH SALE" (home-desktop/tablet). */}
             <h2 className="flex items-center gap-3 text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
-              GIẢM GIÁ SỐC — FLASH SALE
+              <span className="sm:hidden">FLASH SALE</span>
+              <span className="hidden sm:inline">GIẢM GIÁ SỐC — FLASH SALE</span>
             </h2>
           </div>
         </div>
