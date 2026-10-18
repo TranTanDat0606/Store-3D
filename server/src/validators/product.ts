@@ -41,6 +41,14 @@ export const productQuerySchema = z.object({
   featured: z.enum(['true', 'false']).optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
+  // Plan 3 T4: public minimum-star filter (Product.rating is denormalized from
+  // reviews via ratingRefresh) — integer stars 1–5 only.
+  minRating: z.coerce
+    .number()
+    .min(1, 'Đánh giá tối thiểu 1 sao')
+    .max(5, 'Đánh giá tối đa 5 sao')
+    .refine(Number.isInteger, 'Đánh giá phải là số nguyên sao (1-5)')
+    .optional(),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
