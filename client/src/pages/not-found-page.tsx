@@ -28,17 +28,13 @@ export default function NotFoundPage() {
   useEffect(() => {
     let cancelled = false
     productApi
-      .hotSale(3)
+      .list({ sort: 'best-selling', status: 'active', limit: 3 })
       .then((result) => {
-        // Mirror home-page hot-sale handling: envelope { data } + discount-only filter.
+        // Mirror home best-sellers handling: envelope { data }, server order-aggregate ranking.
         if (cancelled) {
           return
         }
-        setSuggested(
-          (Array.isArray(result?.data) ? result.data : []).filter(
-            (p) => p.originalPrice > p.salePrice,
-          ),
-        )
+        setSuggested(Array.isArray(result?.data) ? result.data : [])
       })
       .catch(() => {
         if (!cancelled) setSuggested([])
@@ -182,9 +178,7 @@ export default function NotFoundPage() {
                 </h3>
               </div>
               <p className="text-muted-foreground text-xs sm:text-sm">
-                {/* Plan 3 T3: data là hot-sale (sort=discount), không phải best-seller
-                    → đổi copy cho khớp API thay vì ghi "bán chạy nhất". */}
-                Khám phá các tác phẩm in 3D đang giảm giá tại STORE 3D
+                Khám phá các tác phẩm in 3D bán chạy nhất tại STORE 3D
               </p>
             </div>
             <Link
