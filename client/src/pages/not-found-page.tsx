@@ -7,6 +7,7 @@ import { ProductCard } from '@/components/product/product-card'
 import { ProductCardSkeleton } from '@/components/product/product-card-skeleton'
 import { productApi } from '@/services/productApi'
 import { usePublicSettings } from '@/hooks/usePublicSettings'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import type { Product } from '@/types'
 
 /** Orbitron accents only (Latin/numeric) — per design system; Vietnamese stays in Be Vietnam Pro. */
@@ -18,6 +19,7 @@ const SEARCH_TAGS = ['Tượng Thần Long', 'Gundam RX-78', 'Chùa Một Cột'
 const searchLink = (q: string) => `/san-pham?search=${encodeURIComponent(q)}`
 
 export default function NotFoundPage() {
+  useDocumentTitle('Không tìm thấy trang')
   const navigate = useNavigate()
   const { settings } = usePublicSettings()
   const [query, setQuery] = useState('')

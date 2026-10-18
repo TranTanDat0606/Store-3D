@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/form'
 import { toast } from 'sonner'
 import { usePublicSettings } from '@/hooks/usePublicSettings'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 const contactSchema = z.object({
   fullname: z.string().trim().min(2, 'Vui lòng nhập họ và tên').max(100, 'Họ tên tối đa 100 ký tự'),
@@ -37,6 +38,7 @@ type ContactValues = z.infer<typeof contactSchema>
  */
 
 export default function ContactPage() {
+  useDocumentTitle('Liên hệ')
   const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
   const { settings } = usePublicSettings()

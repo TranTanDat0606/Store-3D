@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AuthShell, AuthInputWrap, PasswordToggle, authInputClass } from '@/pages/auth/auth-shell'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 // Schema byte-preserved from the pre-T2 page (client validation only).
 const loginSchema = z.object({
@@ -43,6 +44,7 @@ let retryEmail: { value: string; at: number } | null = null
 const readRetryEmail = () => (retryEmail && Date.now() - retryEmail.at < ERROR_LATCH_MS ? retryEmail.value : '')
 
 export default function LoginPage() {
+  useDocumentTitle('Đăng nhập')
   const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(readPendingError)

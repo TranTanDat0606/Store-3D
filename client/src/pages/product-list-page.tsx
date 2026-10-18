@@ -18,6 +18,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { Category, PaginationMeta, Product } from '@/types'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import { cn, formatCurrency, calculateDiscountPercent, resolveImageUrl } from '@/lib'
 
 /* Plan 3 T4 — sort labels verbatim from `.stitch/designs/plp.html` (l.245–250).
@@ -175,6 +176,7 @@ function SearchResultRow({ product }: { product: Product }) {
 }
 
 export default function ProductListPage() {
+  useDocumentTitle('Sản phẩm')
   const [searchParams, setSearchParams] = useSearchParams()
   const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<Product[]>([])

@@ -14,6 +14,7 @@ import { PurchasePanel } from '@/components/product/purchase-panel'
 import { MobilePurchaseBar } from '@/components/product/mobile-purchase-bar'
 import { ProductTabs } from '@/components/product/product-tabs'
 import { usePurchasePanel } from '@/components/product/use-purchase-panel'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import type { Product, Review, ReviewEligibility } from '@/types'
 
 export default function ProductDetailPage() {
@@ -28,6 +29,9 @@ export default function ProductDetailPage() {
   const [notFound, setNotFound] = useState(false)
   const [networkError, setNetworkError] = useState(false)
   const [reviewEligibility, setReviewEligibility] = useState<ReviewEligibility | null>(null)
+
+  // Dynamic title: product name once loaded, fallback while loading/404.
+  useDocumentTitle(product?.name ?? 'Sản phẩm')
 
   const highlightReviewId = searchParams.get('review')
 

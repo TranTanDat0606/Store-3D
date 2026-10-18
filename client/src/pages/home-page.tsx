@@ -6,6 +6,7 @@ import { CategoriesSection } from '@/components/home/categories-section'
 import { BestSellersSection } from '@/components/home/best-sellers-section'
 import { NewsSection } from '@/components/home/news-section'
 import { CtaBand } from '@/components/home/cta-band'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 import type { Category, News, Product } from '@/types'
 
 /**
@@ -25,6 +26,7 @@ import type { Category, News, Product } from '@/types'
  * Stats block: KHÔNG tồn tại trên home hiện tại (T3 sẽ xác nhận grep).
  */
 export default function HomePage() {
+  useDocumentTitle('Mô hình in 3D')
   const [flashSale, setFlashSale] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [news, setNews] = useState<News[]>([])

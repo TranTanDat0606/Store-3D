@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AuthShell, AuthInputWrap, PasswordToggle, authInputClass } from '@/pages/auth/auth-shell'
+import { useDocumentTitle } from '@/hooks/useDocumentTitle'
 
 // Schema byte-preserved from the pre-T2 page (client validation only).
 const registerSchema = z
@@ -53,6 +54,7 @@ const readRetryIdentity = () =>
   retryIdentity && Date.now() - retryIdentity.at < ERROR_LATCH_MS ? retryIdentity : null
 
 export default function RegisterPage() {
+  useDocumentTitle('Đăng ký')
   const { register } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
