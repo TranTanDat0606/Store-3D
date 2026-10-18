@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
+import { ArrowRight, Lock, Mail } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getErrorMessage } from '@/services/apiClient'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,9 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { AuthShell, AuthInputWrap, PasswordToggle, authInputClass } from '@/pages/auth/auth-shell'
 
+// Schema byte-preserved from the pre-T2 page (client validation only).
 const loginSchema = z.object({
   email: z.string().min(1, 'Vui lòng nhập email').email('Email không hợp lệ'),
   password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
@@ -25,55 +27,86 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>
 
+/**
+ * Page-scoped server-error latch (page-local; AuthContext C5 + guards untouched).
+ * GuestOnlyRoute swaps <Outlet/> for its loader while AuthContext is mid-flight
+ * (AUTH_START → isLoading), unmounting this page before the login promise
+ * settles — component state alone would swallow the server's rejection
+ * (pre-existing gap: wrong-password never rendered). The latch hands the
+ * message across the remount; stale entries expire after 5 s.
+ */
+const ERROR_LATCH_MS = 5000
+let pendingError: { message: string; at: number } | null = null
+const readPendingError = () => (pendingError && Date.now() - pendingError.at < ERROR_LATCH_MS ? pendingError.message : '')
+/** Email survives the same remount so a failed attempt can be retried (password never latched). */
+let retryEmail: { value: string; at: number } | null = null
+const readRetryEmail = () => (retryEmail && Date.now() - retryEmail.at < ERROR_LATCH_MS ? retryEmail.value : '')
+
 export default function LoginPage() {
   const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(readPendingError)
   const [submitting, setSubmitting] = useState(false)
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: readRetryEmail(), password: '' },
   })
 
   const onSubmit = async (values: LoginValues) => {
+    pendingError = null
+    retryEmail = { value: values.email, at: Date.now() }
     setError('')
     setSubmitting(true)
     try {
-      // Post-success redirect is owned by GuestOnlyRoute (reads location.state.from)
+      // C4: auth call byte-identical. Post-success redirect is owned by GuestOnlyRoute (reads location.state.from).
       await login(values)
+      retryEmail = null
     } catch (err) {
-      setError(getErrorMessage(err))
+      pendingError = { message: getErrorMessage(err), at: Date.now() }
+      setError(pendingError.message)
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col justify-center px-4 py-16 sm:px-6">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold">Đăng nhập</h1>
-        <p className="text-muted-foreground mt-2">Chào mừng bạn quay trở lại Store 3D</p>
+    <AuthShell active="login">
+      <div className="space-y-1">
+        <h2 className="text-foreground text-xl font-bold tracking-tight">Chào mừng bạn trở lại</h2>
+        <p className="text-muted-foreground text-xs">
+          Nhập thông tin xác thực để truy cập bộ sưu tập mô hình 3D của bạn.
+        </p>
       </div>
 
+      {/* Server validation errors (existing getErrorMessage mapping — restyled container, role="alert" from Alert) */}
       {error && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mt-6">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input type="email" placeholder="ban@example.com" autoComplete="email" {...field} />
-                </FormControl>
-                <FormMessage />
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-muted-foreground text-xs font-semibold">Email</FormLabel>
+                <AuthInputWrap icon={Mail}>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="vidu@domain.com"
+                      autoComplete="email"
+                      autoFocus
+                      className={authInputClass}
+                      {...field}
+                    />
+                  </FormControl>
+                </AuthInputWrap>
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
@@ -82,54 +115,55 @@ export default function LoginPage() {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mật khẩu</FormLabel>
-                <FormControl>
-                  <div className="relative">
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-muted-foreground text-xs font-semibold">Mật khẩu</FormLabel>
+                <AuthInputWrap icon={Lock}>
+                  <FormControl>
                     <Input
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="current-password"
-                      className="pr-10"
+                      className={`${authInputClass} pr-11`}
                       {...field}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2"
-                      aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                    >
-                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                  </div>
-                </FormControl>
-                <FormMessage />
+                  </FormControl>
+                  <PasswordToggle
+                    pressed={showPassword}
+                    onToggle={() => setShowPassword((v) => !v)}
+                    ariaLabel="Hiện hoặc ẩn mật khẩu"
+                  />
+                </AuthInputWrap>
+                <FormMessage className="text-xs" />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-2 h-12 w-full rounded-lg font-bold shadow-[0_0_25px] shadow-primary/30 transition-all hover:shadow-[0_0_30px] hover:shadow-primary/45 active:scale-[0.98]"
+          >
             {submitting ? (
               <span className="flex items-center gap-2">
-                <span className="size-4 animate-spin rounded-full border-2 border-foreground/30 border-t-border" />
+                <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                 Đang đăng nhập...
               </span>
             ) : (
               <>
-                <LogIn className="size-4" />
                 Đăng nhập
+                <ArrowRight className="size-4" />
               </>
             )}
           </Button>
         </form>
       </Form>
 
-      <p className="text-muted-foreground mt-6 text-center text-sm">
+      <p className="text-muted-foreground pt-4 text-center text-xs">
         Chưa có tài khoản?{' '}
-        <Link to="/dang-ky" className="text-primary font-medium hover:underline">
-          Đăng ký ngay
+        <Link to="/dang-ky" className="text-primary font-semibold hover:underline">
+          Đăng ký
         </Link>
       </p>
-    </div>
+    </AuthShell>
   )
 }
