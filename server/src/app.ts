@@ -1,3 +1,5 @@
+import path from 'path';
+import { existsSync } from 'fs';
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -42,6 +44,20 @@ export function createApp() {
   app.use(express.json({ limit: '15mb' }));
   app.use(express.urlencoded({ extended: true, limit: '15mb' }));
   app.use(globalLimiter);
+
+  // Legacy uploads (Plan 3 T8): READ-ONLY static mount so DB-referenced
+  // `/uploads/*.png` (13 legacy files) return real image bytes (200 + image/*)
+  // instead of 404 JSON — Chrome ORB blocks JSON-as-image. New uploads go to
+  // Cloudinary (routes/upload.ts stores absolute `secure_url`) → no overlap.
+  // Missing folder in prod = plain 404 from express.static (no boot crash).
+  // Path resolution mirrors routes/debug.ts cwd fallback (repo root vs server dir).
+  const uploadsDir = existsSync(path.resolve(process.cwd(), 'server', 'uploads'))
+    ? path.resolve(process.cwd(), 'server', 'uploads')
+    : path.resolve(process.cwd(), 'uploads');
+  app.use(
+    '/uploads',
+    express.static(uploadsDir, { index: false, dotfiles: 'deny' })
+  );
 
   // Health check
   app.get('/api/health', (_req, res) => {
