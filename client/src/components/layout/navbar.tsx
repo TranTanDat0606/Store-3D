@@ -97,7 +97,7 @@ export function Navbar() {
   const { totalItems, openCart } = useCart()
   const { products: wishlist } = useWishlist()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, state: locationState } = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const isActive = (path: string, exact = false) => {
@@ -142,7 +142,11 @@ export function Navbar() {
       params.delete('search')
       params.delete('page')
     }
-    setSearchParams(params, { replace: true })
+    // Skip no-op replaces: setSearchParams would rewrite the history entry
+    // and wipe router state (e.g. `state.from` written by ProtectedRoute/
+    // AdminRoute for the post-login redirect — Plan 4 T1).
+    if (params.toString() === searchParams.toString()) return
+    setSearchParams(params, { replace: true, state: locationState })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch])
 

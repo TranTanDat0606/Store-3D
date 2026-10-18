@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -27,8 +27,6 @@ type LoginValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const { login } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -38,14 +36,12 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   })
 
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
-
   const onSubmit = async (values: LoginValues) => {
     setError('')
     setSubmitting(true)
     try {
+      // Post-success redirect is owned by GuestOnlyRoute (reads location.state.from)
       await login(values)
-      navigate(from, { replace: true })
     } catch (err) {
       setError(getErrorMessage(err))
     } finally {

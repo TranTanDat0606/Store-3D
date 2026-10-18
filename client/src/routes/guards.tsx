@@ -45,7 +45,11 @@ export function AdminRoute() {
 
 export function GuestOnlyRoute() {
   const { isAuthenticated, isLoading } = useAuth()
+  const location = useLocation()
   if (isLoading) return <FullScreenLoader />
-  if (isAuthenticated) return <Navigate to="/" replace />
+  if (isAuthenticated) {
+    const from = (location.state as { from?: string } | null)?.from
+    return <Navigate to={from ?? '/'} replace />
+  }
   return <Outlet />
 }
