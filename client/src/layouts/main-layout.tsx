@@ -8,7 +8,9 @@ import { useCart } from '@/contexts/CartContext'
 const CartDrawer = lazy(() => import('@/components/cart/cart-drawer').then(m => ({ default: m.CartDrawer })))
 const ChatLauncher = lazy(() => import('@/components/chat/chat-launcher').then(m => ({ default: m.ChatLauncher })))
 const ChatPanel = lazy(() => import('@/components/chat/chat-panel').then(m => ({ default: m.ChatPanel })))
-const OrderCompletionModal = lazy(() => import('@/components/order-completion-modal').then(m => ({ default: m.OrderCompletionModal })))
+// Plan 4 T6 / decision #6: order-completion modal RETIRED — the order-success
+// PAGE is the single completion surface (it mounted globally here and could
+// pop over any route, competing with /thanh-toan-thanh-cong/:id).
 
 function ScrollToTop() {
   const { pathname, search } = useLocation()
@@ -41,7 +43,6 @@ export function MainLayout() {
         <CartDrawer />
         <ChatLauncher isOpen={chatOpen} onToggle={() => setChatOpen(v => !v)} cartOpen={isCartOpen} />
         <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-        <OrderCompletionModal />
       </Suspense>
     </div>
   )
