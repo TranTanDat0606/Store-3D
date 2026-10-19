@@ -5,7 +5,7 @@ export { rewardApi } from './rewardApi'
 export type { GameStartResponse, GameCompleteResponse, GameReward } from './rewardApi'
 export { addressApi } from './addressApi'
 export { authApi } from './authApi'
-import type { ApiResponse, Coupon, CouponWithAvailability, EligibleCoupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
+import type { ApiResponse, Coupon, CouponPreview, CouponPreviewItem, CouponWithAvailability, EligibleCoupon, Order, OrderStatus, PaginationMeta, PaymentMethod, Wishlist, Review, ReviewEligibility, User, StatsOverview, RevenuePoint, RevenuePeriod, RevenuePeriodResult, BestSellingProduct, OrdersByStatus, News, ContactRequest } from '@/types'
 
 export interface OrderItemInput {
   product: string
@@ -84,14 +84,22 @@ export const couponApi = {
   remove: (id: string) =>
     apiClient.delete<ApiResponse<null>>(`/coupons/${id}`).then((r) => r.data.data),
 
-  apply: (code: string, subtotal: number) =>
-    apiClient.post<ApiResponse<{ coupon: Coupon; discount: number }>>('/coupons/apply', { code, subtotal }).then((r) => r.data.data),
+  // Cross-plan contract §1: preview sends `items` (server-priced) alongside the
+  // legacy `subtotal` (estimate fallback). POST body — top-level `basis` per §2.
+  apply: (code: string, opts: { subtotal?: number; items?: CouponPreviewItem[] } = {}) =>
+    apiClient.post<ApiResponse<CouponPreview>>('/coupons/apply', { code, ...opts }).then((r) => r.data.data),
 
-  available: (subtotal: number) =>
-    apiClient.get<ApiResponse<CouponWithAvailability[]>>('/coupons/available', { params: { subtotal } }).then((r) => r.data.data),
+  available: (subtotal: number, opts: { items?: CouponPreviewItem[] } = {}) =>
+    apiClient.get<ApiResponse<CouponWithAvailability[]>>('/coupons/available', {
+      params: { subtotal, ...(opts.items ? { items: JSON.stringify(opts.items) } : {}) },
+    }).then((r) => r.data.data),
 
-  eligible: (subtotal: number) =>
-    apiClient.get<ApiResponse<EligibleCoupon[]>>('/coupons/eligible', { params: { subtotal } }).then((r) => r.data.data),
+  // Cross-plan contract §1: GET preview takes `items` as URL-encoded JSON
+  // (server `parsePreviewItems`, max 50 entries); entries carry per-entry `basis` (§2).
+  eligible: (subtotal: number, opts: { items?: CouponPreviewItem[] } = {}) =>
+    apiClient.get<ApiResponse<EligibleCoupon[]>>('/coupons/eligible', {
+      params: { subtotal, ...(opts.items ? { items: JSON.stringify(opts.items) } : {}) },
+    }).then((r) => r.data.data),
 }
 
 export const reviewApi = {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,6 +29,7 @@ import { orderApi, couponApi, addressApi, authApi, type CreateOrderPayload } fro
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { getErrorMessage } from '@/services/apiClient'
+import { getApiErrorInfo } from '@/lib/apiError'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,7 +40,7 @@ import { EmptyState } from '@/components/common/empty-state'
 import { LoginPromptDialog } from '@/components/auth/login-prompt-dialog'
 import { CouponInput } from '@/components/checkout/coupon-input'
 import { cn, formatCurrency, resolveImageUrl } from '@/lib'
-import type { Address, Coupon, EligibleCoupon, PaymentMethod } from '@/types'
+import type { Address, Coupon, CouponPreviewBasis, CouponPreviewItem, EligibleCoupon, PaymentMethod } from '@/types'
 import {
   Dialog,
   DialogContent,
@@ -92,6 +93,10 @@ export default function CheckoutPage() {
   )
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null)
   const [discount, setDiscount] = useState(0)
+  // Cross-plan contract §2/§3: server-priced preview truth — subtotal + basis
+  // come from the `POST /coupons/apply` response, never recomputed client-side.
+  const [previewSubtotal, setPreviewSubtotal] = useState<number | null>(null)
+  const [previewBasis, setPreviewBasis] = useState<CouponPreviewBasis | null>(null)
   const [applying, setApplying] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -178,7 +183,12 @@ export default function CheckoutPage() {
   }, [loadAddresses, isAuthenticated])
 
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : SHIPPING_FEE
-  const total = Math.max(0, subtotal - discount) + shipping
+  // Cross-plan contract §3: displayed totals are server-derived — the server-priced
+  // subtotal from the preview response when a coupon preview has run, the cart
+  // subtotal otherwise; `discount` is only ever set from preview response fields.
+  // The grand row is a pre-submit ESTIMATE (binding total = order.total, §6).
+  const displaySubtotal = previewSubtotal ?? subtotal
+  const total = Math.max(0, displaySubtotal - discount) + shipping
   const isBankTransferEnabled = total >= PAYMENT_MIN_THRESHOLD
 
   useEffect(() => {
@@ -205,26 +215,73 @@ export default function CheckoutPage() {
     setAddressDropdownOpen(false)
   }
 
+  // Cross-plan contract §1: cart lines in the server preview shape
+  // `items: [{product, quantity}]` — server prices them from DB records.
+  const previewItems = useMemo<CouponPreviewItem[]>(
+    () => items.map((i) => ({ product: i.productId, quantity: i.quantity })),
+    [items]
+  )
+  const previewItemsKey = useMemo(() => JSON.stringify(previewItems), [previewItems])
+  // Last previewed `code:items` key — keeps the cart-change refresh effect from
+  // re-fetching immediately after a manual apply.
+  const lastPreviewKeyRef = useRef<string | null>(null)
+
   const applyCoupon = async (code: string) => {
     if (!code.trim()) return
     setApplying(true)
     setError('')
     try {
-      const result = await couponApi.apply(code.trim(), subtotal)
+      // §1/§3: server-priced preview — `items` in the POST body (top-level
+      // `basis` + `subtotalVnd` + `discountVnd` in the response).
+      const result = await couponApi.apply(code.trim(), { subtotal, items: previewItems })
+      lastPreviewKeyRef.current = `${result.coupon.code}:${previewItemsKey}`
       setAppliedCoupon(result.coupon)
-      setDiscount(result.discount)
+      setDiscount(result.discountVnd)
+      setPreviewSubtotal(result.subtotalVnd)
+      setPreviewBasis(result.basis)
       toast.success('Áp dụng mã giảm giá thành công')
     } catch (err) {
-      setError(getErrorMessage(err))
+      // §4: 409 is owned by the global apiClient toast — no page-level double surface.
+      const info = getApiErrorInfo(err)
+      if (info.kind !== 'conflict') setError(info.message)
     } finally {
       setApplying(false)
     }
   }
 
   const removeCoupon = () => {
+    lastPreviewKeyRef.current = null
     setAppliedCoupon(null)
     setDiscount(0)
+    setPreviewSubtotal(null)
+    setPreviewBasis(null)
   }
+
+  // Cross-plan contract §1/§3: every cart price change (qty ±, item add/remove)
+  // re-runs the server-priced preview for the applied coupon. Server preview
+  // takes no address/shipping input — address changes do NOT refresh (not invented).
+  useEffect(() => {
+    if (!appliedCoupon) return
+    const key = `${appliedCoupon.code}:${previewItemsKey}`
+    if (lastPreviewKeyRef.current === key) return
+    lastPreviewKeyRef.current = key
+    let cancelled = false
+    ;(async () => {
+      try {
+        const result = await couponApi.apply(appliedCoupon.code, { subtotal, items: previewItems })
+        if (cancelled) return
+        setDiscount(result.discountVnd)
+        setPreviewSubtotal(result.subtotalVnd)
+        setPreviewBasis(result.basis)
+      } catch {
+        // Keep the last server values on transient failure; 409 surfaces via the
+        // global toast only (§4).
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [appliedCoupon, previewItems, previewItemsKey, subtotal])
 
   const handleAddressSubmit = async () => {
     setAddressEditError('')
@@ -294,7 +351,8 @@ export default function CheckoutPage() {
     if (subtotal > 0 && !appliedCoupon) {
       setLoadingCoupons(true)
       try {
-        const coupons = await couponApi.eligible(subtotal)
+        // §1: GET preview sends `items` as URL-encoded JSON (server parsePreviewItems).
+        const coupons = await couponApi.eligible(subtotal, { items: previewItems })
         setAvailableCoupons(coupons)
       } catch {
         setAvailableCoupons([])
@@ -302,7 +360,7 @@ export default function CheckoutPage() {
         setLoadingCoupons(false)
       }
     }
-  }, [subtotal, appliedCoupon])
+  }, [subtotal, appliedCoupon, previewItems])
 
   // Plan 4 T4: page now renders for guests (login-prompt overlay) — skip authed fetches while logged out.
   useEffect(() => {
@@ -335,7 +393,9 @@ export default function CheckoutPage() {
         navigate(`/thanh-toan-thanh-cong/${order._id}`)
       }
     } catch (err) {
-      setError(getErrorMessage(err))
+      // §4: 409 surfaces via the global apiClient toast only (no page-level double).
+      const info = getApiErrorInfo(err)
+      if (info.kind !== 'conflict') setError(info.message)
     } finally {
       setSubmitting(false)
     }
@@ -989,11 +1049,11 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Pricing Breakdown (checkout.html copy; totals logic = T5) */}
+                {/* Pricing Breakdown — copy verbatim from checkout.html; totals = server-derived (T5, §3) */}
                 <div className="text-muted-foreground mt-6 space-y-2.5 border-t pt-5 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span>Tạm tính ({items.length} sản phẩm)</span>
-                    <span className="text-foreground font-medium tabular-nums">{formatCurrency(subtotal)}</span>
+                    <span className="text-foreground font-medium tabular-nums">{formatCurrency(displaySubtotal)}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between">
@@ -1003,6 +1063,10 @@ export default function CheckoutPage() {
                           <span className="bg-muted text-primary rounded px-1.5 py-0.2 text-[10px] font-bold">
                             {appliedCoupon.code}
                           </span>
+                        )}
+                        {/* §2: exact-discount copy for server-priced; explicit estimate copy for client-claimed */}
+                        {previewBasis === 'client-claimed' && (
+                          <span className="text-[10px] font-medium">(Ước tính)</span>
                         )}
                       </span>
                       <span className="text-destructive font-medium tabular-nums">-{formatCurrency(discount)}</span>
@@ -1015,9 +1079,17 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
-                  {/* Total Row — display only; server-authoritative swap is T5 (§3) */}
+                  {/* Total Row — screen says "TỔNG CỘNG THANH TOÁN" but this is a pre-submit
+                      server-priced estimate (contract §2 mandates explicit "Ước tính" copy —
+                      screen/contract deviation logged per Plan 4 T5). Binding total =
+                      order.total on order-success (§6). */}
                   <div className="mt-3 flex items-baseline justify-between border-t-2 pt-4">
-                    <span className="text-foreground block text-sm font-bold">TỔNG CỘNG THANH TOÁN</span>
+                    <span className="text-foreground block text-sm font-bold">
+                      TỔNG CỘNG THANH TOÁN
+                      <span className="bg-muted text-primary ml-1.5 rounded px-1.5 py-0.5 align-middle text-[10px] font-bold uppercase">
+                        Ước tính
+                      </span>
+                    </span>
                     <span className="text-primary block text-xl font-black tracking-tight tabular-nums sm:text-2xl">
                       {formatCurrency(total)}
                     </span>

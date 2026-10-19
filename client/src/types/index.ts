@@ -156,9 +156,33 @@ export interface Coupon {
   updatedAt: string
 }
 
+/**
+ * Cross-plan contract §2 (backend-trust-track): preview basis —
+ * 'server-priced' = discount computed from DB prices (authoritative preview),
+ * 'client-claimed' = computed from a client-claimed subtotal (estimate only).
+ */
+export type CouponPreviewBasis = 'server-priced' | 'client-claimed'
+
+/** Cross-plan contract §1/§2: one cart line for server-priced previews. */
+export interface CouponPreviewItem {
+  product: string
+  quantity: number
+}
+
+/** POST /coupons/apply response (server `couponController.apply` data shape). */
+export interface CouponPreview {
+  coupon: Coupon
+  discount: number
+  discountVnd: number
+  subtotalVnd: number
+  basis: CouponPreviewBasis
+  capped: boolean
+}
+
 export interface CouponWithAvailability extends Coupon {
   isApplicable: boolean
   reason?: string
+  basis?: CouponPreviewBasis
 }
 
 export interface EligibleCoupon {
@@ -174,6 +198,7 @@ export interface EligibleCoupon {
   estimatedDiscountAmount: number
   isApplicable: boolean
   reason?: string
+  basis?: CouponPreviewBasis
 }
 
 export interface News {
