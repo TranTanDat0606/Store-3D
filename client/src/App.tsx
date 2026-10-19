@@ -73,8 +73,12 @@ function App() {
                   <Route path="dang-ky" element={<RegisterPage />} />
                 </Route>
 
+                {/* Plan 4 T4 / decision #1: /thanh-toan renders for guests too — the page itself
+                    shows the overlays-spec login-prompt overlay (server requireAuth still guards
+                    order creation; C4/C6 untouched). */}
+                <Route path="thanh-toan" element={<CheckoutPage />} />
+
                 <Route element={<ProtectedRoute />}>
-                  <Route path="thanh-toan" element={<CheckoutPage />} />
                   <Route path="thanh-toan-thanh-cong/:id" element={<OrderSuccessPage />} />
                   <Route path="thanh-toan-qr/:id" element={<QrPaymentPage />} />
                   <Route path="danh-gia/:slug" element={<ReviewFormPage />} />
