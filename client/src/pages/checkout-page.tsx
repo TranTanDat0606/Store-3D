@@ -105,6 +105,9 @@ export default function CheckoutPage() {
   const [addressEditTarget, setAddressEditTarget] = useState<{ type: 'user' | 'address'; id?: string } | null>(null)
   const [addressEditLabel, setAddressEditLabel] = useState('')
   const [addressEditValue, setAddressEditValue] = useState('')
+  const [addressEditProvince, setAddressEditProvince] = useState('')
+  const [addressEditDistrict, setAddressEditDistrict] = useState('')
+  const [addressEditWard, setAddressEditWard] = useState('')
   const [addressEditIsDefault, setAddressEditIsDefault] = useState(false)
   const [addressEditError, setAddressEditError] = useState('')
   const [addressEditSubmitting, setAddressEditSubmitting] = useState(false)
@@ -230,6 +233,19 @@ export default function CheckoutPage() {
       setAddressEditError('Địa chỉ tối thiểu 5 ký tự')
       return
     }
+    // Mirror server rules (server/src/routes/address.ts addressSchema): province & ward min(1) required, district optional.
+    const isAddressRecordMode = addressEditTarget?.type === 'address'
+    const province = addressEditProvince.trim()
+    const ward = addressEditWard.trim()
+    const district = addressEditDistrict.trim()
+    if (isAddressRecordMode && !province) {
+      setAddressEditError('Tỉnh/Thành phố là bắt buộc')
+      return
+    }
+    if (isAddressRecordMode && !ward) {
+      setAddressEditError('Phường/Xã là bắt buộc')
+      return
+    }
     setAddressEditSubmitting(true)
     try {
       if (addressEditTarget?.type === 'user') {
@@ -241,8 +257,9 @@ export default function CheckoutPage() {
           label: addressEditLabel.trim(),
           recipientName: user?.fullname ?? '',
           phone: user?.phone ?? '',
-          province: '',
-          ward: '',
+          province,
+          district,
+          ward,
           street: trimmed,
           isDefault: addressEditIsDefault,
         })
@@ -252,8 +269,9 @@ export default function CheckoutPage() {
           label: addressEditLabel.trim(),
           recipientName: user?.fullname ?? '',
           phone: user?.phone ?? '',
-          province: '',
-          ward: '',
+          province,
+          district,
+          ward,
           street: trimmed,
           isDefault: addressEditIsDefault,
         })
@@ -532,6 +550,9 @@ export default function CheckoutPage() {
                                               setAddressEditTarget(isUserAddress ? { type: 'user' } : { type: 'address', id: addr._id })
                                               setAddressEditLabel(isUserAddress ? '' : (addr.label ?? ''))
                                               setAddressEditValue(addr.street)
+                                              setAddressEditProvince(addr.province)
+                                              setAddressEditDistrict(addr.district ?? '')
+                                              setAddressEditWard(addr.ward)
                                               setAddressEditIsDefault(isUserAddress ? false : addr.isDefault)
                                               setAddressEditError('')
                                               setAddressEditOpen(true)
@@ -561,6 +582,9 @@ export default function CheckoutPage() {
                                       setAddressEditTarget({ type: 'address' })
                                       setAddressEditLabel('')
                                       setAddressEditValue('')
+                                      setAddressEditProvince('')
+                                      setAddressEditDistrict('')
+                                      setAddressEditWard('')
                                       setAddressEditIsDefault(false)
                                       setAddressEditError('')
                                       setAddressEditOpen(true)
@@ -685,6 +709,40 @@ export default function CheckoutPage() {
                           rows={2}
                         />
                       </div>
+                      {addressEditTarget?.type === 'address' && (
+                        <>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
+                              <label className="text-muted-foreground text-sm font-medium">
+                                Tỉnh / Thành phố <span className="text-destructive">*</span>
+                              </label>
+                              <Input
+                                placeholder="Ví dụ: Hà Nội"
+                                value={addressEditProvince}
+                                onChange={(e) => setAddressEditProvince(e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-muted-foreground text-sm font-medium">Quận / Huyện</label>
+                              <Input
+                                placeholder="Ví dụ: Cầu Giấy"
+                                value={addressEditDistrict}
+                                onChange={(e) => setAddressEditDistrict(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-muted-foreground text-sm font-medium">
+                              Phường / Xã <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              placeholder="Ví dụ: Dịch Vọng"
+                              value={addressEditWard}
+                              onChange={(e) => setAddressEditWard(e.target.value)}
+                            />
+                          </div>
+                        </>
+                      )}
                       <label className="flex items-center gap-2 text-sm">
                         <input
                           type="checkbox"
