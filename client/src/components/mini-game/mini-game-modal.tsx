@@ -67,6 +67,15 @@ interface MiniGameModalProps {
  *   (screen's "30 ngày" is demo copy).
  * - Footer hotline note is §5 settings-driven (hide-on-absent) — the screen's
  *   "1900 1234 (8:30 – 21:00)" is placeholder business info (owner mandate).
+ * - Score denominator "/ 100" (screen verbatim) dropped in favor of "{score}
+ *   điểm" (Plan 4 T11b): the game's kill-only scoring is unbounded
+ *   (game-state.ts: DESTROY_ROBOT=2/DESTROY_BIRD=4/DESTROY_MOUSE=2 per kill, no
+ *   cap until 3 lives are lost) and the server accepts 0..MAX_GAME_SCORE=200
+ *   (server/src/config/rewards.ts) while NO max-score field exists in the
+ *   start/complete responses (rewardApi.ts: GameStartResponse = sessionId/
+ *   expiresAt, GameCompleteResponse = score/reward; rewardService returns
+ *   {score, reward}) — keeping "/100" would render impossible values like
+ *   "150/100".
  */
 export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProps) {
   const { status, result, error, startGame, startTestGame, completeGame, reset } = useGameSession()
@@ -272,7 +281,7 @@ export function MiniGameModal({ open, onOpenChange, orderId }: MiniGameModalProp
                     <span className="text-xl font-extrabold tracking-wider text-primary sm:text-2xl" style={ORBITRON}>
                       {result?.score ?? 0}
                     </span>
-                    <span className="text-xs font-bold text-accent/80">/ 100</span>
+                    <span className="text-xs font-bold text-accent/80">điểm</span>
                   </div>
 
                   <p className="max-w-md text-xs text-muted-foreground">

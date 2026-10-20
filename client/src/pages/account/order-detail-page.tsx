@@ -172,7 +172,10 @@ export default function OrderDetailPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        {/* min-w-0 (T11b): grid children default to min-width:auto — a long
+            unbreakable string in a card (e.g. API-allowed 100-char email) would
+            otherwise inflate the track and overflow the 375/390 viewport. */}
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card className={cardCls}>
             <CardHeader>
               <CardTitle className="text-base">Sản phẩm</CardTitle>
@@ -212,7 +215,9 @@ export default function OrderDetailPage() {
             <CardHeader>
               <CardTitle className="text-base">Thông tin giao hàng</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-sm">
+            {/* break-words (T11b): soft-wrap unbreakable user strings (email,
+                address, note) so the card never widens the grid track. */}
+            <CardContent className="space-y-1.5 text-sm break-words">
               <p>
                 <span className="text-muted-foreground">Người nhận:</span>{' '}
                 <span className="font-medium">{order.customer.name}</span>
@@ -236,7 +241,7 @@ export default function OrderDetailPage() {
           </Card>
         </div>
 
-        <Card className={cardCls + ' h-fit'}>
+        <Card className={cardCls + ' h-fit min-w-0'}>
           <CardHeader>
             <CardTitle className="text-base">Tổng đơn hàng</CardTitle>
           </CardHeader>
