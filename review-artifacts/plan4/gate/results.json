@@ -1,0 +1,3646 @@
+{
+ "startedAt": "2026-10-20T07:41:31.991Z",
+ "boot": [
+  {
+   "url": "http://localhost:5173",
+   "status": 200,
+   "startedByThisTask": false
+  },
+  {
+   "url": "http://localhost:5174",
+   "status": 200,
+   "startedByThisTask": false
+  },
+  {
+   "url": "http://localhost:5000/api/health",
+   "status": 200,
+   "startedByThisTask": false
+  }
+ ],
+ "checks": [
+  {
+   "name": "admin logged-out visit → /dang-nhap",
+   "pass": true,
+   "phase": "admin-race",
+   "detail": "http://localhost:5173/dang-nhap"
+  },
+  {
+   "name": "T1 race: admin login from /dang-nhap lands back on /admin",
+   "pass": true,
+   "phase": "admin-race",
+   "detail": "http://localhost:5173/admin"
+  },
+  {
+   "name": "register: auto-login lands /",
+   "pass": true,
+   "phase": "register",
+   "detail": "http://localhost:5173/"
+  },
+  {
+   "name": "register: user visible in navbar",
+   "pass": true,
+   "phase": "register",
+   "detail": "navbar contains \"Kach Gate T12\""
+  },
+  {
+   "name": "authed user bounced off /dang-nhap → /",
+   "pass": true,
+   "phase": "register",
+   "detail": "http://localhost:5173/"
+  },
+  {
+   "name": "guest ctx: cart has 2 distinct items",
+   "pass": true,
+   "phase": "guest-checkout",
+   "detail": "[\"Nhà gỗ truyền thống2\",\"Bánh răng trang trí\"]"
+  },
+  {
+   "name": "logout from navbar works (guest again, cart kept)",
+   "pass": true,
+   "phase": "guest-checkout",
+   "detail": "loggedOut=true cartItems=2"
+  },
+  {
+   "name": "guest checkout: login-prompt overlay verbatim copy",
+   "pass": true,
+   "phase": "guest-checkout",
+   "detail": "Đăng nhập để tiếp tục | Đăng nhập ngay | Đóng / Tiếp tục duyệt sản phẩm | Chưa có tài khoản?"
+  },
+  {
+   "name": "AC7: guest overlay → login → returns to /thanh-toan with form",
+   "pass": true,
+   "phase": "guest-checkout",
+   "detail": "http://localhost:5173/thanh-toan"
+  },
+  {
+   "name": "direct login (no pending) lands /",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "http://localhost:5173/"
+  },
+  {
+   "name": "checkout ctx: 2 cart items",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "[\"Nhà gỗ truyền thống2 x1\",\"Bánh răng trang trí x1\"]"
+  },
+  {
+   "name": "address create → 201",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "POST /api/addresses → 201"
+  },
+  {
+   "name": "address auto-selected after create",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "12 Duong Test T12, Toa B, Dich Vong, Cau Giay, Ha Noi"
+  },
+  {
+   "name": "checkout form prefilled from account",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "name=\"Kach Gate T12\" email=\"gate4t12.20261020@store3d.com\""
+  },
+  {
+   "name": "AC3: coupon preview request carries items[] {product,quantity}",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "[{\"product\":\"6a7575c0ab567b53821181be\",\"quantity\":1},{\"product\":\"6a7575c0ab567b53821181bb\",\"quantity\":1}]"
+  },
+  {
+   "name": "remove coupon → discount row gone",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "null"
+  },
+  {
+   "name": "remove coupon → total restores to subtotal",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "total=150000 subtotal=150000"
+  },
+  {
+   "name": "§6 preview captured (subtotal/discount/total)",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "{\"s\":150000,\"d\":10,\"t\":135000}"
+  },
+  {
+   "name": "order POST → 201",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "POST /api/orders → 201"
+  },
+  {
+   "name": "AC3/§3: order payload omits total & discount",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "customer,items,paymentMethod,couponCode"
+  },
+  {
+   "name": "§6: success page total == preview total",
+   "pass": true,
+   "phase": "checkout",
+   "detail": "preview=135000 success=135000"
+  },
+  {
+   "name": "QR order POST → 201",
+   "pass": true,
+   "phase": "qr",
+   "detail": "POST /api/orders → 201"
+  },
+  {
+   "name": "QR poll ticks ~3s (3-5 ticks in 10.5s)",
+   "pass": true,
+   "phase": "qr",
+   "detail": "ticks=3 in 10.5s"
+  },
+  {
+   "name": "QR countdown visible",
+   "pass": true,
+   "phase": "qr",
+   "detail": "countdown=04:56"
+  },
+  {
+   "name": "QR: polls STOP after unmount (0 GET /orders/:id in 8s after leaving)",
+   "pass": true,
+   "phase": "qr",
+   "detail": "count=0"
+  },
+  {
+   "name": "dashboard renders real widgets",
+   "pass": true,
+   "phase": "account",
+   "detail": "STORE 3D / MÔ HÌNH IN 3D RESIN 8K & FDM / Trang chủ / Sản phẩm / Danh mục / Tin tức"
+  },
+  {
+   "name": "orders page shows scratch order row",
+   "pass": true,
+   "phase": "account",
+   "detail": "looking for null / #8F9B76F7"
+  },
+  {
+   "name": "review form renders honest ineligible state",
+   "pass": true,
+   "phase": "account",
+   "detail": "Đánh giá sản phẩm"
+  },
+  {
+   "name": "profile edit save → 200",
+   "pass": true,
+   "phase": "account",
+   "detail": "PUT http://localhost:5000/api/auth/profile → 200"
+  },
+  {
+   "name": "profile edit persisted after reload",
+   "pass": true,
+   "phase": "account",
+   "detail": "Kach Gate T12 Da Sua"
+  },
+  {
+   "name": "storefront spot-check: hero video loads",
+   "pass": true,
+   "phase": "storefront-regression",
+   "detail": "GET 206, GET 206, GET 206, GET 206"
+  },
+  {
+   "name": "storefront spot-check: 0 broken images on / and /san-pham",
+   "pass": true,
+   "phase": "storefront-regression",
+   "detail": "{\"brokenHome\":[],\"brokenPlp\":[]}"
+  },
+  {
+   "name": "boot: client 5173 reachable",
+   "pass": true,
+   "phase": "init",
+   "detail": "[{\"url\":\"http://localhost:5173\",\"status\":200,\"startedByThisTask\":false},{\"url\":\"http://localhost:5174\",\"status\":200,\"startedByThisTask\":false},{\"url\":\"http://localhost:5000/api/health\",\"status\":200,\"startedByThisTask\":false}]"
+  },
+  {
+   "name": "login title",
+   "pass": true,
+   "phase": "auth-guest",
+   "detail": "Đăng nhập | Store 3D"
+  },
+  {
+   "name": "register title",
+   "pass": true,
+   "phase": "auth-guest",
+   "detail": "Đăng ký | Store 3D"
+  },
+  {
+   "name": "wrong-password: HTTP 401",
+   "pass": true,
+   "phase": "auth-guest",
+   "detail": "POST /api/auth/login → 401"
+  },
+  {
+   "name": "wrong-password: exactly ONE error surface (role=alert)",
+   "pass": true,
+   "phase": "auth-guest",
+   "detail": "count=1 text=\"Email hoặc mật khẩu không đúng\""
+  },
+  {
+   "name": "wrong-password: still on /dang-nhap",
+   "pass": true,
+   "phase": "auth-guest",
+   "detail": "http://localhost:5173/dang-nhap"
+  },
+  {
+   "name": "admin: order advanced pending→completed (3 PUT 200)",
+   "pass": true,
+   "phase": "admin-complete",
+   "detail": "[{\"label\":\"Đã xác nhận\",\"value\":\"confirmed\",\"status\":200},{\"label\":\"Đang giao\",\"value\":\"shipping\",\"status\":200},{\"label\":\"Hoàn thành\",\"value\":\"completed\",\"status\":200}]"
+  },
+  {
+   "name": "negative test: unknown coupon → cited 404 (server resourceNotFound)",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "recorded POST /api/coupons/apply → 404 (server couponService.ts resourceNotFound('coupon') → 404)"
+  },
+  {
+   "name": "AC3: preview response basis = server-priced",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "data.basis=server-priced data.subtotalVnd=150000 data.discountVnd=15000"
+  },
+  {
+   "name": "AC3: totals show Tạm tính + Giảm giá voucher SALE10",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "rows: \"Tạm tính (2 sản phẩm)\" | \"Giảm giá voucher\" + chip \"SALE10\" | -15000₫"
+  },
+  {
+   "name": "AC3: grand row carries \"Ước tính\" badge",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "\"TỔNG CỘNG THANH TOÁNƯỚC TÍNH\""
+  },
+  {
+   "name": "AC3: discount = 10% of server subtotal",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "subtotal=150000 discount=15000 (re-parsed from recorded raw: ₫-line, not the SALE10 chip)"
+  },
+  {
+   "name": "QR image loads (external img.vietqr.io)",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "chain: GET 301 https://img.vietqr.io/image/970423-70877769859-qr_only.png → GET 200 https://img.vietqr.io/image/970423-70877769859-qr_only.svg | naturalWidth=490 (301 = pre-existing CDN redirect → final image renders)"
+  },
+  {
+   "name": "COD success page shows server order code + total",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "orderCode=#8F9B76F7 total=135000 == server order.total 135000"
+  },
+  {
+   "name": "qty change refires coupon preview (POST /coupons/apply count grows)",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "stepper #0 1→2; before=1 after=2"
+  },
+  {
+   "name": "qty change → Tạm tính recalculated by server",
+   "pass": true,
+   "phase": "recheck",
+   "detail": "base 825000 → 970000 (measured, cart-agnostic)"
+  },
+  {
+   "name": "order-detail shows \"Nhận quà\" once completed",
+   "pass": true,
+   "phase": "game",
+   "detail": "button visible for completed order 6ad71ca37070e7748f9b76f7"
+  },
+  {
+   "name": "game modal opens + chest asset 200",
+   "pass": true,
+   "phase": "game",
+   "detail": "{\"url\":\"mini-game-chest.jpg\",\"status\":200}"
+  },
+  {
+   "name": "game session start → 200",
+   "pass": true,
+   "phase": "game",
+   "detail": "POST /rewards/game/start → 200"
+  },
+  {
+   "name": "game complete → 200",
+   "pass": true,
+   "phase": "game",
+   "detail": "POST /rewards/game/complete → 200 {\"success\":true,\"message\":\"Chúc mừng! Bạn nhận được mã giảm giá 5%\",\"data\":{\"score\":52,\"reward\":{\"code\":\"REWARD-D8CB4E9A\",\"discount\":5,\"expiresAt\":\"2026-11-03T13:01:51.883Z\"}}}"
+  },
+  {
+   "name": "round start→complete→claim produced a reward coupon",
+   "pass": true,
+   "phase": "game",
+   "detail": "score=52 code=REWARD-D8CB4E9A liveScore=52 t50=31s pauses=0 played=240053ms"
+  },
+  {
+   "name": "reward coupon appears in /tai-khoan/ma-giam-gia",
+   "pass": true,
+   "phase": "game",
+   "detail": "code=REWARD-D8CB4E9A"
+  },
+  {
+   "name": "review form eligible state for scratch order product",
+   "pass": true,
+   "phase": "game",
+   "detail": "STORE 3D / MÔ HÌNH IN 3D RESIN 8K & FDM / Trang chủ / Sản phẩm"
+  }
+ ],
+ "shots": {
+  "auth-login-desktop.png": "/dang-nhap logged-out 1920 (form + heading \"Chào mừng bạn trở lại\")",
+  "auth-login-tablet.png": "same 834",
+  "auth-login-mobile.png": "same 390",
+  "auth-register-desktop.png": "/dang-ky logged-out 1920 (5 fields + \"Tạo tài khoản\")",
+  "auth-register-tablet.png": "same 834",
+  "auth-register-mobile.png": "same 390",
+  "auth-wrong-password-desktop.png": "wrong password → single inline Alert (role=alert), no other error surface",
+  "auth-admin-guarded-desktop.png": "/admin while logged out → guard sends to /dang-nhap (state.from=/admin)",
+  "auth-admin-dashboard-desktop.png": "admin@store3d.com login → lands /admin dashboard (race fix: pending state.from honoured)",
+  "auth-register-success-desktop.png": "register gate4t12.20261020@store3d.com → auto-login → / with user pill in navbar",
+  "auth-bounce-desktop.png": "authed GET /dang-nhap → GuestOnlyRoute bounces to / (no pending state → /)",
+  "checkout-guest-prompt-desktop.png": "guest /thanh-toan → LoginPromptDialog (overlays-spec TILE 03 verbatim) 1920",
+  "checkout-guest-prompt-tablet.png": "same 834",
+  "checkout-guest-prompt-mobile.png": "same 390",
+  "checkout-ac7-return-desktop.png": "AC7: after login from overlay the SAME checkout form renders at /thanh-toan",
+  "checkout-address-dialog-desktop.png": "address dialog open (\"Thêm địa chỉ nhận hàng mới\") before save — 1920",
+  "checkout-filled-desktop.png": "logged-in checkout fully filled (address selected, recipient prefilled, 2 items) 1920",
+  "checkout-coupon-desktop.png": "SALE10 applied → POST /api/coupons/apply cites items+basis; rows Tạm tính / Giảm giá voucher / TỔNG CỘNG … Ước tính 1920",
+  "checkout-qty-refire-desktop.png": "qty 1→2 → preview refired (2 POSTs), Tạm tính 970000 1920",
+  "checkout-coupon-removed-desktop.png": "Bỏ mã → discount row removed, TỔNG CỘNG restores to Tạm tính",
+  "checkout-filled-tablet.png": "same checkout (coupon applied) 834",
+  "checkout-filled-mobile.png": "same checkout (coupon applied) 390",
+  "order-success-desktop.png": "order-success recheck — orderCode #8F9B76F7, \"Tổng cộng thanh toán\" 135000 == server total 135000 1920",
+  "order-success-tablet.png": "same success page 834",
+  "order-success-mobile.png": "same success page 390",
+  "qr-payment-desktop.png": "QR recheck: GET 301 https://img.vietqr.io/image/970423-70877769859-qr_only.png → GET 200 https://img.vietqr.io/image/970423-70877769859-qr_only.svg, naturalWidth 490, order 6ad71cab7070e7748f9b7747 1920",
+  "qr-payment-tablet.png": "same QR page 834",
+  "qr-payment-mobile.png": "same QR page 390",
+  "account-dashboard-desktop.png": "/tai-khoan 1920 (dashboard) — document.title \"Tài khoản — Tổng quan | Store 3D\"",
+  "account-dashboard-tablet.png": "/tai-khoan 834 (dashboard)",
+  "account-dashboard-mobile.png": "/tai-khoan 390 (dashboard)",
+  "account-orders-desktop.png": "/tai-khoan/don-hang 1920 (orders) — document.title \"Đơn hàng của tôi | Store 3D\"",
+  "account-orders-tablet.png": "/tai-khoan/don-hang 834 (orders)",
+  "account-orders-mobile.png": "/tai-khoan/don-hang 390 (orders)",
+  "account-order-detail-desktop.png": "/tai-khoan/don-hang/6ad71ca37070e7748f9b76f7 1920 (order-detail) — document.title \"Chi tiết đơn hàng | Store 3D\"",
+  "account-order-detail-tablet.png": "/tai-khoan/don-hang/6ad71ca37070e7748f9b76f7 834 (order-detail)",
+  "account-order-detail-mobile.png": "/tai-khoan/don-hang/6ad71ca37070e7748f9b76f7 390 (order-detail)",
+  "account-profile-desktop.png": "/tai-khoan/ho-so 1920 (profile) — document.title \"Hồ sơ cá nhân | Store 3D\"",
+  "account-profile-tablet.png": "/tai-khoan/ho-so 834 (profile)",
+  "account-profile-mobile.png": "/tai-khoan/ho-so 390 (profile)",
+  "account-wishlist-desktop.png": "/tai-khoan/yeu-thich 1920 (wishlist) — document.title \"Sản phẩm yêu thích | Store 3D\"",
+  "account-wishlist-tablet.png": "/tai-khoan/yeu-thich 834 (wishlist)",
+  "account-wishlist-mobile.png": "/tai-khoan/yeu-thich 390 (wishlist)",
+  "account-coupons-empty-desktop.png": "/tai-khoan/ma-giam-gia 1920 (coupons) — document.title \"Mã giảm giá & Ưu đãi | Store 3D\"",
+  "account-coupons-empty-tablet.png": "/tai-khoan/ma-giam-gia 834 (coupons)",
+  "account-coupons-empty-mobile.png": "/tai-khoan/ma-giam-gia 390 (coupons)",
+  "account-change-password-desktop.png": "/tai-khoan/mat-khau 1920 (change-password) — document.title \"Store 3D - Mô hình in 3D\"",
+  "account-change-password-tablet.png": "/tai-khoan/mat-khau 834 (change-password)",
+  "account-change-password-mobile.png": "/tai-khoan/mat-khau 390 (change-password)",
+  "review-form-ineligible-desktop.png": "/danh-gia/one-piece-luffy-gear-5 1920 (review-form) — document.title \"Đánh giá sản phẩm | Store 3D\"",
+  "review-form-ineligible-tablet.png": "/danh-gia/one-piece-luffy-gear-5 834 (review-form)",
+  "review-form-ineligible-mobile.png": "/danh-gia/one-piece-luffy-gear-5 390 (review-form)",
+  "account-profile-saved-desktop.png": "profile edited + saved → PUT 200, value persisted after reload",
+  "regression-home-desktop.png": "Plan 3 regression guard: / still renders (AO BING hero + sections), console/network clean 1920",
+  "regression-plp-desktop.png": "Plan 3 regression guard: /san-pham still renders (filters + sort + grid) 1920",
+  "checkout-guest-prompt-390-overflow.png": "overflow-cell evidence: guest checkout overlay at 390 = 0px horizontal overflow",
+  "admin-order-completed-desktop.png": "admin /admin/don-hang: scratch order advanced Chờ xác nhận→Đã xác nhận→Đang giao→Hoàn thành (enables review + mini-game eligibility)",
+  "account-order-detail-completed-desktop.png": "order-detail /tai-khoan/don-hang/6ad71ca37070e7748f9b76f7 after admin completion (Nhận quà CTA) 1920",
+  "game-modal-mobile.png": "mini-game modal open (chest asset, score pill) 390",
+  "game-modal-desktop.png": "mini-game modal open — chest asset 200, role=dialog, score pill 1920",
+  "game-round-result-desktop.png": "round complete → score 52, server reward REWARD-D8CB4E9A (SERVER response values only) 1920",
+  "account-coupons-reward-desktop.png": "my-coupons after claim — REWARD-D8CB4E9A listed 1920",
+  "review-form-eligible-desktop.png": "/danh-gia/nha-go-truyen-thong2 — purchased via completed scratch order → eligibility purchased:true (form rendered, NOT submitted) 1920"
+ },
+ "titles": {
+  "login (/dang-nhap)": "Đăng nhập | Store 3D",
+  "register (/dang-ky)": "Đăng ký | Store 3D",
+  "checkout guest overlay": "Thanh toán | Store 3D",
+  "checkout (filled)": "Thanh toán | Store 3D",
+  "QR payment": "Thanh toán QR | Store 3D",
+  "order success": "Đặt hàng thành công | Store 3D",
+  "account dashboard": "Tài khoản — Tổng quan | Store 3D",
+  "account orders": "Đơn hàng của tôi | Store 3D",
+  "account order-detail": "Chi tiết đơn hàng | Store 3D",
+  "account profile": "Hồ sơ cá nhân | Store 3D",
+  "account wishlist": "Sản phẩm yêu thích | Store 3D",
+  "account coupons": "Mã giảm giá & Ưu đãi | Store 3D",
+  "review form": "Đánh giá sản phẩm | Store 3D",
+  "game-modal-open": "Chi tiết đơn hàng | Store 3D"
+ },
+ "overflow": [
+  {
+   "page": "game-modal-open",
+   "vp": "375",
+   "ctx": "account(customer)",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "game-modal-open",
+   "vp": "390",
+   "ctx": "account(customer)",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "game-modal-open",
+   "vp": "834",
+   "ctx": "account(customer)",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "game-modal-open",
+   "vp": "1920",
+   "ctx": "account(customer)",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "login (/dang-nhap)",
+   "vp": "375",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Đăng nhập | Store 3D"
+  },
+  {
+   "page": "login (/dang-nhap)",
+   "vp": "390",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Đăng nhập | Store 3D"
+  },
+  {
+   "page": "login (/dang-nhap)",
+   "vp": "834",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Đăng nhập | Store 3D"
+  },
+  {
+   "page": "login (/dang-nhap)",
+   "vp": "1920",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Đăng nhập | Store 3D"
+  },
+  {
+   "page": "register (/dang-ky)",
+   "vp": "375",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Đăng ký | Store 3D"
+  },
+  {
+   "page": "register (/dang-ky)",
+   "vp": "390",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Đăng ký | Store 3D"
+  },
+  {
+   "page": "register (/dang-ky)",
+   "vp": "834",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Đăng ký | Store 3D"
+  },
+  {
+   "page": "register (/dang-ky)",
+   "vp": "1920",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Đăng ký | Store 3D"
+  },
+  {
+   "page": "checkout guest overlay",
+   "vp": "375",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout guest overlay",
+   "vp": "390",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout guest overlay",
+   "vp": "834",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout guest overlay",
+   "vp": "1920",
+   "ctx": "guest",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout (filled)",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout (filled)",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout (filled)",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "checkout (filled)",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Thanh toán | Store 3D"
+  },
+  {
+   "page": "QR payment",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Thanh toán QR | Store 3D"
+  },
+  {
+   "page": "QR payment",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Thanh toán QR | Store 3D"
+  },
+  {
+   "page": "QR payment",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Thanh toán QR | Store 3D"
+  },
+  {
+   "page": "QR payment",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Thanh toán QR | Store 3D"
+  },
+  {
+   "page": "order success",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Đặt hàng thành công | Store 3D"
+  },
+  {
+   "page": "order success",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Đặt hàng thành công | Store 3D"
+  },
+  {
+   "page": "order success",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Đặt hàng thành công | Store 3D"
+  },
+  {
+   "page": "order success",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Đặt hàng thành công | Store 3D"
+  },
+  {
+   "page": "account dashboard",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Tài khoản — Tổng quan | Store 3D"
+  },
+  {
+   "page": "account dashboard",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Tài khoản — Tổng quan | Store 3D"
+  },
+  {
+   "page": "account dashboard",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Tài khoản — Tổng quan | Store 3D"
+  },
+  {
+   "page": "account dashboard",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Tài khoản — Tổng quan | Store 3D"
+  },
+  {
+   "page": "account orders",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Đơn hàng của tôi | Store 3D"
+  },
+  {
+   "page": "account orders",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Đơn hàng của tôi | Store 3D"
+  },
+  {
+   "page": "account orders",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Đơn hàng của tôi | Store 3D"
+  },
+  {
+   "page": "account orders",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Đơn hàng của tôi | Store 3D"
+  },
+  {
+   "page": "account order-detail",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "account order-detail",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "account order-detail",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "account order-detail",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Chi tiết đơn hàng | Store 3D"
+  },
+  {
+   "page": "account profile",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Hồ sơ cá nhân | Store 3D"
+  },
+  {
+   "page": "account profile",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Hồ sơ cá nhân | Store 3D"
+  },
+  {
+   "page": "account profile",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Hồ sơ cá nhân | Store 3D"
+  },
+  {
+   "page": "account profile",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Hồ sơ cá nhân | Store 3D"
+  },
+  {
+   "page": "account wishlist",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Sản phẩm yêu thích | Store 3D"
+  },
+  {
+   "page": "account wishlist",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Sản phẩm yêu thích | Store 3D"
+  },
+  {
+   "page": "account wishlist",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Sản phẩm yêu thích | Store 3D"
+  },
+  {
+   "page": "account wishlist",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Sản phẩm yêu thích | Store 3D"
+  },
+  {
+   "page": "account coupons",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Mã giảm giá & Ưu đãi | Store 3D"
+  },
+  {
+   "page": "account coupons",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Mã giảm giá & Ưu đãi | Store 3D"
+  },
+  {
+   "page": "account coupons",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Mã giảm giá & Ưu đãi | Store 3D"
+  },
+  {
+   "page": "account coupons",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Mã giảm giá & Ưu đãi | Store 3D"
+  },
+  {
+   "page": "review form",
+   "vp": "375",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 375,
+   "cw": 375,
+   "title": "Đánh giá sản phẩm | Store 3D"
+  },
+  {
+   "page": "review form",
+   "vp": "390",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 390,
+   "cw": 390,
+   "title": "Đánh giá sản phẩm | Store 3D"
+  },
+  {
+   "page": "review form",
+   "vp": "834",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 834,
+   "cw": 834,
+   "title": "Đánh giá sản phẩm | Store 3D"
+  },
+  {
+   "page": "review form",
+   "vp": "1920",
+   "ctx": "customer",
+   "px": 0,
+   "sw": 1920,
+   "cw": 1920,
+   "title": "Đánh giá sản phẩm | Store 3D"
+  }
+ ],
+ "console": [
+  {
+   "g": "admin-race",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482419932
+  },
+  {
+   "g": "admin-race",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482420010
+  },
+  {
+   "g": "admin-race",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482420010
+  },
+  {
+   "g": "register",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482424501
+  },
+  {
+   "g": "register",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482424670
+  },
+  {
+   "g": "register",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482424671
+  },
+  {
+   "g": "register",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482427867
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482429992
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482430181
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482430184
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482430945
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482437423
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482437473
+  },
+  {
+   "g": "guest-checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482437475
+  },
+  {
+   "g": "checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482440919
+  },
+  {
+   "g": "checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482441093
+  },
+  {
+   "g": "checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482441095
+  },
+  {
+   "g": "checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482441888
+  },
+  {
+   "g": "checkout",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482446275
+  },
+  {
+   "g": "checkout",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+   "src": "http://localhost:5000/api/coupons/apply",
+   "at": 1792482449824
+  },
+  {
+   "g": "qr",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482469561
+  },
+  {
+   "g": "qr",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482469745
+  },
+  {
+   "g": "qr",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482469749
+  },
+  {
+   "g": "qr",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482470509
+  },
+  {
+   "g": "qr",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482474434
+  },
+  {
+   "g": "qr",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482491303
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482500187
+  },
+  {
+   "g": "account",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482500355
+  },
+  {
+   "g": "account",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792482500357
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482501038
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792482502859
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483318935
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483329055
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483333245
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483337428
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483341601
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483345679
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483349747
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483353861
+  },
+  {
+   "g": "account",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483356860
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483402169
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792483402280
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792483402283
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792483407042
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792483407158
+  },
+  {
+   "g": "storefront-regression",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792483407159
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486058362
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486058596
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486058599
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486060630
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486060753
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486060754
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486062657
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486062768
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486062770
+  },
+  {
+   "g": "auth-guest",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/login",
+   "at": 1792486063365
+  },
+  {
+   "g": "admin-complete",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486081226
+  },
+  {
+   "g": "admin-complete",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486081362
+  },
+  {
+   "g": "admin-complete",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486081366
+  },
+  {
+   "g": "admin-complete",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486082132
+  },
+  {
+   "g": "recheck",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486564144
+  },
+  {
+   "g": "recheck",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486564355
+  },
+  {
+   "g": "recheck",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792486564357
+  },
+  {
+   "g": "recheck",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486565125
+  },
+  {
+   "g": "recheck",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486570011
+  },
+  {
+   "g": "recheck",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486572029
+  },
+  {
+   "g": "recheck",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792486576445
+  },
+  {
+   "g": "game",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501266184
+  },
+  {
+   "g": "game",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501266354
+  },
+  {
+   "g": "game",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501266355
+  },
+  {
+   "g": "game",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501267112
+  },
+  {
+   "g": "game",
+   "lvl": "warning",
+   "msg": "PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+   "src": "http://localhost:5173/@vite/client",
+   "at": 1792501311893
+  },
+  {
+   "g": "game",
+   "lvl": "warning",
+   "msg": "PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+   "src": "http://localhost:5173/@vite/client",
+   "at": 1792501311894
+  },
+  {
+   "g": "game",
+   "lvl": "warning",
+   "msg": "PixiJS Warning:  [BindGroup] a 'textureSampler' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+   "src": "http://localhost:5173/@vite/client",
+   "at": 1792501311896
+  },
+  {
+   "g": "game",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501514970
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501517913
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501518078
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501518081
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501523015
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501523137
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501523139
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501528118
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501528171
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501528171
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501534377
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501534551
+  },
+  {
+   "g": "overflow",
+   "lvl": "error",
+   "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "src": "http://localhost:5000/api/auth/me",
+   "at": 1792501534553
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501535209
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501543681
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501548784
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501553852
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501558928
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501564009
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501569059
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501574151
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501579237
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501584341
+  },
+  {
+   "g": "overflow",
+   "lvl": "info",
+   "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+   "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+   "at": 1792501589390
+  }
+ ],
+ "pageerrors": [],
+ "http4xx": [
+  {
+   "g": "admin-race",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "admin-race",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "register",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "register",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "guest-checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "guest-checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "guest-checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "guest-checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "checkout",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "checkout",
+   "m": "POST",
+   "s": 404,
+   "u": "http://localhost:5000/api/coupons/apply"
+  },
+  {
+   "g": "qr",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "qr",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "account",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "account",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "storefront-regression",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "storefront-regression",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "storefront-regression",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "storefront-regression",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me"
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486058596
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486058599
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486060753
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486060754
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486062768
+  },
+  {
+   "g": "auth-guest",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486062770
+  },
+  {
+   "g": "auth-guest",
+   "m": "POST",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/login",
+   "at": 1792486063364
+  },
+  {
+   "g": "admin-complete",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486081362
+  },
+  {
+   "g": "admin-complete",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486081366
+  },
+  {
+   "g": "recheck",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486564355
+  },
+  {
+   "g": "recheck",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792486564357
+  },
+  {
+   "g": "game",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501266354
+  },
+  {
+   "g": "game",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501266355
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501518078
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501518081
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501523137
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501523139
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501528171
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501528171
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501534551
+  },
+  {
+   "g": "overflow",
+   "m": "GET",
+   "s": 401,
+   "u": "http://localhost:5000/api/auth/me",
+   "at": 1792501534553
+  }
+ ],
+ "reqfail": [],
+ "flows": {
+  "wrongPassword": {
+   "status": 401,
+   "alertCount": 1,
+   "alertText": "Email hoặc mật khẩu không đúng",
+   "url": "http://localhost:5173/dang-nhap",
+   "since": 1792486062574
+  },
+  "adminRace": {
+   "afterLoginURL": "http://localhost:5173/admin",
+   "afterLogoutURL": "http://localhost:5173/dang-nhap"
+  },
+  "register": {
+   "email": "gate4t12.20261020@store3d.com",
+   "landURL": "http://localhost:5173/",
+   "navbarHasName": true
+  },
+  "authedBounce": {
+   "url": "http://localhost:5173/"
+  },
+  "cartDrawerAfterAdd": [
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "closed",
+   "no-drawer",
+   {
+    "status": "closed",
+    "appearMs": 3,
+    "via": [
+     "escape"
+    ],
+    "tag": "post0",
+    "info": {
+     "text": "Thêm vào giỏ",
+     "disabled": false
+    },
+    "added": true,
+    "itemsBefore": 0,
+    "itemsAfter": 1
+   },
+   {
+    "status": "closed",
+    "appearMs": 2,
+    "via": [
+     "escape"
+    ],
+    "tag": "post1",
+    "info": {
+     "text": "Thêm vào giỏ",
+     "disabled": false
+    },
+    "added": true,
+    "itemsBefore": 1,
+    "itemsAfter": 2
+   }
+  ],
+  "guestPrompt": {
+   "verbatim": [
+    "Đăng nhập để tiếp tục",
+    "Đăng nhập ngay",
+    "Đóng / Tiếp tục duyệt sản phẩm",
+    "Chưa có tài khoản?"
+   ],
+   "missing": []
+  },
+  "ac7": {
+   "from": "/thanh-toan (guest overlay)",
+   "loginAt": 1792482439871,
+   "returnedTo": "http://localhost:5173/thanh-toan",
+   "formVisible": true
+  },
+  "customerLoginFromDirect": "http://localhost:5173/",
+  "address": {
+   "createStatus": 201,
+   "body": "{\"label\":\"Nhà Gate T12\",\"recipientName\":\"Kach Gate T12\",\"phone\":\"0901234567\",\"province\":\"Ha Noi\",\"district\":\"Cau Giay\",\"ward\":\"Dich Vong\",\"street\":\"12 Duong Test T12, Toa B\",\"isDefault\":false}"
+  },
+  "negativeCoupon": {
+   "code": "KHONGTONTAI-T12",
+   "status": 404
+  },
+  "preview6": {
+   "raw": "Đơn hàng của bạn\n2\nSửa giỏ hàng\n\nNhà gỗ truyền thống2\n\n5.000 ₫ / sản phẩm\n\n1\n5.000 ₫\n\nBánh răng trang trí\n\n145.000 ₫ / sản phẩm\n\n1\n145.000 ₫\n\nMÃ ƯU ĐÃI / PHIẾU QUÀ TẶNG\n\nSALE10\nBỏ mã\nTạm tính (2 sản phẩm)\n150.000 ₫\nGiảm giá voucher\nSALE10\n-15.000 ₫\nPhí vận chuyển toàn quốc\n0₫ (Miễn phí)\nTỔNG CỘNG THANH TOÁNƯỚC TÍNH\n135.000 ₫\nXÁC NHẬN ĐẶT HÀNG\n• 135.000 ₫\n\nThanh toán an toàn • Đổi trả 7 ngày nếu lỗi in",
+   "subtotalLabel": "Tạm tính (2 sản phẩm)",
+   "subtotal": 150000,
+   "discountLabel": "Giảm giá voucher",
+   "discountValueLine": "SALE10",
+   "discount": 10,
+   "hasEstimateBadge": false,
+   "totalLine": "135.000 ₫",
+   "total": 135000,
+   "buttonLine": "XÁC NHẬN ĐẶT HÀNG",
+   "buttonTotal": null
+  },
+  "cod": {
+   "orderId": "6ad71ca37070e7748f9b76f7",
+   "orderCode": "#8F9B76F7",
+   "requestBody": "{\"customer\":{\"name\":\"Kach Gate T12\",\"phone\":\"0901234567\",\"email\":\"gate4t12.20261020@store3d.com\",\"address\":\"12 Duong Test T12, Toa B, Dich Vong, Cau Giay, Ha Noi\",\"addressId\":\"6ad71c907070e7748f9b76e0\"},\"items\":[{\"product\":\"6a7575c0ab567b53821181be\",\"quantity\":1},{\"product\":\"6a7575c0ab567b53821181bb\",\"quantity\":1}],\"paymentMethod\":\"cash\",\"couponCode\":\"SALE10\"}",
+   "status": 201,
+   "responseBody": "{\"success\":true,\"message\":\"Đặt hàng thành công\",\"data\":{\"customer\":{\"name\":\"Kach Gate T12\",\"phone\":\"0901234567\",\"email\":\"gate4t12.20261020@store3d.com\",\"address\":\"12 Duong Test T12, Toa B, Dich Vong, Cau Giay, Ha Noi\"},\"coupon\":{\"code\":\"SALE10\",\"discount\":15000},\"payment\":{\"method\":\"cash\",\"status\":\"unpaid\"},\"_id\":\"6ad71ca37070e7748f9b76f7\",\"user\":\"6ad71c797070e7748f9b7622\",\"items\":[{\"_id\":\"6ad71ca37070e7748f9b76f9\",\"order\":\"6ad71ca37070e7748f9b76f7\",\"product\":{\"_id\":\"6a7575c0ab567b53821181be\",\"name\":\"Nhà gỗ truyền thống2\",\"images\":[\"https://images.unsplash.com/photo-1768839720694-46c264d72b34?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0\"],\"salePrice\":5000,\"slug\":\"nha-go-truyen-thong2\"},\"name\":\"Nhà gỗ truyền thống2\",\"image\":\"https://images.unsplash.com/photo-1768839720694-46c264d72b34?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0\",\"price\":5000,\"quantity\":1,\"createdAt\":\"2026-10-20T07:47:47.216Z\",\"updatedAt\":\"2026-10-20T07:47:47.216Z\",\"__v\":0},{\"_id\":\"6ad71ca37070e7748f9b76fa\",\"order\":\"6ad71ca37070e7748f9b76f7\",\"product\":{\"_id\":\"6a7575c0ab567b53821181bb\",\"name\":\"Bánh răng trang trí\",\"images\":[\"https://images.unsplash.com/photo-1713244433542-4c6205d09d97?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0\"],\"salePrice\":145000,\"slug\":\"banh-rang-trang-tri\"},\"name\":\"Bánh răng trang trí\",\"image\":\"https://images.unsplash.com/photo-1713244433542-4c6205d09d97?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0\",\"price\":145000,\"quantity\":1,\"createdAt\":\"2026-10-20T07:47:47.216Z\",\"updatedAt\":\"2026-10-20T07:47:47.216Z\",\"__v\":0}],\"note\":\"\",\"subtotal\":150000,\"discount\":15000,\"shipping\":0,\"total\":135000,\"status\":\"pending\",\"createdAt\":\"2026-10-20T07:47:47.213Z\",\"updatedAt\":\"2026-10-20T07:47:47.217Z\",\"__v\":0}}",
+   "preview": {
+    "subtotal": 150000,
+    "discount": 10,
+    "total": 135000
+   },
+   "successTotal": 135000,
+   "totalLine": "135.000 ₫",
+   "successTotalLive": 135000
+  },
+  "checkoutContext": "ok",
+  "wishlistAdd": 200,
+  "dashboardWidgets": [
+   "STORE 3D",
+   "MÔ HÌNH IN 3D RESIN 8K & FDM",
+   "Trang chủ",
+   "Sản phẩm",
+   "Danh mục",
+   "Tin tức",
+   "Liên hệ",
+   "Ctrl+K",
+   "1",
+   "Kach Gate T12",
+   "Khách hàng",
+   "Trang chủ",
+   "Tài khoản của tôi",
+   "Tổng quan tài khoản",
+   "K",
+   "Kach Gate T12",
+   "Khách hàng",
+   "gate4t12.20261020@store3d.com",
+   "Tổng quan tài khoản",
+   "Đơn hàng của tôi",
+   "2",
+   "Mã giảm giá & Ưu đãi",
+   "Sản phẩm yêu thích",
+   "1",
+   "Hồ sơ cá nhân",
+   "Đổi mật khẩu & Bảo mật",
+   "Đăng xuất",
+   "Xin chào, Kach Gate T12",
+   "Chào mừng bạn trở lại với không gian sưu tầm nghệ thuật in 3D tại STORE 3D. Dưới đây là hiện trạng đơn hàng và tài khoản của bạn.",
+   "gate4t12.20261020@store3d.com",
+   "0901234567",
+   "Đơn hàng chưa xử lý",
+   "02",
+   "2 Chờ xác nhận, 0 Đã xác nhận",
+   "Đã hoàn tất",
+   "00",
+   "0 đơn hàng bàn giao hoàn mỹ",
+   "Mã giảm giá khả dụng",
+   "00",
+   "Đơn hàng gần nhất"
+  ],
+  "reviewIneligible": [
+   "Đánh giá sản phẩm",
+   "Đánh giá minh bạch từ khách hàng thực tế",
+   "Đánh giá sản phẩm",
+   "Đơn hàng hợp lệ để đánh giá:",
+   "Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng hoàn tất. Mỗi sản phẩm trong đơn chỉ được đánh giá 1 lần để bảo đảm tính khách quan."
+  ],
+  "profileSave": {
+   "status": 200,
+   "url": "http://localhost:5000/api/auth/profile"
+  },
+  "heroVideo": [
+   "GET 206",
+   "GET 206",
+   "GET 206",
+   "GET 206"
+  ],
+  "storefront": {
+   "heroVideo": [
+    "GET 206",
+    "GET 206",
+    "GET 206",
+    "GET 206"
+   ],
+   "brokenHome": [],
+   "brokenPlp": []
+  },
+  "reviewEligible": true
+ },
+ "coupon": {
+  "apply": {
+   "url": "http://localhost:5000/api/coupons/apply",
+   "status": 200,
+   "requestBody": "{\"code\":\"SALE10\",\"subtotal\":150000,\"items\":[{\"product\":\"6a7575c0ab567b53821181be\",\"quantity\":1},{\"product\":\"6a7575c0ab567b53821181bb\",\"quantity\":1}]}",
+   "responseBody": "{\"success\":true,\"message\":\"Áp dụng mã giảm giá thành công\",\"data\":{\"coupon\":{\"minOrder\":0,\"_id\":\"6a7575c0ab567b53821181c4\",\"code\":\"SALE10\",\"discount\":10,\"type\":\"percent\",\"expiredDate\":\"2026-12-31T00:00:00.000Z\",\"quantity\":100,\"usedCount\":1,\"createdAt\":\"2026-08-07T06:05:52.071Z\",\"updatedAt\":\"2026-10-19T02:26:20.134Z\",\"__v\":0},\"discount\":15000,\"discountVnd\":15000,\"subtotalVnd\":150000,\"basis\":\"server-priced\",\"capped\":false}}",
+   "itemsShape": [
+    {
+     "product": "6a7575c0ab567b53821181be",
+     "quantity": 1
+    },
+    {
+     "product": "6a7575c0ab567b53821181bb",
+     "quantity": 1
+    }
+   ],
+   "subtotal": 150000
+  },
+  "summaryApplied": {
+   "raw": "Đơn hàng của bạn\n2\nSửa giỏ hàng\n\nNhà gỗ truyền thống2\n\n5.000 ₫ / sản phẩm\n\n1\n5.000 ₫\n\nBánh răng trang trí\n\n145.000 ₫ / sản phẩm\n\n1\n145.000 ₫\n\nMÃ ƯU ĐÃI / PHIẾU QUÀ TẶNG\n\nSALE10\nBỏ mã\nTạm tính (2 sản phẩm)\n150.000 ₫\nGiảm giá voucher\nSALE10\n-15.000 ₫\nPhí vận chuyển toàn quốc\n0₫ (Miễn phí)\nTỔNG CỘNG THANH TOÁNƯỚC TÍNH\n135.000 ₫\nXÁC NHẬN ĐẶT HÀNG\n• 135.000 ₫\n\nThanh toán an toàn • Đổi trả 7 ngày nếu lỗi in",
+   "subtotalLabel": "Tạm tính (2 sản phẩm)",
+   "subtotal": 150000,
+   "discountLabel": "Giảm giá voucher",
+   "discountValueLine": "SALE10",
+   "discount": 10,
+   "hasEstimateBadge": false,
+   "totalLine": "135.000 ₫",
+   "total": 135000,
+   "buttonLine": "XÁC NHẬN ĐẶT HÀNG",
+   "buttonTotal": null
+  },
+  "qtyChange": {
+   "applyCallsBefore": 1,
+   "applyCallsAfter": 2,
+   "summary": {
+    "raw": "Đơn hàng của bạn\n2\nSửa giỏ hàng\n\nBánh răng trang trí\n\n145.000 ₫ / sản phẩm\n\n2\n290.000 ₫\n\nRobot Gundam RX-78\n\n680.000 ₫ / sản phẩm\n\n1\n680.000 ₫\n\nMÃ ƯU ĐÃI / PHIẾU QUÀ TẶNG\n\nSALE10\nBỏ mã\nTạm tính (2 sản phẩm)\n970.000 ₫\nGiảm giá voucher\nSALE10\n-97.000 ₫\nPhí vận chuyển toàn quốc\n0₫ (Miễn phí)\nTỔNG CỘNG THANH TOÁNƯỚC TÍNH\n873.000 ₫\nXÁC NHẬN ĐẶT HÀNG\n• 873.000 ₫\n\nThanh toán an toàn • Đổi trả 7 ngày nếu lỗi in",
+    "subtotalLabel": "Tạm tính (2 sản phẩm)",
+    "subtotal": 970000,
+    "discountLabel": "Giảm giá voucher",
+    "discountValueLine": "SALE10",
+    "discount": 97000,
+    "hasEstimateBadge": true,
+    "totalLine": "873.000 ₫",
+    "total": 873000,
+    "buttonLine": "XÁC NHẬN ĐẶT HÀNG",
+    "buttonTotal": null
+   }
+  },
+  "removed": {
+   "raw": "Đơn hàng của bạn\n2\nSửa giỏ hàng\n\nNhà gỗ truyền thống2\n\n5.000 ₫ / sản phẩm\n\n1\n5.000 ₫\n\nBánh răng trang trí\n\n145.000 ₫ / sản phẩm\n\n1\n145.000 ₫\n\nMÃ ƯU ĐÃI / PHIẾU QUÀ TẶNG\n\nÁp dụng\n\nMã có thể sử dụng (1)\n\nSALE10\n\nGiảm 10%(≈ -15.000 ₫)\n\nDùng\nTạm tính (2 sản phẩm)\n150.000 ₫\nPhí vận chuyển toàn quốc\n0₫ (Miễn phí)\nTỔNG CỘNG THANH TOÁNƯỚC TÍNH\n150.000 ₫\nXÁC NHẬN ĐẶT HÀNG\n• 150.000 ₫\n\nThanh toán an toàn • Đổi trả 7 ngày nếu lỗi in",
+   "subtotalLabel": "Tạm tính (2 sản phẩm)",
+   "subtotal": 150000,
+   "discountLabel": null,
+   "discountValueLine": null,
+   "discount": null,
+   "hasEstimateBadge": false,
+   "totalLine": "150.000 ₫",
+   "total": 150000,
+   "buttonLine": "XÁC NHẬN ĐẶT HÀNG",
+   "buttonTotal": null
+  },
+  "qtyStep": {
+   "i": 0,
+   "before": "1",
+   "after": "2",
+   "count": 2
+  },
+  "qtyBase": {
+   "subtotal": 825000,
+   "label": "Tạm tính (2 sản phẩm)"
+  }
+ },
+ "qr": {
+  "orderId": "6ad71cab7070e7748f9b7747",
+  "orderStatus": 201,
+  "imgSrc": "https://img.vietqr.io/image/970423-70877769859-qr_only.png?amount=825000&addInfo=ST3D-A98075&accountName=TRAN+TAN+DAT",
+  "imgStatus": 301,
+  "countdown": "04:56",
+  "ticksIn10_5s": 3,
+  "afterNavigation": {
+   "navAt": 1792482491238,
+   "pollsIn8sAfterLeaving": 0,
+   "totalOrderPollsEver": 6
+  },
+  "imgChain": [
+   "GET 301 https://img.vietqr.io/image/970423-70877769859-qr_only.png",
+   "GET 200 https://img.vietqr.io/image/970423-70877769859-qr_only.svg"
+  ],
+  "imgNatural": {
+   "complete": true,
+   "nw": 490,
+   "cur": "https://img.vietqr.io/image/970423-70877769859-qr_only.png?amount=825000&addInfo=ST3D-A98075&accountName=TRAN+TAN+DAT"
+  }
+ },
+ "game": {
+  "chestAsset": {
+   "url": "mini-game-chest.jpg",
+   "status": 200
+  },
+  "startStatus": 200,
+  "playedMs": 240053,
+  "liveScore": 52,
+  "t50": 31,
+  "pauseResumes": 0,
+  "timeline": [
+   {
+    "t": 0,
+    "s": 0,
+    "l": 3
+   },
+   {
+    "t": 0,
+    "s": 0,
+    "l": 3
+   },
+   {
+    "t": 2,
+    "s": 2,
+    "l": 3
+   },
+   {
+    "t": 4,
+    "s": 4,
+    "l": 3
+   },
+   {
+    "t": 5,
+    "s": 6,
+    "l": 3
+   },
+   {
+    "t": 6,
+    "s": 8,
+    "l": 3
+   },
+   {
+    "t": 7,
+    "s": 10,
+    "l": 3
+   },
+   {
+    "t": 8,
+    "s": 12,
+    "l": 3
+   },
+   {
+    "t": 9,
+    "s": 14,
+    "l": 3
+   },
+   {
+    "t": 11,
+    "s": 16,
+    "l": 3
+   },
+   {
+    "t": 13,
+    "s": 18,
+    "l": 3
+   },
+   {
+    "t": 14,
+    "s": 20,
+    "l": 3
+   },
+   {
+    "t": 15,
+    "s": 20,
+    "l": 3
+   },
+   {
+    "t": 15,
+    "s": 22,
+    "l": 3
+   },
+   {
+    "t": 15,
+    "s": 22,
+    "l": 3
+   },
+   {
+    "t": 17,
+    "s": 24,
+    "l": 3
+   },
+   {
+    "t": 18,
+    "s": 26,
+    "l": 3
+   },
+   {
+    "t": 19,
+    "s": 28,
+    "l": 3
+   },
+   {
+    "t": 20,
+    "s": 30,
+    "l": 3
+   },
+   {
+    "t": 22,
+    "s": 32,
+    "l": 3
+   },
+   {
+    "t": 22,
+    "s": 34,
+    "l": 3
+   },
+   {
+    "t": 23,
+    "s": 36,
+    "l": 3
+   },
+   {
+    "t": 24,
+    "s": 38,
+    "l": 3
+   },
+   {
+    "t": 25,
+    "s": 40,
+    "l": 3
+   },
+   {
+    "t": 26,
+    "s": 42,
+    "l": 3
+   },
+   {
+    "t": 27,
+    "s": 44,
+    "l": 3
+   },
+   {
+    "t": 29,
+    "s": 46,
+    "l": 3
+   },
+   {
+    "t": 30,
+    "s": 48,
+    "l": 3
+   },
+   {
+    "t": 30,
+    "s": 48,
+    "l": 3
+   },
+   {
+    "t": 30,
+    "s": 48,
+    "l": 3
+   },
+   {
+    "t": 31,
+    "s": 50,
+    "l": 3
+   },
+   {
+    "t": 31,
+    "s": 50,
+    "l": 3,
+    "marker": "score>=50 → stop input, wait for natural death"
+   },
+   {
+    "t": 31,
+    "s": 52,
+    "l": 3
+   },
+   {
+    "t": 40,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 45,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 45,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 45,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 60,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 60,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 60,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 60,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 75,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 75,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 75,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 75,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 90,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 90,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 90,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 105,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 105,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 105,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 120,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 120,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 120,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 135,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 135,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 135,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 150,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 150,
+    "s": -1,
+    "l": 0
+   },
+   {
+    "t": 150,
+    "s": -1,
+    "l": 0
+   }
+  ],
+  "completeStatus": 200,
+  "completeBody": "{\"success\":true,\"message\":\"Chúc mừng! Bạn nhận được mã giảm giá 5%\",\"data\":{\"score\":52,\"reward\":{\"code\":\"REWARD-D8CB4E9A\",\"discount\":5,\"expiresAt\":\"2026-11-03T13:01:51.883Z\"}}}",
+  "resultText": [
+   "Mini-game: Đập hộp nhận thưởng",
+   "LIVE BONUS",
+   "Tương tác sau đơn hàng • Nhận ưu đãi giới hạn cho lần mua sau",
+   "LOCKED",
+   "ĐIỂM MAY MẮN CỦA BẠN:",
+   "52",
+   "điểm",
+   "Điểm càng cao, mã giảm giá càng lớn — mỗi đơn hoàn tất chơi 1 lần.",
+   "ĐÃ ĐẠT ĐƯỢC - 52 ĐIỂM",
+   "CHÚC MỪNG KHÁCH HÀNG!",
+   "Bạn đã nhận được mã: REWARD-D8CB4E9A",
+   "5% GIẢM",
+   "Mã đã tự động thêm vào Kho mã giảm giá của bạn",
+   "REWARD-D8CB4E9A",
+   "Sao chép mã",
+   "Hạn dùng: 14 ngày kể từ lúc kích hoạt",
+   "Áp dụng cho mọi đơn hàng mô hình 3D tiếp theo",
+   "Về đơn hàng",
+   "Xem mã giảm giá"
+  ],
+  "rewardCode": "REWARD-D8CB4E9A",
+  "claimedScore": 52,
+  "couponsPageHasCode": true
+ },
+ "admin": {
+  "statusSteps": [
+   {
+    "label": "Đã xác nhận",
+    "value": "confirmed",
+    "status": 200
+   },
+   {
+    "label": "Đang giao",
+    "value": "shipping",
+    "status": 200
+   },
+   {
+    "label": "Hoàn thành",
+    "value": "completed",
+    "status": 200
+   }
+  ]
+ },
+ "cleanup": null,
+ "groups": [],
+ "phaseErrors": [],
+ "classified": {
+  "consoleUnexpected": [
+   {
+    "g": "game",
+    "lvl": "warning",
+    "msg": "PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+    "src": "http://localhost:5173/@vite/client",
+    "at": 1792501311893
+   },
+   {
+    "g": "game",
+    "lvl": "warning",
+    "msg": "PixiJS Warning:  [BindGroup] a 'textureSource' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+    "src": "http://localhost:5173/@vite/client",
+    "at": 1792501311894
+   },
+   {
+    "g": "game",
+    "lvl": "warning",
+    "msg": "PixiJS Warning:  [BindGroup] a 'textureSampler' was destroyed while still bound to a shader. Remove it from the shader before destroying it.",
+    "src": "http://localhost:5173/@vite/client",
+    "at": 1792501311896
+   }
+  ],
+  "consoleAllowed": [
+   {
+    "g": "admin-race",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482419932,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "admin-race",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482420010,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "admin-race",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482420010,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "register",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482424501,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "register",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482424670,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "register",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482424671,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "register",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482427867,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482429992,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482430181,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482430184,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482430945,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482437423,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482437473,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482437475,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482440919,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482441093,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482441095,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482441888,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "checkout",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482446275,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "checkout",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "src": "http://localhost:5000/api/coupons/apply",
+    "at": 1792482449824,
+    "why": "intentional: unknown-coupon negative test (cited → server resourceNotFound → 404)"
+   },
+   {
+    "g": "qr",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482469561,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "qr",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482469745,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "qr",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482469749,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "qr",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482470509,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "qr",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482474434,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "qr",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482491303,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482500187,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482500355,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "account",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792482500357,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482501038,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792482502859,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483318935,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483329055,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483333245,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483337428,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483341601,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483345679,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483349747,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483353861,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "account",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483356860,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483402169,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792483402280,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792483402283,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792483407042,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792483407158,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792483407159,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486058362,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486058596,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486058599,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486060630,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486060753,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486060754,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486062657,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486062768,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486062770,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "auth-guest",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/login",
+    "at": 1792486063365,
+    "why": "intentional: wrong-password negative test (cited)"
+   },
+   {
+    "g": "admin-complete",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486081226,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "admin-complete",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486081362,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "admin-complete",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486081366,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "admin-complete",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486082132,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "recheck",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486564144,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "recheck",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486564355,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "recheck",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792486564357,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "recheck",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486565125,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "recheck",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486570011,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "recheck",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486572029,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "recheck",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792486576445,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "game",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501266184,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "game",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501266354,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "game",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501266355,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "game",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501267112,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "game",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501514970,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501517913,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501518078,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501518081,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501523015,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501523137,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501523139,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501528118,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501528171,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501528171,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501534377,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501534551,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "error",
+    "msg": "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "src": "http://localhost:5000/api/auth/me",
+    "at": 1792501534553,
+    "why": "known: auth/me 401 while logged out"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501535209,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501543681,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501548784,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501553852,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501558928,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501564009,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501569059,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501574151,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501579237,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501584341,
+    "why": "known: React DevTools info"
+   },
+   {
+    "g": "overflow",
+    "lvl": "info",
+    "msg": "%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold",
+    "src": "http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=1044939e",
+    "at": 1792501589390,
+    "why": "known: React DevTools info"
+   }
+  ],
+  "httpAllowed": [
+   {
+    "g": "admin-race",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "admin-race",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "register",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "register",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "guest-checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "checkout",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "checkout",
+    "m": "POST",
+    "s": 404,
+    "u": "http://localhost:5000/api/coupons/apply",
+    "why": "intentional: unknown-coupon negative test (cited: couponService resourceNotFound → 404)"
+   },
+   {
+    "g": "qr",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "qr",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "account",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "account",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "storefront-regression",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486058596,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486058599,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486060753,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486060754,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486062768,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486062770,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "auth-guest",
+    "m": "POST",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/login",
+    "at": 1792486063364,
+    "why": "intentional: wrong-password test (cited)"
+   },
+   {
+    "g": "admin-complete",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486081362,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "admin-complete",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486081366,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "recheck",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486564355,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "recheck",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792486564357,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "game",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501266354,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "game",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501266355,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501518078,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501518081,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501523137,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501523139,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501528171,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501528171,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501534551,
+    "why": "known: auth/me 401 when logged out"
+   },
+   {
+    "g": "overflow",
+    "m": "GET",
+    "s": 401,
+    "u": "http://localhost:5000/api/auth/me",
+    "at": 1792501534553,
+    "why": "known: auth/me 401 when logged out"
+   }
+  ],
+  "httpUnexpected": [],
+  "pageerrors": [],
+  "reqfail": []
+ },
+ "purge": {
+  "failedChecksDropped": 0,
+  "rerunPhaseChecksDropped": 3,
+  "rateLimit429HttpDropped": 0,
+  "rateLimit429ConsoleDropped": 0,
+  "rerunGroupHttpDropped": 10,
+  "rerunGroupConsoleDropped": 24,
+  "rerunGroups": [
+   "game",
+   "overflow"
+  ],
+  "why": "attempt-3 rate-limit artifacts purged (segments re-executed paced); failed assertions re-run with corrected parsing",
+  "at": "2026-10-20T13:01:05.602Z"
+ },
+ "resumedAt": "2026-10-20T13:01:05.602Z"
+}

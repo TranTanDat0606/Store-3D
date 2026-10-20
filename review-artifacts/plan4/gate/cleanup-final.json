@@ -1,0 +1,54 @@
+{
+ "label": "final",
+ "at": "2026-10-20T13:12:06.880Z",
+ "users": [
+  {
+   "id": "6ad71c797070e7748f9b7622",
+   "email": "gate4t12.20261020@store3d.com",
+   "orders": 2,
+   "orderItems": 4,
+   "stockUnitsRestored": 4
+  }
+ ],
+ "deleted": {
+  "orders": 2,
+  "orderitems": 4,
+  "addresses": 1,
+  "usercoupons": 1,
+  "gamesessions": 0,
+  "wishlists": 1,
+  "reviews": 0,
+  "sessions": 0,
+  "contactrequests": 0,
+  "users": 1
+ },
+ "stockRestored": {
+  "6a7575c0ab567b53821181bb +1": 2,
+  "6a7575c0ab567b53821181be +1": 1,
+  "6a7575c0ab567b53821181b8 +1": 1
+ },
+ "couponFix": {
+  "from": 2,
+  "to": 1,
+  "note": "restored to pre-gate baseline"
+ },
+ "verify": {
+  "users_gate": 0,
+  "orders_gate": 0,
+  "sale10": 1,
+  "stockDrift": [],
+  "totalDocs": {
+   "users": 3,
+   "orders": 22,
+   "orderitems": 28,
+   "addresses": 0,
+   "usercoupons": 0,
+   "gamesessions": 0,
+   "wishlists": 12,
+   "reviews": 3,
+   "coupons": 2,
+   "products": 10,
+   "sessions": 0
+  }
+ }
+}
