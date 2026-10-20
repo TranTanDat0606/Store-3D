@@ -108,9 +108,9 @@ function VoucherTicket({
               >
                 {coupon.source === 'game' ? 'Quà tặng Mini-game' : 'Ưu đãi'}
               </span>
-              <h3 className="text-foreground mt-1.5 text-base font-bold">
+              <p className="text-foreground mt-1.5 text-base font-bold">
                 Giảm {coupon.discount}% cho đơn hàng
-              </h3>
+              </p>
             </div>
             <span className="border-primary/30 bg-muted text-primary rounded border px-2.5 py-1 font-mono text-xs font-bold">
               {coupon.code}
@@ -175,7 +175,7 @@ function MutedCouponCard({ coupon, kind }: { coupon: UserCoupon; kind: 'used' | 
             {isUsed ? 'Đã sử dụng' : 'Hết hạn'}
           </span>
         </div>
-        <h4 className="text-foreground mt-2 text-sm font-bold">Giảm {coupon.discount}% cho đơn hàng</h4>
+        <p className="text-foreground mt-2 text-sm font-bold">Giảm {coupon.discount}% cho đơn hàng</p>
         <p className="text-muted-foreground mt-1 line-through text-xs">
           {isUsed && coupon.usedAt
             ? `Đã sử dụng ngày ${formatDate(coupon.usedAt)}`
@@ -361,9 +361,9 @@ export default function CouponsPage() {
                 <Info className="size-4" />
               </span>
               <div className="space-y-1.5 text-xs leading-relaxed text-muted-foreground">
-                <h4 className="text-foreground text-sm font-bold">
+                <p className="text-foreground text-sm font-bold">
                   Quy định sử dụng voucher tại STORE 3D
-                </h4>
+                </p>
                 <p>
                   • Mỗi đơn hàng chỉ áp dụng tối đa{' '}
                   <strong className="text-foreground">01 mã giảm giá</strong>. Voucher không có giá trị

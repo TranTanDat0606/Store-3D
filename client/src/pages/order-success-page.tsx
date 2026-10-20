@@ -230,7 +230,7 @@ export default function OrderSuccessPage() {
 
       {/* ==================== CENTERED HERO SUCCESS ==================== */}
       <section className="mx-auto mb-12 max-w-3xl text-center">
-        <div className="border-primary bg-muted relative mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-[0_0_25px_rgba(237,184,76,0.28)] md:h-24 md:w-24">
+        <div className="border-primary bg-muted relative mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full border-2 shadow-[0_0_25px] shadow-primary/28 md:h-24 md:w-24">
           <CheckCircle2 className="text-primary size-10 md:size-14" />
           <div className="border-primary/30 pointer-events-none absolute -inset-1 animate-pulse rounded-full border" />
         </div>
@@ -296,7 +296,7 @@ export default function OrderSuccessPage() {
                 className={cn(
                   'flex flex-col justify-between rounded-xl border p-4',
                   isActive
-                    ? 'border-primary/70 bg-muted shadow-[0_0_12px_rgba(237,184,76,0.2)]'
+                    ? 'border-primary/70 bg-muted shadow-[0_0_12px] shadow-primary/20'
                     : 'border-border bg-muted/40 opacity-80'
                 )}
               >

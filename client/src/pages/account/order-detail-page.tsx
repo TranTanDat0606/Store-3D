@@ -145,9 +145,9 @@ export default function OrderDetailPage() {
 
       <div className="border-border bg-card flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4 shadow-lg sm:p-5">
         <div>
-          <h2 className="text-foreground flex flex-wrap items-center gap-2 text-xl font-bold">
+          <h1 className="text-foreground flex flex-wrap items-center gap-2 text-xl font-bold">
             <span className="text-primary font-mono tracking-wide">{orderCodeOf(order)}</span>
-          </h2>
+          </h1>
           <p className="text-muted-foreground text-sm">Đặt lúc {formatDateTime(order.createdAt)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

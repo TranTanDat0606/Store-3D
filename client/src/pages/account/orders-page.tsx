@@ -150,10 +150,10 @@ export default function OrdersPage() {
                 {isCompleted && (
                   <div className="border-border/60 bg-muted/30 border-b px-4 py-5 sm:px-5">
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                      <h4 className="text-foreground flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
+                      <p className="text-foreground flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider">
                         <Clock className="text-primary size-3.5" aria-hidden />
                         Tiến trình xử lý &amp; Chế tác mô hình
-                      </h4>
+                      </p>
                       <span className="text-success flex items-center gap-1 text-[11px] font-semibold">
                         <CheckCircle2 className="size-3.5" aria-hidden />
                         Đã giao thành công tới bạn
@@ -215,9 +215,9 @@ export default function OrdersPage() {
                           />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="text-foreground truncate text-sm font-semibold transition-colors sm:text-base">
+                          <p className="text-foreground truncate text-sm font-semibold transition-colors sm:text-base">
                             {item.name}
-                          </h3>
+                          </p>
                           <p className="text-muted-foreground mt-1.5 text-xs">
                             Số lượng: <span className="text-foreground font-semibold">{item.quantity}</span>
                           </p>

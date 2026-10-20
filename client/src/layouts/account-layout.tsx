@@ -161,7 +161,7 @@ export function AccountLayout() {
           </div>
 
           {/* Navigation menu (labels verbatim per design) */}
-          <nav className="border-border bg-card rounded-xl border p-3">
+          <nav aria-label="Điều hướng tài khoản" className="border-border bg-card rounded-xl border p-3">
             <div className="flex flex-col gap-1">
               {navItems.map((item) => {
                 const count = item.badge ? badges[item.badge] : null

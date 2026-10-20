@@ -331,7 +331,9 @@ export default function NewsDetailPage() {
         </aside>
 
         {/* ─── Article Area ─── */}
-        <main style={{ flex: '1 1 0%', minWidth: 0, paddingRight: 24 }}>
+        {/* AC9: `<section>`, not `<main>` — the shell (layouts/main-layout.tsx) owns
+            the page's single `<main>`; a page-level `<main>` would nest landmarks. */}
+        <section style={{ flex: '1 1 0%', minWidth: 0, paddingRight: 24 }}>
           {/* Article Card — max-width 1200px */}
           <article
             className="border shadow-sm border-border bg-foreground/[0.03]"
@@ -435,7 +437,7 @@ export default function NewsDetailPage() {
               {formatDate(news.publishedAt || news.createdAt)}
             </span>
           </div>
-        </main>
+        </section>
       </div>
 
       {/* Related Articles — centered container */}

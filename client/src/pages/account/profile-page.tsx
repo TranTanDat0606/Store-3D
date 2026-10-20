@@ -145,7 +145,7 @@ export default function ProfilePage() {
             )}
           </div>
           <div className="min-w-0">
-            <h4 className="text-foreground text-sm font-bold">Ảnh đại diện</h4>
+            <p className="text-foreground text-sm font-bold">Ảnh đại diện</p>
             <p className="text-muted-foreground mt-1 text-xs">
               Hồ sơ hiển thị theo ảnh đại diện của tài khoản.
             </p>

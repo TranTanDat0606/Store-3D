@@ -1008,18 +1008,18 @@ export default function CheckoutPage() {
                               onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                               disabled={item.quantity <= 1}
                               aria-label="Giảm số lượng"
-                              className="flex size-7 items-center justify-center rounded-l-lg transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+                              className="flex size-7 min-w-11 min-h-11 items-center justify-center rounded-l-lg transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
                             >
                               <Minus className="size-3" />
                             </button>
-                            <span className="flex size-7 items-center justify-center border-x text-xs font-medium">
+                            <span className="flex size-7 min-h-11 items-center justify-center border-x text-xs font-medium">
                               {item.quantity}
                             </span>
                             <button
                               type="button"
                               onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                               aria-label="Tăng số lượng"
-                              className="flex size-7 items-center justify-center rounded-r-lg transition-colors hover:bg-muted"
+                              className="flex size-7 min-w-11 min-h-11 items-center justify-center rounded-r-lg transition-colors hover:bg-muted"
                             >
                               <Plus className="size-3" />
                             </button>
@@ -1035,9 +1035,11 @@ export default function CheckoutPage() {
 
                 {/* Coupon block — placement/label per screen; CouponInput wiring unchanged (T5 reworks preview) */}
                 <div className="mt-5 border-t pt-4">
-                  <p className="text-muted-foreground mb-2 block text-xs font-semibold uppercase tracking-wide">
+                  {/* AC9: `<label htmlFor>` (was a bare `<p>`) so the coupon input gets a
+                      real accessible name — same classes, no visual change. */}
+                  <label htmlFor="coupon-code-input" className="text-muted-foreground mb-2 block text-xs font-semibold uppercase tracking-wide">
                     Mã ưu đãi / Phiếu quà tặng
-                  </p>
+                  </label>
                   <CouponInput
                     coupons={availableCoupons}
                     loading={loadingCoupons}
@@ -1100,7 +1102,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   form="checkout-form"
-                  className="mt-6 w-full"
+                  className="mt-6 w-full min-h-11"
                   size="lg"
                   disabled={submitting || loadingAddresses || !selectedAddressId}
                 >

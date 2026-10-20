@@ -81,7 +81,8 @@ function CopyButton({
       onClick={() => onCopy(value, label)}
       aria-label={`Sao chép ${label}`}
       className={cn(
-        'flex shrink-0 items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all active:scale-95',
+        /* AC9 touch target: ≥44×44 hit area; icon/text sizes untouched. */
+        'flex shrink-0 min-w-11 min-h-11 items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all active:scale-95',
         variant === 'primary'
           ? 'border-transparent bg-primary font-bold text-primary-foreground shadow-md hover:bg-primary/90'
           : 'border-border bg-muted text-foreground hover:bg-muted/70'
@@ -415,10 +416,18 @@ export default function QrPaymentPage() {
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-8 md:py-10">
+      {/* AC9: `<section>`, not `<main>` — the site shell (layouts/main-layout.tsx)
+          already owns the page's single `<main>`; a page-level `<main>` would nest
+          landmarks. */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-6 md:px-8 md:py-10">
         {/* ==================== LIVE STATUS NOTICE BANNER ==================== */}
         <section className="mb-8">
-          <div className="flex flex-col items-center justify-between gap-4 rounded-xl border border-secondary/30 bg-muted/60 p-4 sm:flex-row">
+          {/* AC9: polite live region — announces status flips (paid/cancelled/expired)
+              without stealing focus. */}
+          <div
+            role="status"
+            className="flex flex-col items-center justify-between gap-4 rounded-xl border border-secondary/30 bg-muted/60 p-4 sm:flex-row"
+          >
             <div className="flex items-center gap-3.5">
               <div className="bg-secondary/10 text-secondary flex size-8 shrink-0 items-center justify-center rounded-lg">
                 <RefreshCw className="size-5 animate-spin" />
@@ -457,7 +466,11 @@ export default function QrPaymentPage() {
                       Mở ứng dụng ngân hàng hoặc ví điện tử để quét mã tự động điền nội dung
                     </p>
                   </div>
-                  {/* Countdown Timer */}
+                  {/* Countdown Timer — AC9: the ticking value is `aria-hidden` so a
+                      screen reader never reads every second; the sr-only `role="status"`
+                      below announces only the minute change ("Còn lại X phút"), a
+                      deliberate low-noise choice — status flips (paid/cancelled/expired)
+                      are already announced by the banner's live region above. */}
                   <div className="border-primary/30 bg-background flex shrink-0 items-center gap-3 rounded-xl border px-4 py-2.5 shadow-inner">
                     <Timer
                       className={cn('text-primary size-4 animate-pulse', timerDanger && 'text-destructive')}
@@ -467,6 +480,7 @@ export default function QrPaymentPage() {
                         Hiệu lực còn
                       </div>
                       <div
+                        aria-hidden="true"
                         className={cn(
                           'mt-1 text-lg font-bold tracking-widest tabular-nums md:text-xl',
                           timerDanger ? 'text-destructive animate-pulse' : 'text-primary'
@@ -476,12 +490,19 @@ export default function QrPaymentPage() {
                       </div>
                     </div>
                   </div>
+                  <span className="sr-only" role="status">
+                    {timerExpired ? 'Mã QR đã hết hạn' : `Còn lại ${Math.ceil(remainingMs / 60000)} phút`}
+                  </span>
                 </div>
 
                 {/* QR Presentation Area */}
                 <div className="flex flex-col items-center justify-center border-b border-border bg-background/60 p-6 md:p-8">
                   <div className="flex w-full max-w-[280px] flex-col items-center rounded-2xl border-4 border-primary/80 bg-white p-5 shadow-2xl">
                     <div className="mb-3 flex w-full items-center justify-between px-1">
+                      {/* AC9 scan-contrast exception (intentional): these slate/sky tones on
+                          white paper are NOT muted-foreground drift — keep the hard contrast
+                          so QR scanners read the label block; do not "fix" them in future
+                          token sweeps. */}
                       <span className="text-xs font-black tracking-wider text-slate-800">
                         VietQR
                       </span>
@@ -770,7 +791,7 @@ export default function QrPaymentPage() {
             </div>
           </section>
         </div>
-      </main>
+      </section>
     </div>
   )
 }

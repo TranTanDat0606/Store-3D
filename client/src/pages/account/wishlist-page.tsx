@@ -293,7 +293,7 @@ export default function WishlistPage() {
                 <Upload className="size-5" />
               </div>
               <div>
-                <h3 className="text-foreground text-base font-bold">Bạn có file 3D muốn in riêng?</h3>
+                <p className="text-foreground text-base font-bold">Bạn có file 3D muốn in riêng?</p>
                 <p className="text-muted-foreground mt-0.5 text-xs">
                   Gửi file STL / OBJ ngay để nhận báo giá tự động công nghệ Resin &amp; FDM trong 2h.
                 </p>

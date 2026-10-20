@@ -132,18 +132,21 @@ export function CouponInput({
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             ref={inputRef}
+            /* AC9: id matches the visual <label htmlFor> in checkout-page.tsx — that
+               label is the input's accessible name (placeholder is not one). */
+            id="coupon-code-input"
             placeholder="Nhập mã giảm giá..."
             value={query}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="h-9 pl-8 pr-3 text-sm"
+            className="h-9 min-h-11 pl-8 pr-3 text-sm"
             autoComplete="off"
           />
         </div>
         <Button
           variant="default"
           size="sm"
-          className="h-9 shrink-0 px-4"
+          className="h-9 min-h-11 shrink-0 px-4"
           onClick={() => {
             if (query.trim()) {
               onApply(query.trim())
@@ -217,7 +220,7 @@ export function CouponInput({
                     <Button
                       variant="default"
                       size="sm"
-                      className="h-7 shrink-0 px-3 text-xs"
+                      className="h-7 min-h-11 shrink-0 px-3 text-xs"
                       onClick={() => handleApplySuggestion(c)}
                       disabled={applying}
                     >
